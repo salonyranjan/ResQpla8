@@ -233,6 +233,9 @@ const QuickActions = ({ T }) => {
     { icon: "🏆", label: "Leaderboard", desc: "Top volunteers", to: "/leaderboard", color: T.amber, bg: T.amberSoft, border: `rgba(245,158,11,0.2)` },
     { icon: "📊", label: "Analytics", desc: "Deep insights", to: "/dashboard/analytics", color: T.teal, bg: T.tealSoft, border: `rgba(20,184,166,0.2)` },
     { icon: "⚡", label: "AI Matching", desc: "Smart food-NGO pairing", to: "/dashboard/ai-matching", color: "#10b981", bg: "rgba(16,185,129,0.08)", border: `rgba(16,185,129,0.15)` },
+    { icon: "🔔", label: "Smart Alerts", desc: "Real-time notifications", to: "/dashboard/smart-alerts", color: "#7c3aed", bg: "rgba(124,58,237,0.08)", border: `rgba(124,58,237,0.15)` },
+    { icon: "🚴", label: "Volunteer Pickups", desc: "Live tracking", to: "/dashboard/volunteer-pickups", color: T.blue, bg: T.blueSoft, border: `rgba(59,130,246,0.2)` },
+    { icon: "📸", label: "Post 60s", desc: "Quick donation", to: "/dashboard/post-60", color: "#f59e0b", bg: T.amberSoft, border: `rgba(245,158,11,0.2)` },
     { icon: "⚙️", label: "Settings", desc: "Preferences", to: "/settings", color: T.textMuted, bg: T.border, border: T.border },
   ];
 

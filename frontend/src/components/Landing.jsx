@@ -861,7 +861,7 @@ const FEATURES = [
   { emoji: "🗺️", title: "Live Map Tracking",   desc: "Follow every donation from post to plate with real-time GPS tracking and push notifications for all parties.", tag: "", accent: "#e8a838", to: "/map" },
   { emoji: "🛡️", title: "Trust & Safety",      desc: "Every NGO is background-checked, rated, and insured. Donors get full transparency with photo proof of delivery.", tag: "", accent: "#2d6a4f", to: "/about" },
   { emoji: "📊", title: "Impact Dashboard",    desc: "See your personal CO₂ savings, meals rescued, and families helped in a beautiful, shareable impact report.", tag: "NEW", accent: "#d4622a", to: "/dashboard" },
-  { emoji: "🔔", title: "Smart Alerts",        desc: "WhatsApp, SMS, and app notifications ensure zero missed pickups. Set your schedule and we'll handle coordination.", tag: "", accent: "#7c3aed", to: "/dashboard/profile" },
+  { emoji: "🔔", title: "Smart Alerts",        desc: "WhatsApp, SMS, and app notifications ensure zero missed pickups. Set your schedule and we'll handle coordination.", tag: "", accent: "#7c3aed", to: "/dashboard/smart-alerts" },
   { emoji: "🏆", title: "Donor Rewards",       desc: "Earn ResQPoints for every donation. Redeem for tax certificates, brand badges, and exclusive partner discounts.", tag: "NEW", accent: "#0891b2", to: "/dashboard/profile" },
 ];
 
@@ -944,9 +944,9 @@ const Features = ({ c }) => (
    HOW IT WORKS — steps link to /register
 ══════════════════════════════════════════════════ */
 const HOW_STEPS = [
-  { num: "01", emoji: "📸", title: "Post in 60 Seconds", desc: "Snap a photo, add quantity and pickup window. No forms, no friction — just impact.", color: "#52b788", to: "/register?role=donor" },
-  { num: "02", emoji: "🤖", title: "AI Finds the Match",  desc: "Our engine notifies the best-fit NGO within seconds based on location, type, and urgency.", color: "#e8a838", to: "/dashboard/search" },
-  { num: "03", emoji: "🚴", title: "Volunteer Picks Up",  desc: "A vetted volunteer collects the food with live GPS updates for all parties.", color: "#d4622a", to: "/map" },
+  { num: "01", emoji: "📸", title: "Post in 60 Seconds", desc: "Snap a photo, add quantity and pickup window. No forms, no friction — just impact.", color: "#52b788", to: "/dashboard/post-60" },
+  { num: "02", emoji: "🤖", title: "AI Finds the Match",  desc: "Our engine notifies the best-fit NGO within seconds based on location, type, and urgency.", color: "#e8a838", to: "/dashboard/ai-matching" },
+  { num: "03", emoji: "🚴", title: "Volunteer Picks Up",  desc: "A vetted volunteer collects the food with live GPS updates for all parties.", color: "#d4622a", to: "/dashboard/volunteer-pickups" },
   { num: "04", emoji: "📋", title: "Impact Delivered",    desc: "Receive a certificate with CO₂ saved, meals rescued, and families fed. Share on social.", color: "#2d6a4f", to: "/dashboard" },
 ];
 

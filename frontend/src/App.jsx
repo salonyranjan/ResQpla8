@@ -22,6 +22,9 @@ import Settings from "./pages/Settings.jsx";
 import AIMatching from "./pages/AIMatching.jsx";
 import DonateFood from "./pages/DonateFood.jsx";
 import Analytics from "./pages/Analytics.jsx";
+import SmartAlerts from "./pages/SmartAlerts.jsx";
+import PostIn60Seconds from "./pages/PostIn60Seconds.jsx";
+import VolunteerPickup from "./pages/VolunteerPickup.jsx";
 
 /* ══════════════════════════════════════
    PUBLIC LAYOUT WRAPPER
@@ -51,6 +54,9 @@ function App() {
           <Route path="ai-matching" element={<AIMatching />} />
           <Route path="donate" element={<DonateFood />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="smart-alerts" element={<SmartAlerts />} />
+          <Route path="post-60" element={<PostIn60Seconds />} />
+          <Route path="volunteer-pickups" element={<VolunteerPickup />} />
         </Route>
       </Route>
 
