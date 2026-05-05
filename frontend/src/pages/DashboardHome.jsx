@@ -225,20 +225,21 @@ const WelcomeHero = ({ T, dark }) => {
 ══════════════════════════════════════ */
 const QuickActions = ({ T }) => {
   const actions = [
-    { icon: "🍱", label: "Donate Food", desc: "Share your surplus", to: "/dashboard/search", color: T.accent, bg: T.accentSoft, border: T.borderMed },
+    { icon: "🍱", label: "Donate Food", desc: "Share your surplus", to: "/dashboard/donate", color: T.accent, bg: T.accentSoft, border: T.borderMed },
     { icon: "🔍", label: "Find Food", desc: "Browse listings", to: "/dashboard/search", color: T.blue, bg: T.blueSoft, border: `rgba(59,130,246,0.2)` },
     { icon: "📦", label: "Track Order", desc: "Live updates", to: "/dashboard/orders", color: T.amber, bg: T.amberSoft, border: `rgba(245,158,11,0.2)` },
     { icon: "💚", label: "My Donations", desc: "View history", to: "/dashboard/profile", color: T.teal, bg: T.tealSoft, border: `rgba(20,184,166,0.2)` },
     { icon: "🗺️", label: "Live Map", desc: "Rescue near you", to: "/map", color: T.purple, bg: T.purpleSoft, border: `rgba(168,85,247,0.2)` },
     { icon: "🏆", label: "Leaderboard", desc: "Top volunteers", to: "/leaderboard", color: T.amber, bg: T.amberSoft, border: `rgba(245,158,11,0.2)` },
-    { icon: "📊", label: "Analytics", desc: "Deep insights", to: "/analytics", color: T.teal, bg: T.tealSoft, border: `rgba(20,184,166,0.2)` },
+    { icon: "📊", label: "Analytics", desc: "Deep insights", to: "/dashboard/analytics", color: T.teal, bg: T.tealSoft, border: `rgba(20,184,166,0.2)` },
+    { icon: "⚡", label: "AI Matching", desc: "Smart food-NGO pairing", to: "/dashboard/ai-matching", color: "#10b981", bg: "rgba(16,185,129,0.08)", border: `rgba(16,185,129,0.15)` },
     { icon: "⚙️", label: "Settings", desc: "Preferences", to: "/settings", color: T.textMuted, bg: T.border, border: T.border },
   ];
 
   return (
     <div style={{ marginBottom: 28 }}>
       <SectionHeader label="navigation" title="Quick Actions" T={T} />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }} className="rqdh-actions">
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 12 }} className="rqdh-actions">
         {actions.map((a, i) => (
           <motion.div
             key={i}
@@ -664,6 +665,104 @@ const DashboardHome = () => {
     <div style={{ maxWidth: 1280, margin: "0 auto" }}>
       {/* Welcome Hero */}
       <WelcomeHero T={T} dark={dark} />
+
+      {/* AI Matching Promo */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        style={{
+          background: T.bgCard, borderRadius: 24, padding: "28px 32px",
+          border: `1px solid ${T.border}`, marginBottom: 24,
+          position: "relative", overflow: "hidden",
+        }}
+      >
+        {/* Decorative elements */}
+        <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: `radial-gradient(circle, ${T.accent}12 0%, transparent 70%)`, pointerEvents: "none" }} />
+        <div style={{ position: "absolute", top: 20, right: 20, width: 80, height: 80, borderRadius: "50%", background: `radial-gradient(circle, ${T.teal}08 0%, transparent 70%)`, pointerEvents: "none" }} />
+
+        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                style={{ fontSize: 24 }}
+              >🤖</motion.div>
+              <div style={{
+                background: T.accentSoft, color: T.accent,
+                padding: "4px 12px", borderRadius: 100,
+                fontFamily: "'JetBrains Mono', monospace", fontSize: 10, fontWeight: 700,
+                letterSpacing: "0.08em",
+              }}>AI POWERED</div>
+            </div>
+            <h3 style={{
+              margin: 0, fontFamily: "Georgia, 'Times New Roman', serif",
+              fontSize: 24, fontWeight: 700, color: T.text,
+              letterSpacing: "-0.02em", marginBottom: 8,
+            }}>Smart Food-NGO Matching</h3>
+            <p style={{
+              margin: 0, fontFamily: "'JetBrains Mono', monospace", fontSize: 13,
+              color: T.textMuted, lineHeight: 1.6,
+              maxWidth: 400,
+            }}>
+              Our AI instantly matches surplus food with nearest NGOs in under 90 seconds,
+              optimizing routes and minimizing food waste.
+            </p>
+            <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+              <Link to="/dashboard/ai-matching" style={{ textDecoration: "none" }}>
+                <motion.button
+                  whileHover={{ scale: 1.04, boxShadow: `0 8px 28px ${T.accentGlow}` }}
+                  whileTap={{ scale: 0.97 }}
+                  style={{
+                    padding: "11px 22px", borderRadius: 14, border: "none",
+                    background: T.accent, color: "#fff",
+                    fontFamily: "'JetBrains Mono', monospace", fontSize: 12, fontWeight: 700,
+                    cursor: "pointer", letterSpacing: "0.04em", display: "flex",
+                    alignItems: "center", gap: 8,
+                  }}
+                >
+                  Try AI Matching →
+                </motion.button>
+              </Link>
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => alert("Feature coming soon!")}
+                style={{
+                  padding: "11px 22px", borderRadius: 14,
+                  background: T.bgAlt, border: `1px solid ${T.border}`,
+                  color: T.text, fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 12, fontWeight: 600, cursor: "pointer",
+                  letterSpacing: "0.04em",
+                }}
+              >
+                Learn More
+              </motion.button>
+            </div>
+          </div>
+
+          <motion.div
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            style={{
+              width: 160, height: 160, borderRadius: 24,
+              background: T.accentSoft, border: `1px solid ${T.accent}33`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 80, position: "relative", flexShrink: 0,
+            }}
+          >
+            <div style={{
+              position: "absolute", inset: 0, borderRadius: 24,
+              background: `radial-gradient(circle, ${T.accent}08 0%, transparent 60%)`,
+            }} />
+            <motion.div
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >🚀</motion.div>
+          </motion.div>
+        </div>
+      </motion.div>
 
       {/* Live status banner */}
       <LiveBanner T={T} />

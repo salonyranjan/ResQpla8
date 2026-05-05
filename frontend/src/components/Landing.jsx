@@ -857,7 +857,7 @@ const Mission = ({ c }) => (
    FEATURES — each card links to /dashboard
 ══════════════════════════════════════════════════ */
 const FEATURES = [
-  { emoji: "⚡", title: "AI-Powered Matching",  desc: "Our algorithm matches surplus food to the nearest verified NGO in under 90 seconds, factoring in distance, capacity, and food type.", tag: "NEW", accent: "#52b788", to: "/dashboard/search" },
+  { emoji: "⚡", title: "AI-Powered Matching",  desc: "Our algorithm matches surplus food to the nearest verified NGO in under 90 seconds, factoring in distance, capacity, and food type.", tag: "NEW", accent: "#52b788", to: "/dashboard/ai-matching" },
   { emoji: "🗺️", title: "Live Map Tracking",   desc: "Follow every donation from post to plate with real-time GPS tracking and push notifications for all parties.", tag: "", accent: "#e8a838", to: "/map" },
   { emoji: "🛡️", title: "Trust & Safety",      desc: "Every NGO is background-checked, rated, and insured. Donors get full transparency with photo proof of delivery.", tag: "", accent: "#2d6a4f", to: "/about" },
   { emoji: "📊", title: "Impact Dashboard",    desc: "See your personal CO₂ savings, meals rescued, and families helped in a beautiful, shareable impact report.", tag: "NEW", accent: "#d4622a", to: "/dashboard" },

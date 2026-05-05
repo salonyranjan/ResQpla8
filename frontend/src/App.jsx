@@ -19,6 +19,9 @@ import OrderTracking from "./pages/OrderTracking.jsx";
 import MapView from "./components/MapView.jsx";
 import ProfilePage from "./pages/Profile.jsx";
 import Settings from "./pages/Settings.jsx";
+import AIMatching from "./pages/AIMatching.jsx";
+import DonateFood from "./pages/DonateFood.jsx";
+import Analytics from "./pages/Analytics.jsx";
 
 /* ══════════════════════════════════════
    PUBLIC LAYOUT WRAPPER
@@ -45,6 +48,9 @@ function App() {
           <Route path="orders"  element={<OrderTracking />}  />
           <Route path="profile" element={<ProfilePage />}    />
           <Route path="settings" element={<Settings />} />
+          <Route path="ai-matching" element={<AIMatching />} />
+          <Route path="donate" element={<DonateFood />} />
+          <Route path="analytics" element={<Analytics />} />
         </Route>
       </Route>
 
