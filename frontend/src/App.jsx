@@ -20,53 +20,48 @@ import MapView from "./components/MapView.jsx";
 import ProfilePage from "./pages/Profile.jsx";
 
 /* ══════════════════════════════════════
-   LAYOUT WRAPPERS
+   PUBLIC LAYOUT WRAPPER
 ══════════════════════════════════════ */
-
-// Wrapper for public pages that automatically includes the Navbar
 const PublicLayout = () => (
   <>
     <Navbar />
-    {/* Outlet renders the child routes (Landing, Login, etc.) here */}
     <Outlet />
   </>
 );
 
 /* ══════════════════════════════════════
-   MAIN APP ROUTER
+   APP ROUTER
 ══════════════════════════════════════ */
-
 function App() {
   return (
     <Routes>
-      
-      {/* 1. DASHBOARD ROUTES (Role-based workflows) */}
+
+      {/* ── DASHBOARD (protected, no public Navbar) ── */}
       <Route element={<PageTransition />}>
         <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<DashboardHome />} />
-          <Route path="search" element={<FoodListing />} />
-          <Route path="orders" element={<OrderTracking />} />
-          <Route path="profile" element={<ProfilePage />} />
+          <Route index          element={<DashboardHome />}  />
+          <Route path="search"  element={<FoodListing />}    />
+          <Route path="orders"  element={<OrderTracking />}  />
+          <Route path="profile" element={<ProfilePage />}    />
         </Route>
       </Route>
 
-      {/* 2. PUBLIC ROUTES (Marketing, Auth, Info) */}
+      {/* ── PUBLIC (marketing, auth — with Navbar) ── */}
       <Route element={<PageTransition />}>
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Signup />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/map" element={<MapView />} /> 
+          <Route path="/"         element={<Landing />}  />
+          <Route path="/login"    element={<Login />}    />
+          <Route path="/register" element={<Signup />}   />
+          <Route path="/contact"  element={<Contact />}  />
+          <Route path="/about"    element={<About />}    />
         </Route>
       </Route>
 
-      {/* 3. STANDALONE PAGES (Operational/Checkout focus - No Navbar) */}
-      <Route path="/cart" element={<CartPage />} />
-      <Route path="/checkout" element={<CheckoutPage />} />
-      <Route path="/tracking/:orderId" element={<OrderTracking />} />
-      <Route path="/map" element={<MapView />} /> 
+      {/* ── STANDALONE (no layout chrome) ── */}
+      <Route path="/cart"                element={<CartPage />}      />
+      <Route path="/checkout"            element={<CheckoutPage />}  />
+      <Route path="/tracking/:orderId"   element={<OrderTracking />} />
+      <Route path="/map"                 element={<MapView />}       />
 
     </Routes>
   );
