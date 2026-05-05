@@ -79,7 +79,7 @@ const navItems = [
 const bottomNavItems = [
   { icon: "🗺️",  label: "Map View",     path: "/map"      },
   { icon: "🛒",  label: "Cart",         path: "/cart"     },
-  { icon: "⚙️",   label: "Settings",     path: "/settings" },
+  { icon: "⚙️",   label: "Settings",     path: "/dashboard/settings" },
 ];
 
 /* ══════════════════════════════════════
@@ -1353,7 +1353,7 @@ const DashboardLayout = () => {
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
                 {/* Child routes render here */}
-                <Outlet context={{ T, dark }} />
+                <Outlet context={{ T, dark, toggleDark: () => setDark(d => !d) }} />
               </motion.div>
             </AnimatePresence>
           </main>

@@ -18,6 +18,7 @@ import CheckoutPage from "./pages/Checkout.jsx";
 import OrderTracking from "./pages/OrderTracking.jsx";
 import MapView from "./components/MapView.jsx";
 import ProfilePage from "./pages/Profile.jsx";
+import Settings from "./pages/Settings.jsx";
 
 /* ══════════════════════════════════════
    PUBLIC LAYOUT WRAPPER
@@ -43,6 +44,7 @@ function App() {
           <Route path="search"  element={<FoodListing />}    />
           <Route path="orders"  element={<OrderTracking />}  />
           <Route path="profile" element={<ProfilePage />}    />
+          <Route path="settings" element={<Settings />} />
         </Route>
       </Route>
 
