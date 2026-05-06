@@ -4,11 +4,12 @@ import { Route, Routes, Outlet } from "react-router-dom";
 import Navbar from "./components/NavBar.jsx";
 import PageTransition from "./components/PageTransition.jsx";
 import Landing from "./components/Landing.jsx";
-import Login from "./components/Login.jsx";
-import Signup from "./components/Signup.jsx";
+import Login from "./pages/Login.jsx";
+import Signup from "./pages/Signup.jsx";
 import Contact from "./components/Contact/Contact.jsx";
 import About from "./components/About.jsx";
 import DashboardLayout from "./layouts/DashboardLayout.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 // Pages
 import DashboardHome from "./pages/DashboardHome.jsx";
@@ -26,6 +27,7 @@ import SmartAlerts from "./pages/SmartAlerts.jsx";
 import PostIn60Seconds from "./pages/PostIn60Seconds.jsx";
 import VolunteerPickup from "./pages/VolunteerPickup.jsx";
 import ImpactDelivered from "./pages/ImpactDelivered.jsx";
+import { AuthProvider } from "./context/AuthContext";
 
 /* ══════════════════════════════════════
    PUBLIC LAYOUT WRAPPER
@@ -42,11 +44,12 @@ const PublicLayout = () => (
 ══════════════════════════════════════ */
 function App() {
   return (
-    <Routes>
+    <AuthProvider>
+      <Routes>
 
       {/* ── DASHBOARD (protected, no public Navbar) ── */}
       <Route element={<PageTransition />}>
-        <Route path="/dashboard" element={<DashboardLayout />}>
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           <Route index          element={<DashboardHome />}  />
           <Route path="search"  element={<FoodListing />}    />
           <Route path="orders"  element={<OrderTracking />}  />
@@ -80,6 +83,7 @@ function App() {
       <Route path="/map"                 element={<MapView />}       />
 
     </Routes>
+    </AuthProvider>
   );
 }
 

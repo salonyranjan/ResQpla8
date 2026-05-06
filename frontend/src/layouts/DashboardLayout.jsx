@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import ProtectedRoute from "../components/ProtectedRoute.jsx";
 
 /* ══════════════════════════════════════
    THEME SYSTEM  (mirrors your app)
@@ -1288,7 +1289,8 @@ const DashboardLayout = () => {
   useGlobalStyles(T);
 
   return (
-    <div
+    <ProtectedRoute>
+      <div
       style={{
         background: T.bg,
         minHeight: "100vh",
@@ -1363,6 +1365,7 @@ const DashboardLayout = () => {
       {/* Mobile bottom tab bar */}
       <MobileTabBar T={T} />
     </div>
+    </ProtectedRoute>
   );
 };
 

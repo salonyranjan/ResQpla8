@@ -1,10 +1,32 @@
 import { useOutletContext } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useVolunteerPickups } from "../hooks/useVolunteerPickups";
+import { useState, useMemo } from "react";
 
 const VolunteerPickup = () => {
   const { T } = useOutletContext();
-  const { filteredPickups, filter, setFilter, statusCounts } = useVolunteerPickups(T);
+  const { pickups, loading, error } = useVolunteerPickups();
+  const [filter, setFilter] = useState("all");
+
+  const filteredPickups = useMemo(() => {
+    if (!pickups) return [];
+    return filter === "all" ? pickups : pickups.filter(p => p.status === filter);
+  }, [filter, pickups]);
+
+  const statusCounts = useMemo(() => {
+    const counts = { all: pickups?.length || 0 };
+    (pickups || []).forEach(p => {
+      counts[p.status] = (counts[p.status] || 0) + 1;
+    });
+    return counts;
+  }, [pickups]);
+
+  if (loading) {
+    return <div style={{ padding: "28px", background: T.bg, minHeight: "100vh" }}><p>Loading pickups...</p></div>;
+  }
+  if (error) {
+    return <div style={{ padding: "28px", background: T.bg, minHeight: "100vh" }}><p>Error loading pickups.</p></div>;
+  }
 
   const getStatusBadge = (status) => {
     const badges = {

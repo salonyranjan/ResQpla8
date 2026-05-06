@@ -1,43 +1,87 @@
-import { useState, useMemo, useEffect } from "react";
-import { getActivePickups } from "../services/dataService";
+import { useState, useEffect, useCallback } from "react";
+import { databases } from "../services/appwrite";
+
+const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
+const PICKUPS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PICKUPS_COLLECTION_ID;
 
 /**
- * Hook providing pickup data and live progress simulation.
- * @param {object} theme - Theme object for colors.
+ * Map an Appwrite document to the shape the UI expects.
+ * Adjust the field mappings to match your actual Appwrite collection schema.
  */
-export const useVolunteerPickups = (theme) => {
-  const [pickups, setPickups] = useState(() => getActivePickups().map(p => ({
-    ...p,
-    color: p.color || theme?.accent,
-  })));
+const mapPickup = (doc) => {
+  // Derive avatar initials from volunteer name
+  const volunteerName = doc.volunteerName || doc.volunteer || "Unknown";
+  const avatar = doc.avatar ||
+    volunteerName
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase();
 
-  // Simulate live progress updates similar to original component.
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPickups(prev =>
-        prev.map(p => {
-          const newProgress = Math.min(100, p.progress + Math.random() * 2);
-          const newEta = p.progress < 90 ? `${Math.max(0, parseInt(p.eta) - 1)} min` : "Arrived";
-          return { ...p, progress: newProgress, eta: newEta };
-        })
+  // Determine color based on status
+  const statusColorMap = {
+    "on-the-way": "#10B981",
+    "arrived": "#F59E0B",
+    "picking-up": "#14B8A6",
+    "delivered": "#2563EB",
+  };
+
+  return {
+    id: doc.$id,
+    status: doc.status || "on-the-way",
+    volunteer: volunteerName,
+    avatar,
+    rating: doc.rating || doc.volunteerRating || 4.5,
+    rescues: doc.rescues || doc.volunteerRescues || 0,
+    foodItem: doc.foodItem || doc.food || "Unknown food",
+    donor: doc.donor || doc.restaurant || "Unknown donor",
+    ngo: doc.ngo || doc.ngoName || "Unknown NGO",
+    pickupLocation: doc.pickupLocation || doc.pickupAddress || "Unknown",
+    deliveryLocation: doc.deliveryLocation || doc.deliveryAddress || "Unknown",
+    distance: doc.distance || "0 km",
+    eta: doc.eta || "0 min",
+    progress: doc.progress ?? 0,
+    color: statusColorMap[doc.status] || "#10B981",
+    // Reliable static map placeholder — no external API dependency
+    mapImageUrl: `https://placehold.co/440x120/e2e8f0/475569?text=Map+${encodeURIComponent(doc.pickupLocation || doc.pickupAddress || "Pickup")}`,
+  };
+};
+
+/**
+ * Hook to fetch volunteer pickups from Appwrite.
+ * Returns { pickups, loading, error }.
+ * Polling is set up to refresh data every 30 seconds for near-real-time feel.
+ */
+export const useVolunteerPickups = () => {
+  const [pickups, setPickups] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchPickups = useCallback(async () => {
+    try {
+      const response = await databases.listDocuments(
+        DATABASE_ID,
+        PICKUPS_COLLECTION_ID
+        // Add queries if needed, e.g., Query.equal('status', 'active')
       );
-    }, 3000);
-    return () => clearInterval(interval);
+      const mapped = response.documents.map(mapPickup);
+      setPickups(mapped);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to fetch pickups:", err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const [filter, setFilter] = useState("all");
+  useEffect(() => {
+    fetchPickups();
 
-  const filteredPickups = useMemo(() => {
-    return filter === "all" ? pickups : pickups.filter(p => p.status === filter);
-  }, [filter, pickups]);
+    // Poll for updates every 30 seconds
+    const interval = setInterval(fetchPickups, 30000);
+    return () => clearInterval(interval);
+  }, [fetchPickups]);
 
-  const statusCounts = useMemo(() => {
-    const counts = { all: pickups.length };
-    pickups.forEach(p => {
-      counts[p.status] = (counts[p.status] || 0) + 1;
-    });
-    return counts;
-  }, [pickups]);
-
-  return { filteredPickups, filter, setFilter, statusCounts };
+  return { pickups, loading, error };
 };
