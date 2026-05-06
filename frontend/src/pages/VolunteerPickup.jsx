@@ -1,80 +1,10 @@
 import { useOutletContext } from "react-router-dom";
-import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useVolunteerPickups } from "../hooks/useVolunteerPickups";
 
 const VolunteerPickup = () => {
-  const { T, dark } = useOutletContext();
-  const [activePickups, setActivePickups] = useState([
-    {
-      id: 1,
-      status: "on-the-way",
-      volunteer: "Ramesh K.",
-      avatar: "RK",
-      rating: 4.9,
-      rescues: 142,
-      foodItem: "Dal Makhani x45",
-      donor: "Taj Palace Hotel",
-      ngo: "Akshaya Patra",
-      pickupLocation: "Connaught Place, Delhi",
-      deliveryLocation: "Karol Bagh, Delhi",
-      distance: "1.2 km",
-      eta: "4 min",
-      progress: 65,
-      color: T.accent,
-    },
-    {
-      id: 2,
-      status: "arrived",
-      volunteer: "Priya S.",
-      avatar: "PS",
-      rating: 4.7,
-      rescues: 118,
-      foodItem: "Biryani Platter x80",
-      donor: "ITC Grand Chola",
-      ngo: "Feeding India",
-      pickupLocation: "Chanakyapuri, Delhi",
-      deliveryLocation: "Paharganj, Delhi",
-      distance: "2.8 km",
-      eta: "0 min",
-      progress: 85,
-      color: T.amber,
-    },
-    {
-      id: 3,
-      status: "picking-up",
-      volunteer: "Arun M.",
-      avatar: "AM",
-      rating: 4.5,
-      rescues: 97,
-      foodItem: "South Indian Thali x60",
-      donor: "Marriott Chennai",
-      ngo: "Govt. Shelter #42",
-      pickupLocation: "Anna Salai, Chennai",
-      deliveryLocation: "T. Nagar, Chennai",
-      distance: "0.9 km",
-      eta: "12 min",
-      progress: 45,
-      color: T.teal,
-    },
-  ]);
-
-  const [filter, setFilter] = useState("all");
-
-  const filteredPickups = filter === "all"
-    ? activePickups
-    : activePickups.filter(p => p.status === filter);
-
-  // Simulate live progress updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActivePickups(prev => prev.map(pickup => ({
-        ...pickup,
-        progress: Math.min(100, pickup.progress + Math.random() * 2),
-        eta: pickup.progress < 90 ? `${Math.max(0, parseInt(pickup.eta) - 1)} min` : "Arrived",
-      })));
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+  const { T } = useOutletContext();
+  const { filteredPickups, filter, setFilter, statusCounts } = useVolunteerPickups(T);
 
   const getStatusBadge = (status) => {
     const badges = {
@@ -84,13 +14,6 @@ const VolunteerPickup = () => {
       "delivered": { label: "Delivered", color: T.teal, bg: T.tealSoft },
     };
     return badges[status] || badges["on-the-way"];
-  };
-
-  const statusCounts = {
-    all: activePickups.length,
-    "on-the-way": activePickups.filter(p => p.status === "on-the-way").length,
-    "arrived": activePickups.filter(p => p.status === "arrived").length,
-    "picking-up": activePickups.filter(p => p.status === "picking-up").length,
   };
 
   return (

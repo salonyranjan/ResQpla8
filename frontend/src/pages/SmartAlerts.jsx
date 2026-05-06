@@ -1,103 +1,10 @@
 import { useOutletContext } from "react-router-dom";
-import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSmartAlerts } from "../hooks/useSmartAlerts";
 
 const SmartAlerts = () => {
-  const { T, dark } = useOutletContext();
-  const [filter, setFilter] = useState("all");
-
-  const alerts = [
-    {
-      id: 1,
-      type: "urgent",
-      icon: "⚠️",
-      title: "Food Expiring Soon",
-      message: "45 meals of Dal Makhani at Taj Palace will expire in 30 minutes",
-      time: "2 min ago",
-      location: "Connaught Place, Delhi",
-      action: "Notify NGOs",
-      color: T.amber,
-      bg: T.amberSoft,
-      border: `rgba(245,158,11,0.2)`,
-    },
-    {
-      id: 2,
-      type: "match",
-      icon: "🤖",
-      title: "AI Match Found",
-      message: "Found 3 NGOs within 2km suitable for your Biryani donation (80 meals)",
-      time: "5 min ago",
-      location: "ITC Grand Chola, Delhi",
-      action: "View Matches",
-      color: T.accent,
-      bg: T.accentSoft,
-      border: `rgba(34,197,94,0.2)`,
-    },
-    {
-      id: 3,
-      type: "pickup",
-      icon: "🚴",
-      title: "Pickup Update",
-      message: "Volunteer Ramesh is 0.8km away and will arrive in 4 minutes",
-      time: "8 min ago",
-      location: "Paharganj, Delhi",
-      action: "Track Live",
-      color: T.blue,
-      bg: T.blueSoft,
-      border: `rgba(59,130,246,0.2)`,
-    },
-    {
-      id: 4,
-      type: "delivery",
-      icon: "✅",
-      title: "Delivery Confirmed",
-      message: "Order #2847 successfully delivered to Akshaya Patra - 45 meals",
-      time: "15 min ago",
-      location: "Karol Bagh, Delhi",
-      action: "View Proof",
-      color: T.teal,
-      bg: T.tealSoft,
-      border: `rgba(20,184,166,0.2)`,
-    },
-    {
-      id: 5,
-      type: "new",
-      icon: "🆕",
-      title: "New Donation Posted",
-      message: "Hyderabadi Biryani Platter - 80 meals available for pickup",
-      time: "18 min ago",
-      location: "Bangalore South",
-      action: "View Details",
-      color: "#8b5cf6",
-      bg: "rgba(139,92,246,0.08)",
-      border: `rgba(139,92,246,0.2)`,
-    },
-    {
-      id: 6,
-      type: "system",
-      icon: "⚙️",
-      title: "System Alert",
-      message: "3 NGOs haven't confirmed pickup within 30min window - auto-escalating",
-      time: "22 min ago",
-      location: "Mumbai Central",
-      action: "Manage",
-      color: T.red,
-      bg: T.redSoft,
-      border: `rgba(239,68,68,0.2)`,
-    },
-  ];
-
-  const filteredAlerts = filter === "all"
-    ? alerts
-    : alerts.filter(a => a.type === filter);
-
-  const typeCounts = {
-    all: alerts.length,
-    urgent: alerts.filter(a => a.type === "urgent").length,
-    match: alerts.filter(a => a.type === "match").length,
-    pickup: alerts.filter(a => a.type === "pickup").length,
-    delivery: alerts.filter(a => a.type === "delivery").length,
-  };
+  const { T } = useOutletContext();
+  const { alerts, filteredAlerts, filter, setFilter, typeCounts } = useSmartAlerts();
 
   return (
     <div style={{ padding: "28px", background: T.bg, minHeight: "100vh" }}>
@@ -149,7 +56,7 @@ const SmartAlerts = () => {
         gap: 12, marginBottom: 24,
       }} className="rq-alerts-stats">
         {[
-          { label: "Total Alerts", value: alerts.length, color: T.accent, icon: "🔔" },
+          { label: "Total Alerts", value: typeCounts.all, color: T.accent, icon: "🔔" },
           { label: "Urgent", value: typeCounts.urgent, color: T.amber, icon: "⚠️" },
           { label: "AI Matches", value: typeCounts.match, color: T.blue, icon: "🤖" },
           { label: "Active Pickups", value: typeCounts.pickup, color: T.teal, icon: "🚴" },

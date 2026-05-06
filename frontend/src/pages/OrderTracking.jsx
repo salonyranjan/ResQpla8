@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate, useOutletContext } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -10,15 +9,7 @@ import {
   HiOutlineFire,
   HiOutlinePhone,
 } from "react-icons/hi";
-import { mockOrders } from "../data/mockData";
-
-const STATUS_STEPS = [
-  { id: "order_placed", label: "Order Placed", sub: "We received your request", icon: HiOutlineShoppingBag },
-  { id: "confirmed", label: "Confirmed", sub: "Restaurant is preparing your order", icon: HiOutlineCheckCircle },
-  { id: "preparing", label: "Preparing", sub: "Food being packed carefully", icon: HiOutlineFire },
-  { id: "out_for_delivery", label: "Out for Delivery", sub: "Volunteer is on the way", icon: HiOutlineTruck },
-  { id: "delivered", label: "Delivered", sub: "Enjoy your meal! 🎉", icon: HiOutlineCheckCircle },
-];
+import { useOrderTracking } from "../hooks/useOrderTracking";
 
 export default function OrderTracking() {
   const ctx = useOutletContext?.() ?? {};
@@ -41,26 +32,16 @@ export default function OrderTracking() {
 
   const { orderId } = useParams();
   const navigate = useNavigate();
-  const [order, setOrder] = useState(null);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [eta, setEta] = useState(18);
+  const { order, currentStep, eta, progressPct, STATUS_STEPS } = useOrderTracking(orderId);
 
-  useEffect(() => {
-    const found = mockOrders?.find((o) => o.id === orderId);
-    if (found) setOrder(found);
-    else setOrder({ id: orderId, deliveryAddress: "Your location", items: [] });
-  }, [orderId]);
-
-  useEffect(() => {
-    if (currentStep >= STATUS_STEPS.length - 1) return;
-    const timer = setInterval(() => {
-      setCurrentStep((p) => Math.min(p + 1, STATUS_STEPS.length - 1));
-      setEta((p) => Math.max(p - 4, 0));
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [order, currentStep]);
-
-  const progressPct = ((currentStep) / (STATUS_STEPS.length - 1)) * 100;
+  // Map icons to steps (since hook doesn't include icon components)
+  const STEP_ICONS = {
+    order_placed: HiOutlineShoppingBag,
+    confirmed: HiOutlineCheckCircle,
+    preaping: HiOutlineFire,
+    out_for_delivery: HiOutlineTruck,
+    delivered: HiOutlineCheckCircle,
+  };
 
   return (
     <div style={{ background: T.bg, minHeight: "100vh", paddingBottom: 32 }}>
@@ -160,7 +141,7 @@ export default function OrderTracking() {
           />
 
           {STATUS_STEPS.map((step, idx) => {
-            const Icon = step.icon;
+            const Icon = STEP_ICONS[step.id] || HiOutlineShoppingBag;
             const isCompleted = idx < currentStep;
             const isCurrent = idx === currentStep;
             return (

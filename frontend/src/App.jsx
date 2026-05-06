@@ -8,7 +8,7 @@ import Login from "./components/Login.jsx";
 import Signup from "./components/Signup.jsx";
 import Contact from "./components/Contact/Contact.jsx";
 import About from "./components/About.jsx";
-import DashboardLayout from "./components/Dashboard/DashboardLayout.jsx";
+import DashboardLayout from "./layouts/DashboardLayout.jsx";
 
 // Pages
 import DashboardHome from "./pages/DashboardHome.jsx";
