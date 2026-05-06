@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { databases } from "../services/appwrite";
 import { Query } from "appwrite";
@@ -237,6 +237,22 @@ export default function ImpactDelivered() {
               color: theme.textMuted,
               fontFamily: "'Outfit', sans-serif",
             }}>Track your community's rescued meals and environmental impact</p>
+            <Link to="/dashboard" style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              marginTop: "0.75rem",
+              color: theme.accent || "#10b981",
+              fontFamily: "'DM Mono', monospace",
+              fontSize: "0.85rem",
+              textDecoration: "none",
+              borderBottom: `1px solid ${theme.accent || "#10b981"}33`,
+              paddingBottom: "2px",
+              transition: "all 0.2s",
+            }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = "0.7"; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
+            >← Back to Dashboard</Link>
           </div>
 
           {/* Error Banner */}

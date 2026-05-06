@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 /* ─── Theme Toggle ────────────────────────────────────────────── */
@@ -170,12 +170,22 @@ function PasswordStrength({ password, dark }) {
 export default function Signup() {
   const { register, loading: authLoading, user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     if (user && !authLoading) {
       navigate("/dashboard", { replace: true });
     }
   }, [user, authLoading, navigate]);
+
+  // Read ?role= from URL and pre-select the correct role
+  useEffect(() => {
+    const roleParam = searchParams.get("role");
+    if (roleParam && ["donor", "ngo", "volunteer"].includes(roleParam)) {
+      setForm(f => ({ ...f, role: roleParam }));
+    }
+  }, [searchParams]);
+
   const [dark, setDark] = useState(true);
   const [step, setStep] = useState(0);
   const [animDir, setAnimDir] = useState(1); // 1 = forward, -1 = back

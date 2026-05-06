@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import ProtectedRoute from "../components/ProtectedRoute.jsx";
+import { useAuth } from "../context/AuthContext";
 
 /* ══════════════════════════════════════
    THEME SYSTEM  (mirrors your app)
@@ -141,6 +142,7 @@ const TickerBanner = ({ T }) => {
 ══════════════════════════════════════ */
 const Sidebar = ({ T, collapsed, setCollapsed, dark, toggleDark }) => {
   const location = useLocation();
+  const { logout } = useAuth();
 
   const NavItem = ({ item }) => {
     const isActive =
@@ -542,6 +544,30 @@ const Sidebar = ({ T, collapsed, setCollapsed, dark, toggleDark }) => {
                 {dark ? "☀️" : "🌙"}
               </motion.span>
             </AnimatePresence>
+          </motion.button>
+        )}
+
+        {/* Logout button */}
+        {!collapsed && (
+          <motion.button
+            onClick={logout}
+            whileHover={{ scale: 1.12 }}
+            whileTap={{ scale: 0.9 }}
+            title="Logout"
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 8,
+              background: T.redSoft || "rgba(239,68,68,0.12)",
+              border: `1px solid ${T.red || "#ef4444"}33`,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ fontSize: 13 }}>⎋</span>
           </motion.button>
         )}
       </div>
@@ -1184,7 +1210,12 @@ const TopBar = ({ T, dark, toggleDark, collapsed, setCollapsed }) => {
 ══════════════════════════════════════ */
 const MobileTabBar = ({ T }) => {
   const location = useLocation();
-  const allTabs = [...navItems.slice(0, 4), { icon: "⚙", label: "More", path: "/settings" }];
+  const allTabs = [
+    ...navItems.slice(0, 2), // Dashboard, Food Search
+    { icon: "🔍", label: "Search", path: "/dashboard/search" },
+    ...navItems.slice(2, 4), // My Orders, Profile
+    { icon: "⚙", label: "More", path: "/dashboard/settings" },
+  ];
 
   return (
     <div

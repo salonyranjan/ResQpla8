@@ -17,10 +17,10 @@ const FontLoader = () => {
 };
 
 /* ══════════════════════════════════════════════════
-   DARK MODE HOOK
+   DARK MODE HOOK — dark is now DEFAULT (true)
 ══════════════════════════════════════════════════ */
 const useDarkMode = () => {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true); // ← changed from false to true
   const toggle = useCallback(() => setDark((d) => !d), []);
   return { dark, toggle };
 };
