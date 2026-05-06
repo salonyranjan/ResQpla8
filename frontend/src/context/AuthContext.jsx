@@ -42,7 +42,10 @@ export function AuthProvider({ children }) {
       // Should rarely happen since getCurrentUser() catches its own errors,
       // but kept as safety net for network errors, etc.
       console.error("AuthContext: Failed to fetch user", err);
-      setUser(null);
+      // Only clear user on authentication errors (e.g., 401). For other errors, keep the existing user.
+      if (err.code === 401) {
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }

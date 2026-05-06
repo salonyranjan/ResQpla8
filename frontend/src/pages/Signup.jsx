@@ -168,8 +168,14 @@ function PasswordStrength({ password, dark }) {
 
 /* ─── Main Component ──────────────────────────────────────────── */
 export default function Signup() {
-  const { register, loading: authLoading } = useAuth();
+  const { register, loading: authLoading, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user && !authLoading) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [user, authLoading, navigate]);
   const [dark, setDark] = useState(true);
   const [step, setStep] = useState(0);
   const [animDir, setAnimDir] = useState(1); // 1 = forward, -1 = back

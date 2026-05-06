@@ -67,10 +67,12 @@ export async function getCurrentUser() {
     const user = await account.get();
     return user;
   } catch (err) {
-    // Not authenticated – not an error, just return null.
+    // Only treat 401 (no session) as "not logged in".
+    // For all other errors (network, 404, etc.), propagate the error
+    // so the caller can decide how to handle it without clearing the session.
     if (err.code === 401) return null;
     console.error("Failed to fetch current user:", err.message);
-    return null;
+    throw err;
   }
 }
 
@@ -82,6 +84,11 @@ export async function logout() {
   try {
     await account.deleteSession("current");
   } catch (err) {
+    // Gracefully handle missing session (404 or user_session_not_found)
+    if (err.code === 404 || err.type === "user_session_not_found") {
+      // No active session – nothing to delete.
+      return;
+    }
     console.error("Logout failed:", err.message);
     throw err;
   }

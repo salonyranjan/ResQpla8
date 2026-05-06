@@ -9,8 +9,14 @@ function Particle({ style }) {
 
 /* ─── Main Component ─────────────────────────────────────────────── */
 export default function Login() {
-  const { login, loading: authLoading } = useAuth();
+  const { login, loading: authLoading, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user && !authLoading) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [user, authLoading, navigate]);
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
