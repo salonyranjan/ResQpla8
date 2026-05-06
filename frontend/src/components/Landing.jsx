@@ -947,7 +947,7 @@ const HOW_STEPS = [
   { num: "01", emoji: "📸", title: "Post in 60 Seconds", desc: "Snap a photo, add quantity and pickup window. No forms, no friction — just impact.", color: "#52b788", to: "/dashboard/post-60" },
   { num: "02", emoji: "🤖", title: "AI Finds the Match",  desc: "Our engine notifies the best-fit NGO within seconds based on location, type, and urgency.", color: "#e8a838", to: "/dashboard/ai-matching" },
   { num: "03", emoji: "🚴", title: "Volunteer Picks Up",  desc: "A vetted volunteer collects the food with live GPS updates for all parties.", color: "#d4622a", to: "/dashboard/volunteer-pickups" },
-  { num: "04", emoji: "📋", title: "Impact Delivered",    desc: "Receive a certificate with CO₂ saved, meals rescued, and families fed. Share on social.", color: "#2d6a4f", to: "/dashboard" },
+  { num: "04", emoji: "📋", title: "Impact Delivered",    desc: "Receive a certificate with CO₂ saved, meals rescued, and families fed. Share on social.", color: "#2d6a4f", to: "/dashboard/impact-delivered" },
 ];
 
 const HowItWorks = ({ c }) => (

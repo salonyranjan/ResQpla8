@@ -25,6 +25,7 @@ import Analytics from "./pages/Analytics.jsx";
 import SmartAlerts from "./pages/SmartAlerts.jsx";
 import PostIn60Seconds from "./pages/PostIn60Seconds.jsx";
 import VolunteerPickup from "./pages/VolunteerPickup.jsx";
+import ImpactDelivered from "./pages/ImpactDelivered.jsx";
 
 /* ══════════════════════════════════════
    PUBLIC LAYOUT WRAPPER
@@ -57,6 +58,7 @@ function App() {
           <Route path="smart-alerts" element={<SmartAlerts />} />
           <Route path="post-60" element={<PostIn60Seconds />} />
           <Route path="volunteer-pickups" element={<VolunteerPickup />} />
+              <Route path="impact-delivered" element={<ImpactDelivered />} />
         </Route>
       </Route>
 
