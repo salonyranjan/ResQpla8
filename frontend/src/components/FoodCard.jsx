@@ -459,7 +459,7 @@ const FoodCard = ({
   onDarkToggle,
 }) => {
   const [added, setAdded] = useState(false);
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true); // ← dark mode is now DEFAULT
   const cardRef = useRef(null);
 
   // Allow external dark control or internal
