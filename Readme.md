@@ -1,40 +1,40 @@
-# ResQPlate: Food Waste Reduction & Donation Web App
+# 🥗 ResQPlate: AI-Driven Food Rescue Ecosystem
 
-> **Tech Stack:** MERN (MongoDB, Express, React, Node.js)
-
-## Overview
-**ResQPlate** is a real-time web platform designed to bridge the gap between food donors (restaurants, messes, events) and receivers (NGOs, volunteers). By utilizing **Geo-spatial logic**, the app optimizes the logistics of food recovery, ensuring surplus food reaches the needy before it expires.
-
-## Key Features
-- **Real-time Geo-Matching:** Donors and NGOs are matched based on GPS location (Haversine Formula).
-- **Interactive Map:** View available food donations on a live map (Leaflet/Google Maps).
-- **Expiry Management:** Automated system to flag or remove expired food listings.
-- **Role-Based Access:** Separate dashboards for Donors, NGOs, and Admins.
-- **Analytics:** Admin dashboard to track total food saved and impact created.
+**ResQPlate** is a smart food redistribution platform designed to bridge the gap between surplus food donors (restaurants, households, event planners) and NGOs in **Patna, Bihar**. By leveraging **Generative AI** and **Real-time Logistics**, we aim to minimize food waste and combat hunger.
 
 ---
 
-## Tech Stack
-| Component | Technology |
-| :--- | :--- |
-| **Frontend** | React.js, Tailwind CSS, Leaflet Maps |
-| **Backend** | Node.js, Express.js |
-| **Database** | MongoDB Atlas (Cloud) |
-| **Auth** | JSON Web Tokens (JWT) & Bcrypt |
-| **Tools** | Postman, VS Code, Git |
+## 🚀 Key Features
+
+### 🤖 ResQBot (AI Coordinator)
+A botanical-themed, floating chatbot built with **Gemini 2.5 Flash**.
+* **Smart Matching:** Automatically matches donors to the nearest NGO based on food type and storage facilities (e.g., matching Biryani with NGOs that have refrigeration).
+* **Multimodal Vision:** Upload a photo of food, and the AI identifies ingredients, estimated shelf-life, and safety guidelines.
+
+### 📍 Intelligent Logistics
+* **NGO Directory:** A curated list of verified NGOs in Locations with specific requirements.
+* **Real-time Tracking:** Seamless donation lifecycle management using **Appwrite** as a backend.
+
+### 🎨 Cinematic UX
+* **3D Visuals:** Integrated **Three.js** and **GSAP** for a high-end, smooth user experience.
+* **Responsive Design:** Fully optimized for mobile and desktop donors.
 
 ---
 
-## Getting Started
+## 🛠️ Tech Stack
 
-### 1. Prerequisites
-Make sure you have the following installed on your machine:
-- [Node.js](https://nodejs.org/) (v16 or higher)
-- [MongoDB Atlas](https://www.mongodb.com/) Account (for database connection)
+* **Frontend:** React.js, Tailwind CSS, Framer Motion
+* **3D Engine:** Three.js, GSAP (for smooth transitions)
+* **Artificial Intelligence:** Google Gemini API (Multimodal & RAG)
+* **Backend as a Service:** Appwrite (Database, Auth, and Storage)
+* **Deployment:** Vercel / AWS EC2
 
-### 2. Installation
+---
 
-**Step 1: Clone the Repository**
-```bash
-git clone [https://github.com/your-username/ResQPlate.git](https://github.com/your-username/ResQPlate.git)
-cd ResQPlate
+## 🏗️ System Architecture
+
+1.  **User Interface:** React components styled with botanical aesthetics.
+2.  **AI Layer:** An agentic workflow that processes user text and images via Gemini 1.5 Flash.
+3.  **Data Layer:** Appwrite handles real-time updates for food pickup status and NGO availability.
+
+---
