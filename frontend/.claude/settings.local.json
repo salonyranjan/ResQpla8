@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node replace_logo.js)",
+      "Bash(node replace_logo.mjs)"
+    ]
+  }
+}
