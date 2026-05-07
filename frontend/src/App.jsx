@@ -29,6 +29,7 @@ import VolunteerPickup from "./pages/VolunteerPickup.jsx";
 import ImpactDelivered from "./pages/ImpactDelivered.jsx";
 import Leaderboard from "./pages/Leaderboard.jsx";
 import { AuthProvider } from "./context/AuthContext";
+import ResQBot from "./components/Chat/ResQBot";
 
 /* ════════════════════════════════════
    PUBLIC LAYOUT WRAPPER
@@ -85,6 +86,7 @@ function App() {
         <Route path="/map"                 element={<MapView />}       />
 
       </Routes>
+    <ResQBot />
     </AuthProvider>
   );
 }
