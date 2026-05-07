@@ -104,7 +104,28 @@ const Reveal = ({ children, delay = 0, y = 26 }) => {
   );
 };
 
-/* ─── Theme Toggle Button ─── */
+/* ─── ResQPlate SVG Logo ─── */
+const ResQPlateLogo = ({ T, size = 34 }) => (
+  <div style={{
+    width: size, height: size, borderRadius: Math.round(size * 0.32),
+    background: `linear-gradient(135deg, ${T.leaf}, ${T.leafMid})`,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    flexShrink: 0, boxShadow: `0 4px 12px ${T.leaf}44`,
+    transition: "background .4s",
+  }}>
+    <svg width={size * 0.58} height={size * 0.58} viewBox="0 0 24 24" fill="none">
+      {/* Plate */}
+      <ellipse cx="12" cy="14" rx="8" ry="3.5" stroke="#95d5b2" strokeWidth="1.4" />
+      {/* Leaf / sprout rising from plate */}
+      <path d="M12 13.5 C12 10 9 7 9 7 C10.5 7 13.5 8.5 13.5 11.5" fill="#52b788" opacity="0.9" />
+      <path d="M12 13.5 C12 10 15 7.5 15 7.5 C13.5 7.5 11 9 11 12" fill="#95d5b2" opacity="0.85" />
+      {/* Stem */}
+      <path d="M12 14 L12 8" stroke="#52b788" strokeWidth="1.1" strokeLinecap="round" />
+    </svg>
+  </div>
+);
+
+/* ─── Theme Toggle / Navbar ─── */
 const ThemeToggle = ({ dark, onToggle, T }) => (
   <div style={{
     background: T.card, borderBottom: `1px solid ${T.border}`,
@@ -112,11 +133,16 @@ const ThemeToggle = ({ dark, onToggle, T }) => (
     justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100,
     transition: "background .4s, border-color .4s",
   }}>
-    <div style={{
-      fontFamily: "'Cormorant Garamond', serif", fontSize: 19,
-      fontWeight: 700, color: T.ink, transition: "color .4s",
-    }}>
-      ResQ<em style={{ color: T.amber, fontStyle: "italic" }}>Plate</em>
+    {/* Logo + Wordmark */}
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <ResQPlateLogo T={T} size={34} />
+      <div style={{
+        fontFamily: "'Cormorant Garamond', serif", fontSize: 20,
+        fontWeight: 700, color: T.ink, letterSpacing: "-0.01em",
+        transition: "color .4s",
+      }}>
+        ResQ<em style={{ color: T.amber, fontStyle: "italic" }}>Plate</em>
+      </div>
     </div>
 
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -149,15 +175,15 @@ const ThemeToggle = ({ dark, onToggle, T }) => (
         >
           {dark ? (
             <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-              <path d="M10 6.5A4.5 4.5 0 015.5 2a4.5 4.5 0 100 9A4.5 4.5 0 0110 6.5z" fill="#1a4a2e" />
+              <circle cx="6" cy="6" r="2.8" fill="#1a4a2e" />
+              <line x1="6" y1="0.5" x2="6" y2="2" stroke="#1a4a2e" strokeWidth="1.3" strokeLinecap="round" />
+              <line x1="6" y1="10" x2="6" y2="11.5" stroke="#1a4a2e" strokeWidth="1.3" strokeLinecap="round" />
+              <line x1="0.5" y1="6" x2="2" y2="6" stroke="#1a4a2e" strokeWidth="1.3" strokeLinecap="round" />
+              <line x1="10" y1="6" x2="11.5" y2="6" stroke="#1a4a2e" strokeWidth="1.3" strokeLinecap="round" />
             </svg>
           ) : (
             <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-              <circle cx="6" cy="6" r="2.8" fill="#e8f5ee" />
-              <line x1="6" y1="0.5" x2="6" y2="2" stroke="#e8f5ee" strokeWidth="1.3" strokeLinecap="round" />
-              <line x1="6" y1="10" x2="6" y2="11.5" stroke="#e8f5ee" strokeWidth="1.3" strokeLinecap="round" />
-              <line x1="0.5" y1="6" x2="2" y2="6" stroke="#e8f5ee" strokeWidth="1.3" strokeLinecap="round" />
-              <line x1="10" y1="6" x2="11.5" y2="6" stroke="#e8f5ee" strokeWidth="1.3" strokeLinecap="round" />
+              <path d="M10 6.5A4.5 4.5 0 015.5 2a4.5 4.5 0 100 9A4.5 4.5 0 0110 6.5z" fill="#e8f5ee" />
             </svg>
           )}
         </motion.div>
@@ -330,9 +356,9 @@ const Hero = ({ T }) => (
 /* ═══════════════════════════════ INFO CARDS ═══════════════════════════════ */
 const infoCards = [
   { emoji: "✉️", title: "Email Us",    lines: ["support@resqplate.org", "logistics@resqplate.org"], accent: "#b85c38" },
-  { emoji: "📞", title: "Call Us",     lines: ["+91 98765 43210", "24/7 Emergency Line"],          accent: "#d4933a" },
-  { emoji: "📍", title: "Our Hub",     lines: ["ResQPlate HQ", "Patna, Bihar — 800001"],           accent: "#2d6a4f" },
-  { emoji: "🕐", title: "Hours",       lines: ["Platform: Always On", "Support: 9 AM – 8 PM"],    accent: "#6a9e7a" },
+  { emoji: "📞", title: "Call Us",     lines: ["+91 98765 43210", "24/7 Emergency Line"],           accent: "#d4933a" },
+  { emoji: "📍", title: "Our Hub",     lines: ["ResQPlate HQ", "Patna, Bihar — 800001"],            accent: "#2d6a4f" },
+  { emoji: "🕐", title: "Hours",       lines: ["Platform: Always On", "Support: 9 AM – 8 PM"],     accent: "#6a9e7a" },
 ];
 
 const InfoCards = ({ T }) => (
@@ -595,8 +621,12 @@ const Partners = ({ T }) => (
 /* ═══════════════════════════════ FOOTER ═══════════════════════════════ */
 const Footer = ({ T }) => (
   <footer style={{ background: T.heroBg, padding: "34px 40px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, transition: "background .4s" }}>
-    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 21, fontWeight: 700, color: "#fff" }}>
-      ResQ<em style={{ color: T.amber, fontStyle: "italic" }}>Plate</em>
+    {/* Logo + wordmark in footer */}
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <ResQPlateLogo T={{ ...T, leaf: "#2d6a4f", leafMid: "#3d8a67" }} size={30} />
+      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 21, fontWeight: 700, color: "#fff" }}>
+        ResQ<em style={{ color: T.amber, fontStyle: "italic" }}>Plate</em>
+      </div>
     </div>
     <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11.5, color: "rgba(255,255,255,.4)" }}>© 2026 ResQPlate · Built for Social Good</div>
     <div style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: "'DM Mono', monospace", fontSize: 11, color: T.mint, transition: "color .4s" }}>
@@ -609,7 +639,7 @@ const Footer = ({ T }) => (
 
 /* ═══════════════════════════════ ROOT ═══════════════════════════════ */
 const Contact = () => {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true); // ← dark mode is now DEFAULT
   const T = dark ? DARK : LIGHT;
 
   return (
