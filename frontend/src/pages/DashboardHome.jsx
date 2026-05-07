@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import { motion, AnimatePresence, useSpring } from "framer-motion";
 import { databases } from "../services/appwrite";
+import ImpactCard from "../components/Dashboard/ImpactCard";
 import { Query } from "appwrite";
 import { useAuth } from "../context/AuthContext";
 
@@ -839,7 +840,32 @@ const DashboardHome = () => {
       <LiveBanner T={T} />
 
       {/* Impact Stats */}
-      <ImpactStats T={T} impactStats={impactStats} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+  <ImpactCard userId={user?.$id} T={T} />
+  <motion.button
+    whileHover={{ scale: 1.04, boxShadow: `0 8px 30px ${T.accentGlow}` }}
+    whileTap={{ scale: 0.97 }}
+    onClick={() => alert('Quick donation flow not implemented')}
+    style={{
+      padding: "16px 24px",
+      borderRadius: 20,
+      background: T.accent,
+      border: "none",
+      color: "#fff",
+      fontFamily: "'JetBrains Mono', monospace",
+      fontSize: 13,
+      fontWeight: 700,
+      cursor: "pointer",
+      letterSpacing: "0.04em",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      height: "100%",
+    }}
+  >
+    Quick Donation →
+  </motion.button>
+</div>
 
       {/* Quick Actions */}
       <QuickActions T={T} />
