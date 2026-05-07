@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import ProtectedRoute from "../components/ProtectedRoute.jsx";
 import { useAuth } from "../context/AuthContext";
@@ -260,69 +260,71 @@ const Sidebar = ({ T, collapsed, setCollapsed, dark, toggleDark }) => {
       }}
     >
       {/* ── Logo ── */}
-      <div
-        style={{
-          padding: collapsed ? "20px 14px" : "20px 18px",
-          borderBottom: `1px solid ${T.border}`,
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          overflow: "hidden",
-          flexShrink: 0,
-        }}
-      >
+      <Link to="/" style={{ textDecoration: "none" }}>
         <div
           style={{
-            width: 36,
-            height: 36,
-            flexShrink: 0,
-            borderRadius: 12,
-            background: `linear-gradient(135deg, ${T.accent}, ${T.teal})`,
+            padding: collapsed ? "20px 14px" : "20px 18px",
+            borderBottom: `1px solid ${T.border}`,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            fontSize: 18,
-            boxShadow: `0 4px 16px ${T.accentGlow}`,
+            gap: 10,
+            overflow: "hidden",
+            flexShrink: 0,
           }}
         >
-          🌿
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              flexShrink: 0,
+              borderRadius: 12,
+              background: `linear-gradient(135deg, ${T.accent}, ${T.teal})`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 18,
+              boxShadow: `0 4px 16px ${T.accentGlow}`,
+            }}
+          >
+            🌿
+          </div>
+          <AnimatePresence initial={false}>
+            {!collapsed && (
+              <motion.div
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.2 }}
+                style={{ overflow: "hidden" }}
+              >
+                <div
+                  style={{
+                    fontFamily: "Georgia, 'Times New Roman', serif",
+                    fontWeight: 900,
+                    fontSize: 17,
+                    color: T.text,
+                    whiteSpace: "nowrap",
+                    letterSpacing: "-0.03em",
+                  }}
+                >
+                  ResQ<span style={{ color: T.amber }}>Plate</span>
+                </div>
+                <div
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 8,
+                    color: T.textMuted,
+                    letterSpacing: "0.14em",
+                    marginTop: 1,
+                  }}
+                >
+                  OPS DASHBOARD
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        <AnimatePresence initial={false}>
-          {!collapsed && (
-            <motion.div
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -8 }}
-              transition={{ duration: 0.2 }}
-              style={{ overflow: "hidden" }}
-            >
-              <div
-                style={{
-                  fontFamily: "Georgia, 'Times New Roman', serif",
-                  fontWeight: 900,
-                  fontSize: 17,
-                  color: T.text,
-                  whiteSpace: "nowrap",
-                  letterSpacing: "-0.03em",
-                }}
-              >
-                ResQ<span style={{ color: T.amber }}>Plate</span>
-              </div>
-              <div
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: 8,
-                  color: T.textMuted,
-                  letterSpacing: "0.14em",
-                  marginTop: 1,
-                }}
-              >
-                OPS DASHBOARD
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      </Link>
 
       {/* ── Main Nav ── */}
       <div
@@ -547,6 +549,41 @@ const Sidebar = ({ T, collapsed, setCollapsed, dark, toggleDark }) => {
           </motion.button>
         )}
 
+        {/* Back to Home button */}
+        {!collapsed && (
+          <Link to="/" style={{ textDecoration: "none" }}>
+            <motion.button
+              whileHover={{ scale: 1.12, x: 3 }}
+              whileTap={{ scale: 0.9 }}
+              title="Back to Home"
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 8,
+                background: "transparent",
+                border: `1px solid ${T.border}`,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                color: T.textMuted,
+                fontSize: 13,
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.color = T.accent;
+                e.currentTarget.style.borderColor = T.accent + "66";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.color = T.textMuted;
+                e.currentTarget.style.borderColor = T.border;
+              }}
+            >
+              🏠
+            </motion.button>
+          </Link>
+        )}
+
         {/* Logout button */}
         {!collapsed && (
           <motion.button
@@ -738,9 +775,24 @@ const TopBar = ({ T, dark, toggleDark, collapsed, setCollapsed }) => {
                 color: i === crumbs.length - 1 ? T.accent : T.textMuted,
                 fontWeight: i === crumbs.length - 1 ? 700 : 400,
                 letterSpacing: "0.04em",
+                cursor: i === 0 ? "pointer" : "default",
               }}
             >
-              {c}
+              {i === 0 ? (
+                <Link
+                  to="/"
+                  style={{
+                    color: T.textMuted,
+                    transition: "color 0.2s",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.color = T.accent)}
+                  onMouseLeave={e => (e.currentTarget.style.color = T.textMuted)}
+                >
+                  {c}
+                </Link>
+              ) : (
+                c
+              )}
             </span>
           </span>
         ))}
