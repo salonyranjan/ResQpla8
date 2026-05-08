@@ -71,6 +71,31 @@ const getCacheKey = (stats) => {
  * @param {{totalWeight:number,totalMeals:number,estimatedCO2:number}} stats
  * @returns {Promise<string>} – poetic three-sentence story.
  */
+export async function fetchDailyTip() {
+  // Calls Groq model to generate a one-sentence surprising fact about food waste.
+  try {
+    const groq = new Groq({
+      apiKey: import.meta.env.VITE_GROQ_API_KEY,
+    });
+
+    const prompt = "Generate a one-sentence, surprising fact about food waste and environmental impact (water savings, $CO_2$, or energy). Keep it under 100 characters and use a professional botanical tone.";
+
+    const response = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+      max_tokens: 150,
+    });
+
+    const tip = response.choices[0].message.content.trim();
+    return tip;
+  } catch (error) {
+    console.error("Groq tip generation failed:", error);
+    // Fallback generic fact
+    return "Every rescued meal saves roughly 0.3 kg of CO₂ and 0.5 L of water.";
+  }
+}
+
 export async function generateImpactStory(stats) {
   // Check cache first
   const cacheKey = getCacheKey(stats);

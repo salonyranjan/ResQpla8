@@ -138,7 +138,7 @@ function GoalBar({ pct, theme }) {
 /* ─────────────────────────────────────────────
    Main ImpactCard
 ───────────────────────────────────────────── */
-export default function ImpactCard({ userId, T }) {
+export default function ImpactCard({ userId, T, onQuickDonation }) {
   const cardRef = useRef(null);
   const [shareState, setShareState] = useState("idle"); // idle | downloading | done
 
@@ -426,6 +426,25 @@ export default function ImpactCard({ userId, T }) {
           transition={{ delay: 0.64 }}
           style={{ display: "flex", alignItems: "center", gap: 12 }}
         >
+          {/* Quick Donation button */}
+          <motion.button
+            whileHover={{ scale: 1.03, boxShadow: "0 8px 28px rgba(34,197,94,0.4)" }}
+            whileTap={{ scale: 0.96 }}
+            onClick={onQuickDonation}
+            style={{
+              flex: 1, padding: "13px 18px",
+              borderRadius: 14, border: "none", cursor: "pointer",
+              fontFamily: "'Space Mono', monospace", fontSize: 11, fontWeight: 700,
+              letterSpacing: "0.06em",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              background: `linear-gradient(135deg, ${theme.accent} 0%, #14b8a6 100%)`,
+              color: "#052e16",
+              boxShadow: "0 4px 20px rgba(34,197,94,0.28)",
+              transition: "background 0.3s",
+            }}
+          >
+            <span>📸 Quick Donation</span>
+          </motion.button>
           {/* Primary share button */}
           <motion.button
             whileHover={{ scale: 1.03, boxShadow: "0 10px 36px rgba(34,197,94,0.45)" }}

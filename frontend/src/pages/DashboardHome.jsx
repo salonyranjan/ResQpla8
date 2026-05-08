@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useMemo } from "react";
+import { fetchDailyTip } from "../services/impactService";
+import QuickDonationModal from "../components/Dashboard/QuickDonationModal";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import { motion, AnimatePresence, useSpring } from "framer-motion";
 import { databases } from "../services/appwrite";
 import ImpactCard from "../components/Dashboard/ImpactCard";
-import AIMatching from "../pages/AIMatching";
 import { Query } from "appwrite";
 import { useAuth } from "../context/AuthContext";
 
@@ -659,6 +660,38 @@ const DashboardHome = () => {
   const [recentAvailable, setRecentAvailable] = useState([]);
   const [listingsLoading, setListingsLoading] = useState(true);
 
+  // Daily AI tip
+  const [dailyTip, setDailyTip] = useState("");
+  const [tipLoading, setTipLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const today = new Date().toISOString().split("T")[0];
+    const cacheKey = `dailyTip_${today}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached && !cancelled) {
+      setDailyTip(cached);
+      setTipLoading(false);
+      return;
+    }
+    setTipLoading(true);
+    fetchDailyTip()
+      .then(tip => {
+        if (!cancelled) {
+          setDailyTip(tip);
+          setTipLoading(false);
+          try { localStorage.setItem(cacheKey, tip); } catch(e) {}
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDailyTip("");
+          setTipLoading(false);
+        }
+      });
+    return () => { cancelled = true; };
+  }, []);
+
   // Fetch live impact data
   useEffect(() => {
     let cancelled = false;
@@ -843,7 +876,9 @@ const DashboardHome = () => {
 
       {/* Impact Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-  <ImpactCard userId={user?.$id} T={T} />
+  <ImpactCard userId={user?.$id} T={T} onQuickDonation={() => setShowAIModal(true)} />
+      {/* Quick Donation Modal */}
+      <QuickDonationModal isOpen={showAIModal} onClose={() => setShowAIModal(false)} T={T} />
   <div
     style={{
       background: T.bgCard,
@@ -853,7 +888,8 @@ const DashboardHome = () => {
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      justifyContent: "center",
+      justifyContent: "flex-start",
+      minHeight: "600px",
       position: "relative",
       overflow: "hidden",
     }}
@@ -869,6 +905,7 @@ const DashboardHome = () => {
       color: T.text,
       opacity: 0.05,
       pointerEvents: "none",
+      zIndex: -1,
     }}>🌿</div>
 
     <h3 style={{
@@ -899,84 +936,55 @@ const DashboardHome = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        marginBottom: "40px",
       }}
     >
       Quick Donation →
     </motion.button>
+
+          {/* AI Insight */}
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 16 }}>
+              <div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: T.textFaint, letterSpacing: "0.2em", marginBottom: 4, textTransform: "uppercase" }}>INSIGHT</div>
+                <h2 style={{ margin: 0, fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 19, fontWeight: 700, color: T.text, letterSpacing: "-0.02em" }}>AI Insight</h2>
+              </div>
+              <motion.div
+                onClick={async () => {
+                  setTipLoading(true);
+                  try {
+                    const tip = await fetchDailyTip();
+                    const today = new Date().toISOString().split("T")[0];
+                    const cacheKey = `dailyTip_${today}`;
+                    setDailyTip(tip);
+                    try { localStorage.setItem(cacheKey, tip); } catch (e) {}
+                  } catch (e) {
+                    console.error(e);
+                  } finally {
+                    setTipLoading(false);
+                  }
+                }}
+                style={{ cursor: "pointer", opacity: 0.4, fontSize: 18, marginLeft: 8 }}
+                animate={tipLoading ? { rotate: 360 } : { rotate: 0 }}
+                transition={tipLoading ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}
+              >↻</motion.div>
+            </div>
+            {tipLoading ? (
+              <div style={{ color: T.textMuted, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>
+                Generating insight...
+              </div>
+            ) : (
+              <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: T.text }}>
+                {dailyTip || "[AI Insight placeholder]"}
+              </p>
+            )}
+          </div>
   </div>
-  {showAIModal && (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      background: 'rgba(5, 18, 9, 0.95)',
-      backdropFilter: 'blur(8px)',
-      WebkitBackdropFilter: 'blur(8px)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 1000
-    }}>
-      <div style={{
-        background: T.bgCard,
-        borderRadius: 24,
-        padding: '2rem',
-        width: '90vw',
-        maxWidth: '850px',
-        maxHeight: '90vh',
-        overflowY: 'auto',
-        boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
-        border: `1px solid ${T.border}`
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '24px'
-        }}>
-          <h3 style={{
-            margin: 0,
-            fontFamily: 'Georgia, Times New Roman, serif',
-            fontSize: 20,
-            fontWeight: 700,
-            color: T.text
-          }}>
-            Quick Donation
-          </h3>
-          <button
-            onClick={() => setShowAIModal(false)}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: 24,
-              color: T.textMuted,
-              cursor: 'pointer',
-              width: 32,
-              height: 32,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            ×
-          </button>
-        </div>
-        <AIMatching
-          onDone={() => {
-            setShowAIModal(false);
-            navigate('/donation-flow');
-          }}
-          onClose={() => setShowAIModal(false)}
-        />
-      </div>
-    </div>
-  )}
 </div>
 
       {/* Quick Actions */}
       <QuickActions T={T} />
+
 
       {/* Two-column layout */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 28 }}>
