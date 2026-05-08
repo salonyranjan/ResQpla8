@@ -3,6 +3,7 @@ import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import { motion, AnimatePresence, useSpring } from "framer-motion";
 import { databases } from "../services/appwrite";
 import ImpactCard from "../components/Dashboard/ImpactCard";
+import AIMatching from "../pages/AIMatching";
 import { Query } from "appwrite";
 import { useAuth } from "../context/AuthContext";
 
@@ -642,6 +643,7 @@ const DashboardHome = () => {
   }
 
   const { user } = useAuth();
+  const [showAIModal, setShowAIModal] = useState(false);
 
   // Live impact stats
   const [impactStats, setImpactStats] = useState({
@@ -845,7 +847,7 @@ const DashboardHome = () => {
   <motion.button
     whileHover={{ scale: 1.04, boxShadow: `0 8px 30px ${T.accentGlow}` }}
     whileTap={{ scale: 0.97 }}
-    onClick={() => alert('Quick donation flow not implemented')}
+    onClick={() => setShowAIModal(true)}
     style={{
       padding: "16px 24px",
       borderRadius: 20,
@@ -865,6 +867,75 @@ const DashboardHome = () => {
   >
     Quick Donation →
   </motion.button>
+  {showAIModal && (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      background: 'rgba(5, 18, 9, 0.95)',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1000
+    }}>
+      <div style={{
+        background: T.bgCard,
+        borderRadius: 24,
+        padding: '2rem',
+        width: '90vw',
+        maxWidth: '850px',
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+        border: `1px solid ${T.border}`
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '24px'
+        }}>
+          <h3 style={{
+            margin: 0,
+            fontFamily: 'Georgia, Times New Roman, serif',
+            fontSize: 20,
+            fontWeight: 700,
+            color: T.text
+          }}>
+            Quick Donation
+          </h3>
+          <button
+            onClick={() => setShowAIModal(false)}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: 24,
+              color: T.textMuted,
+              cursor: 'pointer',
+              width: 32,
+              height: 32,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            ×
+          </button>
+        </div>
+        <AIMatching
+          onDone={() => {
+            setShowAIModal(false);
+            navigate('/donation-flow');
+          }}
+          onClose={() => setShowAIModal(false)}
+        />
+      </div>
+    </div>
+  )}
 </div>
 
       {/* Quick Actions */}

@@ -1,52 +1,170 @@
-import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { motion, AnimatePresence, useSpring, useTransform } from "framer-motion";
 import { toPng } from "html-to-image";
 import { getMonthlyStats, generateImpactStory } from "../../services/impactService";
 
-/**
- * Glassmorphic Impact Card with AI‑generated story.
- * - Fetches monthly stats for the logged‑in donor (via userId prop).
- * - Uses Gemini 1.5 Flash to craft a poetic impact story.
- * - “Share Your Growth” downloads the card as PNG via html‑to‑image.
- *
- * Props:
- *   userId {string}   – Appwrite user $id (required)
- *   T      {object}   – theme object from DashboardLayout outlet context (optional)
- */
+/* ─────────────────────────────────────────────
+   Animated number counter
+───────────────────────────────────────────── */
+function AnimatedNumber({ value, duration = 1.4 }) {
+  const spring = useSpring(0, { stiffness: 60, damping: 18, duration });
+  const display = useTransform(spring, (v) =>
+    Math.round(v).toLocaleString()
+  );
+  useEffect(() => { spring.set(value); }, [value, spring]);
+  return <motion.span>{display}</motion.span>;
+}
+
+/* ─────────────────────────────────────────────
+   Floating particle
+───────────────────────────────────────────── */
+function Particle({ style }) {
+  return (
+    <motion.div
+      style={{
+        position: "absolute",
+        borderRadius: "50%",
+        background: "rgba(34,197,94,0.4)",
+        pointerEvents: "none",
+        ...style,
+      }}
+      initial={{ opacity: 0, y: 0 }}
+      animate={{ opacity: [0, 0.7, 0.7, 0], y: [-4, -90] }}
+      transition={{
+        duration: style.duration ?? 5,
+        delay: style.delay ?? 0,
+        repeat: Infinity,
+        ease: "easeOut",
+      }}
+    />
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Stat card
+───────────────────────────────────────────── */
+function StatPill({ icon, value, unit, label, delay, theme }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16, scale: 0.94 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: "spring", stiffness: 200, damping: 20, delay }}
+      whileHover={{ scale: 1.04, transition: { type: "spring", stiffness: 400, damping: 20 } }}
+      style={{
+        position: "relative",
+        background: "rgba(34,197,94,0.05)",
+        border: `1px solid rgba(34,197,94,0.12)`,
+        borderRadius: 18,
+        padding: "18px 12px 16px",
+        textAlign: "center",
+        overflow: "hidden",
+        cursor: "default",
+      }}
+    >
+      {/* inner glow */}
+      <div style={{
+        position: "absolute", bottom: -20, left: "50%", transform: "translateX(-50%)",
+        width: 70, height: 50, borderRadius: "50%",
+        background: `radial-gradient(ellipse, ${theme.accent}22 0%, transparent 70%)`,
+        pointerEvents: "none",
+      }} />
+
+      <div style={{ fontSize: 22, marginBottom: 10 }}>{icon}</div>
+
+      <div style={{
+        fontSize: 26, fontWeight: 700, color: theme.accent,
+        fontVariantNumeric: "tabular-nums", lineHeight: 1,
+        fontFamily: "'Space Mono', 'JetBrains Mono', monospace",
+      }}>
+        <AnimatedNumber value={value} />
+        {unit && <span style={{ fontSize: 11, marginLeft: 2, color: theme.textMuted }}>{unit}</span>}
+      </div>
+
+      <div style={{
+        fontSize: 8.5, color: "rgba(110,231,183,0.45)",
+        letterSpacing: "0.1em", textTransform: "uppercase",
+        marginTop: 6, fontFamily: "'Space Mono', monospace",
+      }}>
+        {label}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Progress bar
+───────────────────────────────────────────── */
+function GoalBar({ pct, theme }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.6 }}
+      style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}
+    >
+      <span style={{
+        fontSize: 9, color: "rgba(110,231,183,0.5)",
+        letterSpacing: "0.1em", textTransform: "uppercase",
+        fontFamily: "'Space Mono', monospace", whiteSpace: "nowrap",
+      }}>
+        Monthly goal
+      </span>
+      <div style={{
+        flex: 1, height: 4, borderRadius: 100,
+        background: "rgba(34,197,94,0.1)", overflow: "hidden",
+      }}>
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ delay: 0.8, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            height: "100%", borderRadius: 100,
+            background: `linear-gradient(90deg, ${theme.accent}, #14b8a6)`,
+            transformOrigin: "left",
+            width: `${Math.min(pct, 100)}%`,
+          }}
+        />
+      </div>
+      <span style={{
+        fontSize: 10, color: theme.accent, fontWeight: 700,
+        fontFamily: "'Space Mono', monospace",
+      }}>
+        {pct}%
+      </span>
+    </motion.div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Main ImpactCard
+───────────────────────────────────────────── */
 export default function ImpactCard({ userId, T }) {
   const cardRef = useRef(null);
+  const [shareState, setShareState] = useState("idle"); // idle | downloading | done
 
-  // Fallback theme (matches DashboardHome fallbackTheme)
   const theme = T || {
     accent: "#22c55e",
     accentGlow: "rgba(34,197,94,0.25)",
     text: "#ecfdf5",
     textMuted: "#6ee7b7",
-    bgCard: "rgba(13,22,15,0.85)",
+    bgCard: "rgba(5,18,9,0.97)",
     border: "rgba(34,197,94,0.12)",
-    borderMed: "rgba(34,197,94,0.15)",
+    borderMed: "rgba(34,197,94,0.18)",
   };
 
-  const [stats, setStats] = useState({
-    totalWeight: 0,
-    totalMeals: 0,
-    estimatedCO2: 0,
-  });
+  const [stats, setStats] = useState({ totalWeight: 0, totalMeals: 0, estimatedCO2: 0 });
   const [story, setStory] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [goalPct] = useState(74); // derive from stats if available in your impactService
 
-  // Fetch stats & generate story once we have a userId
   useEffect(() => {
     if (!userId) return;
-
     let cancelled = false;
-
     async function load() {
       try {
         const data = await getMonthlyStats(userId);
         if (!cancelled) setStats(data);
-
         const aiStory = await generateImpactStory(data);
         if (!cancelled) setStory(aiStory);
       } catch (err) {
@@ -56,187 +174,316 @@ export default function ImpactCard({ userId, T }) {
         if (!cancelled) setLoading(false);
       }
     }
-
     load();
     return () => { cancelled = true; };
   }, [userId]);
 
-  const handleShare = async () => {
-    const node = cardRef.current;
-    if (!node) return;
+  const handleShare = useCallback(async () => {
+    if (!cardRef.current || shareState !== "idle") return;
+    setShareState("downloading");
     try {
-      const dataUrl = await toPng(node, { cacheBust: true });
+      const dataUrl = await toPng(cardRef.current, { cacheBust: true, pixelRatio: 3 });
       const link = document.createElement("a");
       link.download = "resqplate-impact.png";
       link.href = dataUrl;
       link.click();
+      setShareState("done");
+      setTimeout(() => setShareState("idle"), 2500);
     } catch (err) {
       console.error("Share failed:", err);
+      setShareState("idle");
     }
-  };
+  }, [shareState]);
 
-  /* ── Loading state ────────────────────────────────────────── */
+  /* Particle data */
+  const particles = Array.from({ length: 10 }, (_, i) => ({
+    width: Math.random() * 4 + 2,
+    height: Math.random() * 4 + 2,
+    left: `${Math.random() * 95}%`,
+    bottom: Math.random() * 40,
+    duration: 4 + Math.random() * 5,
+    delay: Math.random() * 5,
+  }));
+
+  /* ── Loading ── */
   if (loading) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 8,
-          padding: "2rem",
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: 12,
-          color: theme.textMuted,
-        }}
-      >
+      <div style={{
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        gap: 16, padding: "3rem",
+        fontFamily: "'Space Mono', 'JetBrains Mono', monospace",
+      }}>
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+          transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
           style={{
-            width: 32,
-            height: 32,
-            border: `3px solid ${theme.accent}33`,
+            width: 36, height: 36,
+            border: `2.5px solid ${theme.accent}30`,
             borderTopColor: theme.accent,
             borderRadius: "50%",
           }}
         />
-        Growing your impact story…
+        <motion.span
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+          style={{ fontSize: 11, color: theme.textMuted, letterSpacing: "0.06em" }}
+        >
+          Growing your impact story…
+        </motion.span>
+      </div>
+    );
+  }
+
+  /* ── Error ── */
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          padding: "16px 20px",
+          background: "rgba(239,68,68,0.06)",
+          border: "1px solid rgba(239,68,68,0.15)",
+          borderRadius: 16,
+          color: "#ef4444",
+          fontFamily: "'Space Mono', monospace",
+          fontSize: 12,
+        }}
+      >
+        ⚠ {error}
       </motion.div>
     );
   }
 
-  /* ── Error state ─────────────────────────────────────────── */
-  if (error) {
-    return (
-      <div style={{
-        padding: "1rem",
-        background: "rgba(239,68,68,0.08)",
-        borderRadius: 12,
-        color: "#ef4444",
-        fontFamily: "'JetBrains Mono', monospace",
-        fontSize: 12,
-      }}>
-        ⚠ {error}
-      </div>
-    );
-  }
+  const now = new Date();
+  const monthLabel = now.toLocaleString("default", { month: "long", year: "numeric" });
 
-  /* ── Main card ──────────────────────────────────────────── */
+  /* ── Main card ── */
   return (
     <motion.div
       ref={cardRef}
-      initial={{ scale: 0 }}
-      animate={{ scale: 1 }}
-      transition={{ type: "spring", stiffness: 200, damping: 20 }}
+      initial={{ opacity: 0, y: 28, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: "spring", stiffness: 160, damping: 22 }}
       style={{
-        // Glassmorphic dark‑green gradient
-        background: `linear-gradient(135deg, ${theme.bgCard || "rgba(13,31,18,0.55)"} 0%, rgba(10,26,15,0.55) 60%, rgba(8,18,8,0.55) 100%)`,
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        borderRadius: 24,
-        padding: "28px 32px",
-        border: `1px solid ${theme.border}`,
-        boxShadow: `0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px ${theme.borderMed || theme.border}`,
-        maxWidth: 480,
-        color: theme.text,
-        fontFamily: "'JetBrains Mono', monospace",
         position: "relative",
+        width: "100%",
+        maxWidth: 480,
+        borderRadius: 28,
         overflow: "hidden",
+        background: `linear-gradient(145deg, rgba(5,18,9,0.97) 0%, rgba(3,14,7,0.98) 55%, rgba(2,10,5,0.99) 100%)`,
+        border: `1px solid ${theme.border}`,
+        boxShadow: `0 0 0 1px rgba(34,197,94,0.05), 0 40px 90px rgba(0,0,0,0.65), 0 0 140px rgba(34,197,94,0.05)`,
+        fontFamily: "'Space Mono', 'JetBrains Mono', monospace",
+        color: theme.text,
       }}
     >
-      {/* Decorative glow */}
+      {/* Scan line grid texture */}
       <div style={{
-        position: "absolute",
-        top: -40,
-        right: -40,
-        width: 160,
-        height: 160,
-        borderRadius: "50%",
-        background: `radial-gradient(circle, ${theme.accent}12 0%, transparent 70%)`,
-        pointerEvents: "none",
+        position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
+        backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 32px, rgba(34,197,94,0.022) 32px, rgba(34,197,94,0.022) 33px)",
       }} />
 
-      {/* Header */}
-      <h3 style={{
-        margin: "0 0 20px",
-        fontFamily: "Georgia, serif",
-        fontSize: 22,
-        fontWeight: 700,
-        color: theme.accent,
-        letterSpacing: "-0.02em",
-        position: "relative",
-      }}>
-        🌿 Your Impact Story
-      </h3>
-
-      {/* Stats grid */}
+      {/* Top radial glow */}
       <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gap: 12,
-        marginBottom: 24,
-        position: "relative",
-      }}>
-        {[
-          { label: "Meals Rescued", value: stats.totalMeals, unit: "" },
-          { label: "Weight Saved", value: stats.totalWeight, unit: "kg" },
-          { label: "CO₂ Offset", value: stats.estimatedCO2, unit: "kg" },
-        ].map((s) => (
-          <div key={s.label} style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 20, fontWeight: 700, color: theme.accent }}>
-              {s.value.toLocaleString()}
-              {s.unit && <span style={{ fontSize: 12, marginLeft: 2 }}>{s.unit}</span>}
-            </div>
-            <div style={{ fontSize: 9, color: theme.textMuted, marginTop: 4, letterSpacing: "0.04em" }}>
-              {s.label.toUpperCase()}
-            </div>
-          </div>
-        ))}
+        position: "absolute", top: -90, left: "50%", transform: "translateX(-50%)",
+        width: 340, height: 220, borderRadius: "50%", pointerEvents: "none",
+        background: "radial-gradient(ellipse, rgba(34,197,94,0.16) 0%, transparent 68%)",
+        zIndex: 0,
+      }} />
+
+      {/* Floating particles */}
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 }}>
+        {particles.map((p, i) => <Particle key={i} style={p} />)}
       </div>
 
-      {/* AI‑generated story */}
-      <blockquote style={{
-        margin: "0 0 24px",
-        padding: "16px",
-        background: "rgba(255,255,255,0.04)",
-        borderRadius: 12,
-        borderLeft: `3px solid ${theme.accent}`,
-        fontStyle: "italic",
-        fontSize: 14,
-        lineHeight: 1.6,
-        color: theme.text,
-        position: "relative",
-      }}>
-        {story || "Your botanical legacy is being written…"}
-      </blockquote>
+      {/* Month chip (top-right) */}
+      <motion.div
+        initial={{ opacity: 0, x: 10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.1 }}
+        style={{
+          position: "absolute", top: 28, right: 32, zIndex: 2,
+          background: "rgba(34,197,94,0.07)",
+          border: "1px solid rgba(34,197,94,0.14)",
+          borderRadius: 9, padding: "5px 11px",
+          fontSize: 9, letterSpacing: "0.1em",
+          color: "rgba(110,231,183,0.6)", textTransform: "uppercase",
+        }}
+      >
+        {monthLabel}
+      </motion.div>
 
-      {/* Share button */}
-      <div style={{ textAlign: "center" }}>
-        <motion.button
-          whileHover={{ scale: 1.03, boxShadow: `0 8px 30px ${theme.accentGlow}` }}
-          whileTap={{ scale: 0.97 }}
-          onClick={handleShare}
+      {/* Card body */}
+      <div style={{ position: "relative", zIndex: 1, padding: "36px 36px 32px" }}>
+
+        {/* Live badge */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
           style={{
-            padding: "11px 22px",
-            borderRadius: 14,
-            background: `linear-gradient(135deg, ${theme.accent}, #14b8a6)`,
-            border: "none",
-            color: "#fff",
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: 12,
-            fontWeight: 700,
-            cursor: "pointer",
-            letterSpacing: "0.04em",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
+            display: "inline-flex", alignItems: "center", gap: 7,
+            background: "rgba(34,197,94,0.08)",
+            border: "1px solid rgba(34,197,94,0.2)",
+            borderRadius: 100, padding: "5px 14px 5px 10px",
+            marginBottom: 22,
           }}
         >
-          📸 Share Your Growth
-        </motion.button>
+          <motion.div
+            animate={{ boxShadow: ["0 0 0 0 rgba(34,197,94,0.5)", "0 0 0 5px rgba(34,197,94,0)"] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            style={{ width: 7, height: 7, borderRadius: "50%", background: theme.accent }}
+          />
+          <span style={{ fontSize: 10, letterSpacing: "0.12em", color: "#4ade80", textTransform: "uppercase" }}>
+            Live Impact
+          </span>
+        </motion.div>
+
+        {/* Title */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18, type: "spring", stiffness: 200, damping: 22 }}
+        >
+          <h2 style={{
+            margin: "0 0 6px",
+            fontFamily: "'Playfair Display', Georgia, serif",
+            fontSize: 30, fontWeight: 700, lineHeight: 1.18,
+            color: theme.text, letterSpacing: "-0.02em",
+          }}>
+            Your Impact<br />
+            <em style={{ fontStyle: "italic" }}>Story</em>
+          </h2>
+          <p style={{
+            margin: "0 0 28px", fontSize: 11,
+            color: "rgba(110,231,183,0.5)", letterSpacing: "0.05em",
+          }}>
+            Monthly environmental contribution · ResQplate
+          </p>
+        </motion.div>
+
+        {/* Divider */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ delay: 0.25, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            height: 1, marginBottom: 28,
+            background: "linear-gradient(90deg, transparent, rgba(34,197,94,0.28) 30%, rgba(34,197,94,0.28) 70%, transparent)",
+            transformOrigin: "left",
+          }}
+        />
+
+        {/* Stats */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 28 }}>
+          <StatPill icon="🍽" value={stats.totalMeals} label="Meals Rescued" delay={0.3} theme={theme} />
+          <StatPill icon="⚖" value={stats.totalWeight} unit="kg" label="Weight Saved" delay={0.38} theme={theme} />
+          <StatPill icon="🌿" value={stats.estimatedCO2} unit="kg" label="CO₂ Offset" delay={0.46} theme={theme} />
+        </div>
+
+        {/* AI story */}
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.54, type: "spring", stiffness: 180, damping: 22 }}
+          style={{ position: "relative", marginBottom: 28 }}
+        >
+          {/* Left accent bar */}
+          <div style={{
+            position: "absolute", left: 0, top: 0, bottom: 0, width: 3, borderRadius: 8,
+            background: `linear-gradient(180deg, ${theme.accent}, #14b8a6)`,
+          }} />
+
+          <blockquote style={{
+            margin: 0, padding: "18px 18px 18px 24px",
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(34,197,94,0.08)",
+            borderRadius: 16,
+            fontFamily: "'Playfair Display', Georgia, serif",
+            fontStyle: "italic", fontSize: 14, lineHeight: 1.78,
+            color: "rgba(236,253,245,0.85)",
+          }}>
+            <span style={{
+              fontSize: 44, lineHeight: 1, color: "rgba(34,197,94,0.14)",
+              fontFamily: "Georgia, serif", float: "left",
+              marginRight: 8, marginTop: -4, userSelect: "none",
+            }}>
+              "
+            </span>
+            {story || "Your botanical legacy is being written…"}
+          </blockquote>
+        </motion.div>
+
+        {/* Monthly goal bar */}
+        <GoalBar pct={goalPct} theme={theme} />
+
+        {/* Footer actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.64 }}
+          style={{ display: "flex", alignItems: "center", gap: 12 }}
+        >
+          {/* Primary share button */}
+          <motion.button
+            whileHover={{ scale: 1.03, boxShadow: "0 10px 36px rgba(34,197,94,0.45)" }}
+            whileTap={{ scale: 0.96 }}
+            onClick={handleShare}
+            style={{
+              flex: 1, padding: "13px 18px",
+              borderRadius: 14, border: "none", cursor: "pointer",
+              fontFamily: "'Space Mono', monospace", fontSize: 11, fontWeight: 700,
+              letterSpacing: "0.06em",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              background: shareState === "done"
+                ? "linear-gradient(135deg, #16a34a, #0f766e)"
+                : `linear-gradient(135deg, ${theme.accent} 0%, #14b8a6 100%)`,
+              color: "#052e16",
+              boxShadow: "0 4px 20px rgba(34,197,94,0.28)",
+              transition: "background 0.3s",
+            }}
+          >
+            <AnimatePresence mode="wait">
+              {shareState === "idle" && (
+                <motion.span key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  📸 Share Your Growth
+                </motion.span>
+              )}
+              {shareState === "downloading" && (
+                <motion.span key="dl" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                    style={{ display: "inline-block" }}>⟳</motion.span>
+                  Downloading…
+                </motion.span>
+              )}
+              {shareState === "done" && (
+                <motion.span key="done" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+                  style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  ✓ Saved!
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </motion.button>
+
+          {/* Refresh icon button */}
+          <motion.button
+            whileHover={{ scale: 1.07, background: "rgba(34,197,94,0.12)" }}
+            whileTap={{ scale: 0.92, rotate: -30 }}
+            style={{
+              width: 48, height: 48, borderRadius: 14, border: "1px solid rgba(34,197,94,0.18)",
+              background: "rgba(34,197,94,0.07)", color: "#4ade80",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", fontSize: 18,
+            }}
+            aria-label="Refresh stats"
+          >
+            ↺
+          </motion.button>
+        </motion.div>
       </div>
     </motion.div>
   );
