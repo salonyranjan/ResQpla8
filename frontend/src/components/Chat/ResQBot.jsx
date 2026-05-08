@@ -12,9 +12,9 @@ import {
   HiOutlineClipboardDocument,
   HiOutlineCheckCircle,
 } from "react-icons/hi2";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Groq } from "groq-sdk";
 
-const SYSTEM_INSTRUCTION = `You are ResQBot, the AI assistant for ResQPlate — a food rescue platform connecting food donors with NGOs to reduce waste and fight hunger.
+const SYSTEM_INSTRUCTION = `You are ResQBot, the AI assistant for ResQPlate — a food rescue platform connecting food donors with NGOs to reduce waste and fight hunger in Patna. Use botanical metaphors (roots, leaves, oxygen, garden, growth) when appropriate.
 
 Your role:
 - Help users donate surplus food and navigate donation listings
@@ -32,19 +32,20 @@ const QUICK_REPLIES = [
   { label: "Track my donation", emoji: "📦" },
 ];
 
-let geminiModel = null;
+let groqClient = null;
 try {
-  const key = import.meta.env.VITE_GEMINI_KEY;
+  const key = import.meta.env.VITE_GROQ_API_KEY;
   if (key) {
-    const genAI = new GoogleGenerativeAI(key);
-    geminiModel = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      systemInstruction: SYSTEM_INSTRUCTION,
+    groqClient = new Groq({
+      apiKey: key,
+      dangerouslyAllowBrowser: true,
     });
   }
 } catch (e) {
-  console.error("Gemini init failed:", e);
+  console.error("Groq init failed:", e);
 }
+
+const FALLBACK_MESSAGE = "ResQBot is currently tending to the garden, but I will be back soon! 🌿";
 
 function formatTime(ts) {
   return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -418,7 +419,7 @@ export default function ResQBot() {
       chatHistoryRef.current = [];
       const name = user?.name?.split(" ")[0];
       const greeting = name
-        ? `Hey **${name}**! 👋 I'm **ResQBot** — your AI-powered food rescue assistant. I can help you donate surplus food, connect with NGOs, and fight food waste. What can I help you with today?`
+        ? `Hey **${name}**! 👋 I'm **ResQBot** : your AI-powered food rescue assistant. I can help you donate surplus food, connect with NGOs, and fight food waste. What can I help you with today?`
         : "Hey there! 👋 I'm **ResQBot** — your AI-powered food rescue assistant. I can help you donate surplus food, connect with NGOs, and fight food waste. What can I help you with?";
       setMessages([{ id: Date.now(), text: greeting, sender: "bot" }]);
     }
@@ -467,24 +468,40 @@ export default function ResQBot() {
       chatHistoryRef.current.push({ role: "user", parts });
 
       try {
-        if (!geminiModel) throw new Error("Model not initialized");
-        const history = chatHistoryRef.current.slice(0, -1);
-        const chat = geminiModel.startChat({ history });
-        const result = await chat.sendMessage(parts);
-        const responseText = result.response.text();
+        if (!groqClient) throw new Error("Groq client not initialized");
+
+        // Build messages array for Groq
+        const messages = [{ role: "system", content: SYSTEM_INSTRUCTION }];
+
+        // Convert chat history to Groq format
+        chatHistoryRef.current.forEach(entry => {
+          const text = entry.parts.map(p => p.text).filter(Boolean).join(" ");
+          if (!text) return;
+          if (entry.role === "user") {
+            messages.push({ role: "user", content: text });
+          } else if (entry.role === "model") {
+            messages.push({ role: "assistant", content: text });
+          }
+        });
+
+        const response = await groqClient.chat.completions.create({
+          model: "llama-3.1-8b-instant",
+          messages,
+          temperature: 0.7,
+          max_tokens: 200,
+        });
+
+        const responseText = response.choices[0].message.content.trim();
 
         chatHistoryRef.current.push({ role: "model", parts: [{ text: responseText }] });
         setMessages((prev) => [...prev, { id: Date.now() + 1, text: responseText, sender: "bot" }]);
 
         if (!isOpen || isMinimized) setHasUnread(true);
       } catch (error) {
-        console.error("Gemini error:", error);
+        console.error("Groq error:", error);
         chatHistoryRef.current.pop();
 
-        let errText = "I'm having trouble connecting right now. Please try again in a moment. 🌿";
-        if (error.message?.includes("API_KEY")) errText = "⚠️ API key error. Please check your configuration.";
-        if (error.message?.includes("quota")) errText = "⏱️ Rate limit reached. Please wait a moment and try again.";
-
+        const errText = FALLBACK_MESSAGE;
         setMessages((prev) => [...prev, { id: Date.now() + 1, text: errText, sender: "bot" }]);
       } finally {
         setIsTyping(false);
@@ -690,7 +707,7 @@ export default function ResQBot() {
                   {/* Messages */}
                   <div
                     ref={messagesContainerRef}
-                    style={{ position: "relative", height: 300, overflowY: "auto", background: t.msgAreaBg }}
+                    style={{ position: "relative", height: 350, overflowY: "auto", background: t.msgAreaBg }}
                     className="resqbot-scrollbar"
                   >
                     <div
@@ -923,7 +940,7 @@ export default function ResQBot() {
                   }}>
                     <span style={{ fontSize: 14 }}>🌿</span>
                     <span style={{ fontSize: 10, color: t.footerText, fontFamily: "Inter, sans-serif" }}>
-                      ResQPlate AI · Powered by Gemini
+                      ResQPlate AI · Powered by Groq
                     </span>
                   </div>
                 </motion.div>

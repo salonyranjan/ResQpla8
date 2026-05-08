@@ -844,29 +844,66 @@ const DashboardHome = () => {
       {/* Impact Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
   <ImpactCard userId={user?.$id} T={T} />
-  <motion.button
-    whileHover={{ scale: 1.04, boxShadow: `0 8px 30px ${T.accentGlow}` }}
-    whileTap={{ scale: 0.97 }}
-    onClick={() => setShowAIModal(true)}
+  <div
     style={{
-      padding: "16px 24px",
-      borderRadius: 20,
-      background: T.accent,
-      border: "none",
-      color: "#fff",
-      fontFamily: "'JetBrains Mono', monospace",
-      fontSize: 13,
-      fontWeight: 700,
-      cursor: "pointer",
-      letterSpacing: "0.04em",
+      background: T.bgCard,
+      borderRadius: 24,
+      border: `1px solid ${T.border}`,
+      padding: "2rem",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      position: "relative",
+      overflow: "hidden",
+    }}
+  >
+    {/* Faint background icon */}
+    <div style={{
+      position: "absolute",
+      inset: 0,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      height: "100%",
-    }}
-  >
-    Quick Donation →
-  </motion.button>
+      fontSize: "10rem",
+      color: T.text,
+      opacity: 0.05,
+      pointerEvents: "none",
+    }}>🌿</div>
+
+    <h3 style={{
+      margin: 0,
+      fontFamily: "Georgia, 'Times New Roman', serif",
+      fontSize: 20,
+      fontWeight: 700,
+      color: T.text,
+      marginBottom: "1rem",
+      textAlign: "center",
+    }}>Quick Action</h3>
+
+    <motion.button
+      whileHover={{ scale: 1.04, boxShadow: `0 10px 40px rgba(34,197,94,0.3)` }}
+      whileTap={{ scale: 0.97 }}
+      onClick={() => setShowAIModal(true)}
+      style={{
+        padding: "16px 32px",
+        borderRadius: 20,
+        background: T.accent,
+        border: "none",
+        color: "#fff",
+        fontFamily: "'JetBrains Mono', monospace",
+        fontSize: 13,
+        fontWeight: 700,
+        cursor: "pointer",
+        letterSpacing: "0.04em",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      Quick Donation →
+    </motion.button>
+  </div>
   {showAIModal && (
     <div style={{
       position: 'fixed',

@@ -3,6 +3,8 @@
 import { databases } from "./appwrite";
 import { Query } from "appwrite";
 
+import { Groq } from "groq-sdk";
+
 // Environment variables for Appwrite IDs
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const PICKUPS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PICKUPS_COLLECTION_ID;
@@ -52,26 +54,82 @@ export async function getMonthlyStats(userId) {
 }
 
 /**
- * Generate an AI‑crafted impact story using Gemini 1.5 Flash.
+ * Cache key generator for impact stories
+ */
+const getCacheKey = (stats) => {
+  const keyString = JSON.stringify({
+    totalWeight: stats.totalWeight,
+    totalMeals: stats.totalMeals,
+    estimatedCO2: stats.estimatedCO2,
+    month: new Date().getFullYear() + "-" + (new Date().getMonth() + 1)
+  });
+  return `impactStory_${btoa(keyString)}`;
+};
+
+/**
+ * Generate an AI-crafted impact story using Groq llama3-8b-8192.
  * @param {{totalWeight:number,totalMeals:number,estimatedCO2:number}} stats
- * @returns {Promise<string>} – poetic three‑sentence story.
+ * @returns {Promise<string>} – poetic three-sentence story.
  */
 export async function generateImpactStory(stats) {
-  const key = import.meta.env.VITE_GEMINI_KEY;
-  if (!key) {
-    throw new Error("Gemini API key not configured (VITE_GEMINI_KEY)");
+  // Check cache first
+  const cacheKey = getCacheKey(stats);
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    const cachedData = JSON.parse(cached);
+    // Validate cache freshness (30 days max)
+    const cacheTime = new Date(cachedData.timestamp || 0);
+    if (Date.now() - cacheTime.getTime() < 30 * 24 * 60 * 60 * 1000) {
+      return cachedData.story;
+    }
   }
 
-  // Lazy‑load the SDK to keep bundle size small for callers that never use it.
-  const { GoogleGenerativeAI } = await import("@google/generative-ai");
-  const genAI = new GoogleGenerativeAI(key);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    systemInstruction: `You are the ResQPlate Botanical Historian. Write a poetic three‑sentence impact story using growth metaphors (roots, leaves, oxygen) and end with a prestigious Eco‑Rank like "Banyan Guardian" or "Golden Sprout".`,
-  });
+  try {
+    // Initialize Groq client with environment variable
+    const groq = new Groq({
+      apiKey: import.meta.env.VITE_GROQ_API_KEY,
+    });
 
-  const prompt = `Stats: ${JSON.stringify(stats)}. Write the story.`;
-  const result = await model.generateContent(prompt);
-  const text = await result.response?.text?.();
-  return text?.trim() ?? "";
+    const prompt = `You are the ResQPlate Botanical Historian. Write a poetic three-sentence impact story using growth metaphors (roots, leaves, photosynthesis, soil). Show how rescued food nourishes communities like a thriving ecosystem, ending with a unique "Eco-Rank" such as "Mycelium Guardian" or "Carbon Seedling". Keep tone warm and concise, using short paragraphs. Stats: ${JSON.stringify(stats)}`;
+
+    const response = await groq.chat.completions.create({
+      model: "llama3-8b-8192",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+      max_tokens: 200,
+    });
+
+    const story = response.choices[0].message.content.trim();
+
+    // Cache successful response
+    const cacheData = {
+      story: story,
+      timestamp: Date.now(),
+    };
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    } catch (storageError) {
+      // Silently fail if quota exceeded or storage unavailable
+    }
+
+    return story;
+  } catch (error) {
+    console.error("Groq generation failed:", error);
+
+    // Return professional botanical-themed fallback message
+    const fallbackMessage =
+      "Your commitment to a greener planet continues to grow. " +
+      "Every rescued meal strengthens the roots of our community garden. " +
+      "Keep nurturing the green growth and you'll bloom into a Carbon Seedling soon." ;
+
+    // Attempt to cache the fallback for future use
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify({
+        story: fallbackMessage,
+        timestamp: Date.now(),
+      }));
+    } catch {}
+
+    return fallbackMessage;
+  }
 }
