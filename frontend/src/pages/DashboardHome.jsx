@@ -5,6 +5,7 @@ import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import { motion, AnimatePresence, useSpring } from "framer-motion";
 import { databases } from "../services/appwrite";
 import ImpactCard from "../components/Dashboard/ImpactCard";
+import QuickActionCard from "../components/QuickActionCard.jsx";
 import { Query } from "appwrite";
 import { useAuth } from "../context/AuthContext";
 
@@ -876,111 +877,11 @@ const DashboardHome = () => {
 
       {/* Impact Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-  <ImpactCard userId={user?.$id} T={T} onQuickDonation={() => setShowAIModal(true)} />
+        <ImpactCard userId={user?.$id} T={T} onQuickDonation={() => setShowAIModal(true)} />
+        <QuickActionCard stats={{ totalMeals: impactStats.mealsRescued }} T={T} onQuickDonation={() => setShowAIModal(true)} dailyTip={dailyTip} tipLoading={tipLoading} />
+      </div>
       {/* Quick Donation Modal */}
       <QuickDonationModal isOpen={showAIModal} onClose={() => setShowAIModal(false)} T={T} />
-  <div
-    style={{
-      background: T.bgCard,
-      borderRadius: 24,
-      border: `1px solid ${T.border}`,
-      padding: "2rem",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "flex-start",
-      minHeight: "600px",
-      position: "relative",
-      overflow: "hidden",
-    }}
-  >
-    {/* Faint background icon */}
-    <div style={{
-      position: "absolute",
-      inset: 0,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: "10rem",
-      color: T.text,
-      opacity: 0.05,
-      pointerEvents: "none",
-      zIndex: -1,
-    }}>🌿</div>
-
-    <h3 style={{
-      margin: 0,
-      fontFamily: "Georgia, 'Times New Roman', serif",
-      fontSize: 20,
-      fontWeight: 700,
-      color: T.text,
-      marginBottom: "1rem",
-      textAlign: "center",
-    }}>Quick Action</h3>
-
-    <motion.button
-      whileHover={{ scale: 1.04, boxShadow: `0 10px 40px rgba(34,197,94,0.3)` }}
-      whileTap={{ scale: 0.97 }}
-      onClick={() => setShowAIModal(true)}
-      style={{
-        padding: "16px 32px",
-        borderRadius: 20,
-        background: T.accent,
-        border: "none",
-        color: "#fff",
-        fontFamily: "'JetBrains Mono', monospace",
-        fontSize: 13,
-        fontWeight: 700,
-        cursor: "pointer",
-        letterSpacing: "0.04em",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        marginBottom: "40px",
-      }}
-    >
-      Quick Donation →
-    </motion.button>
-
-          {/* AI Insight */}
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 16 }}>
-              <div>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: T.textFaint, letterSpacing: "0.2em", marginBottom: 4, textTransform: "uppercase" }}>INSIGHT</div>
-                <h2 style={{ margin: 0, fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 19, fontWeight: 700, color: T.text, letterSpacing: "-0.02em" }}>AI Insight</h2>
-              </div>
-              <motion.div
-                onClick={async () => {
-                  setTipLoading(true);
-                  try {
-                    const tip = await fetchDailyTip();
-                    const today = new Date().toISOString().split("T")[0];
-                    const cacheKey = `dailyTip_${today}`;
-                    setDailyTip(tip);
-                    try { localStorage.setItem(cacheKey, tip); } catch (e) {}
-                  } catch (e) {
-                    console.error(e);
-                  } finally {
-                    setTipLoading(false);
-                  }
-                }}
-                style={{ cursor: "pointer", opacity: 0.4, fontSize: 18, marginLeft: 8 }}
-                animate={tipLoading ? { rotate: 360 } : { rotate: 0 }}
-                transition={tipLoading ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}
-              >↻</motion.div>
-            </div>
-            {tipLoading ? (
-              <div style={{ color: T.textMuted, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>
-                Generating insight...
-              </div>
-            ) : (
-              <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: T.text }}>
-                {dailyTip || "[AI Insight placeholder]"}
-              </p>
-            )}
-          </div>
-  </div>
-</div>
 
       {/* Quick Actions */}
       <QuickActions T={T} />
