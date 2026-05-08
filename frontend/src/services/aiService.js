@@ -43,3 +43,35 @@ Return ONLY a JSON object with keys "food", "meals", and "type". Do not include 
     throw new Error("Invalid JSON from Groq vision model");
   }
 }
+
+/**
+ * Get a 7‑day waste forecast for a given region type.
+ * @param {string} regionType - e.g. "city", "state", "national"
+ * @returns {Promise<Array<{day:string,intensity:number,insight:string}>>}
+ */
+export async function getWasteForecast(regionType) {
+  const groq = new Groq({ apiKey: import.meta.env.VITE_GROQ_API_KEY });
+
+  const prompt = `You are a food‑waste analyst. Provide a 7‑day forecast (next Monday to Sunday) for the given region type (${regionType}). For each day output a JSON object with:
+- day: three‑letter abbreviation (Mon, Tue, ...)
+- intensity: a number 0‑100 indicating predicted waste volume (higher = more waste)
+- insight: a short explanation considering weekends, cultural events, seasonal trends.
+Return ONLY a JSON array of the seven objects, no extra text or markdown.`;
+
+  const response = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
+    messages: [{ role: "user", content: [{ type: "text", text: prompt }] }],
+    temperature: 0.2,
+    max_tokens: 300,
+  });
+
+  const raw = response.choices[0].message.content.trim();
+  try {
+    const cleaned = raw.replace(/```json|```/g, "").trim();
+    const data = JSON.parse(cleaned);
+    return data;
+  } catch (e) {
+    console.error("Failed to parse waste forecast", e, raw);
+    throw new Error("Invalid JSON from Groq forecast model");
+  }
+}

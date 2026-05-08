@@ -1,10 +1,24 @@
 import { useOutletContext } from "react-router-dom";
+import { getWasteForecast } from "../services/aiService";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 const Analytics = () => {
   const { T, dark } = useOutletContext();
   const [timeRange, setTimeRange] = useState("7d");
+  const [forecast, setForecast] = useState([]);
+  // Fetch waste forecast on component mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getWasteForecast("city"); // adjust region as needed
+        setForecast(data);
+      } catch (err) {
+        console.error("Forecast fetch error", err);
+      }
+    })();
+  }, []);
+
 
   // Mock data
   const metrics = [
@@ -97,6 +111,112 @@ const Analytics = () => {
           ))}
         </div>
       </div>
+
+      {/* Weekly Waste Projection Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        style={{
+          background: `linear-gradient(135deg, ${T.bgCard}, ${T.accent}08)`,
+          borderRadius: 18,
+          padding: "22px 24px",
+          border: `1px solid ${T.border}`,
+          position: "relative",
+          overflow: "hidden",
+          marginBottom: 28,
+        }}
+      >
+        {/* Pulsing status badge */}
+        <motion.div
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+          style={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            background: T.accent,
+            color: "#fff",
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 10,
+            padding: "2px 8px",
+            borderRadius: 6,
+          }}
+        >GROQ PREDICTIVE ENGINE</motion.div>
+
+        <h3 style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 14,
+          color: T.text,
+          margin: 0,
+          fontWeight: 700,
+        }}>Weekly Waste Projection</h3>
+        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: T.textMuted, marginTop: 4 }}>
+          AI‑driven forecast for the next 7 days based on weekends, events, and seasonal trends.
+        </div>
+
+        {/* Bar chart */}
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 140, marginTop: 16, position: "relative" }}>
+          {forecast.map((f, i) => (
+            <div key={i} style={{ flex: 1, textAlign: "center", position: "relative" }}>
+              <motion.div
+                className="forecast-bar"
+                initial={{ height: 0 }}
+                animate={{ height: `${f.intensity}%` }}
+                transition={{ duration: 0.8, delay: 0.3 + i * 0.07 }}
+                whileHover={{ background: T.accent }}
+                style={{
+                  width: "100%",
+                  borderRadius: "4px 4px 0 0",
+                  background: `linear-gradient(180deg, ${T.accent}, ${T.teal})`,
+                  cursor: "pointer",
+                  position: "relative",
+                }}
+              >
+                {/* Tooltip */}
+                <div className="forecast-tooltip" style={{
+                  position: "absolute",
+                  bottom: `${f.intensity}%`,
+                  left: "50%",
+                  transform: "translate(-50%, -120%)",
+                  background: "rgba(0,0,0,0.75)",
+                  color: "#fff",
+                  padding: "4px 6px",
+                  borderRadius: 4,
+                  fontSize: 9,
+                  whiteSpace: "nowrap",
+                  opacity: 0,
+                  transition: "opacity 0.2s",
+                }}>
+                  {f.insight}
+                </div>
+              </motion.div>
+              <span style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 9,
+                color: T.textFaint,
+                marginTop: 4,
+                display: "block",
+              }}>{f.day}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Smart Insights Footer */}
+        <div style={{
+          marginTop: 16,
+          padding: "8px 12px",
+          background: `${T.bgCard}33`,
+          borderRadius: 8,
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 10,
+          color: T.textMuted,
+        }}>
+          {forecast[0] && (
+            <>Today ({forecast[0].day}) – {forecast[0].insight}</>
+          )}
+        </div>
+      </motion.div>
 
       {/* Key Metrics Grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 14, marginBottom: 28 }}>
@@ -407,6 +527,7 @@ const Analytics = () => {
         }
         .rq-chart-tooltip:hover { opacity: 1 !important; }
         .rq-chart-bar:hover + .rq-chart-tooltip { opacity: 1 !important; }
+        .forecast-bar:hover .forecast-tooltip { opacity: 1 !important; }
       `}</style>
     </div>
   );
