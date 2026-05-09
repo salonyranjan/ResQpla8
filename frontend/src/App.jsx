@@ -54,7 +54,7 @@ function App() {
           <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
             <Route index          element={<DashboardHome />}  />
             <Route path="search"  element={<FoodListing />}    />
-            <Route path="orders"  element={<OrderTracking />}  />
+            <Route path="track"  element={<OrderTracking />}  />
             <Route path="profile" element={<ProfilePage />}    />
             <Route path="settings" element={<Settings />} />
             <Route path="ai-matching" element={<AIMatching />} />
@@ -62,7 +62,7 @@ function App() {
             <Route path="analytics" element={<Analytics />} />
             <Route path="smart-alerts" element={<SmartAlerts />} />
             <Route path="post-60" element={<PostIn60Seconds />} />
-            <Route path="volunteer-pickups" element={<VolunteerPickup />} />
+            <Route path="volunteer" element={<VolunteerPickup />} />
             <Route path="impact-delivered" element={<ImpactDelivered />} />
             <Route path="leader-board" element={<Leaderboard />} />
           </Route>

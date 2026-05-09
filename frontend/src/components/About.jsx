@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+
+const MotionLink = motion(Link);
 
 /* ═══════════════════════════════════════════════════
    THEME TOKENS
@@ -951,10 +955,10 @@ export default function About() {
 
   /* ── HOW steps ── */
   const HOW_STEPS = [
-    { emoji: "🍽️", title: "Food Listed",    body: "Restaurants, events & households list surplus food with expiry time and quantity.", color: "step-c-green" },
-    { emoji: "📍", title: "Smart Matched",  body: "Our algorithm instantly notifies the nearest verified NGO or volunteer.", color: "step-c-teal" },
-    { emoji: "🤝", title: "Claim & Pickup", body: "Verified receivers claim the listing and coordinate pickup within minutes.", color: "step-c-amber" },
-    { emoji: "❤️", title: "Meal Delivered", body: "Safe, warm food reaches families in need — tracked end-to-end.", color: "step-c-leaf" },
+    { emoji: "🍽️", title: "Food Listed",    body: "Restaurants, events & households list surplus food with expiry time and quantity.", color: "step-c-green", to: "/dashboard/donate" },
+    { emoji: "📍", title: "Smart Matched",  body: "Our algorithm instantly notifies the nearest verified NGO or volunteer.", color: "step-c-teal", to: "/dashboard/ai-matching" },
+    { emoji: "🤝", title: "Claim & Pickup", body: "Verified receivers claim the listing and coordinate pickup within minutes.", color: "step-c-amber", to: "/dashboard/volunteer" },
+    { emoji: "❤️", title: "Meal Delivered", body: "Safe, warm food reaches families in need — tracked end-to-end.", color: "step-c-leaf", to: "/dashboard/track" },
   ];
 
   /* ── Impact cards ── */
@@ -1098,9 +1102,12 @@ export default function About() {
 
             <div className="how-timeline">
               {HOW_STEPS.map((step, i) => (
-                <div
-                  className={`how-step ${step.color} rv rv-d${i + 1}`}
+                <MotionLink
                   key={i}
+                  to={step.to}
+                  className={`how-step ${step.color} rv rv-d${i + 1}`}
+                  whileHover={{ y: -10, scale: 1.02 }}
+                  style={{ textDecoration: "none", color: "inherit" }}
                 >
                   <div
                     className="how-step-num"
@@ -1112,7 +1119,7 @@ export default function About() {
                   </div>
                   <h3 className="how-step-title display">{step.title}</h3>
                   <p className="how-step-body">{step.body}</p>
-                </div>
+                </MotionLink>
               ))}
             </div>
           </div>

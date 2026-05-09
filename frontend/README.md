@@ -1,7 +1,7 @@
 # ResQPlate Frontend
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/yourusername/ResQPlate_frontend/main/public/logo.png" alt="ResQPlate Logo" width="120" />
+  <img src="./public/logo.png" alt="ResQPlate Logo" width="120" />
 </p>
 
 <h1 align="center">ResQPlate</h1>
