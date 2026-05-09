@@ -1,390 +1,652 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { motion, useInView, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import emailjs from "@emailjs/browser";
 
-/* ─── Font Loader ─── */
+/* ═══════════════════════════════════════════════════════════
+   FONTS
+═══════════════════════════════════════════════════════════ */
 const FontLoader = () => {
   useEffect(() => {
     const l = document.createElement("link");
     l.rel = "stylesheet";
     l.href =
-      "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap";
+      "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Instrument+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap";
     document.head.appendChild(l);
   }, []);
   return null;
 };
 
-/* ─── Theme tokens ─── */
-const LIGHT = {
-  bg:         "#f7f3ec", bg2: "#ede8dc", bg3: "#e4dfd2",
-  card:       "#ffffff", card2: "#f7f3ec",
-  border:     "#d9d0bc", border2: "#c8bfaa",
-  ink:        "#2f2a24", muted: "#7a7065", hint: "#a89e92",
-  leaf:       "#1a4a2e", leafMid: "#2d6a4f", sage: "#6a9e7a", mint: "#a8cdb5",
-  terra:      "#b85c38", amber: "#d4933a",
-  accentSoft: "rgba(26,74,46,0.08)",
-  heroBg:     "#1a4a2e", heroText: "rgba(255,255,255,0.62)",
-};
+/* ═══════════════════════════════════════════════════════════
+   THEME TOKENS
+═══════════════════════════════════════════════════════════ */
 const DARK = {
-  bg:         "#0f1410", bg2: "#141a15", bg3: "#1a2219",
-  card:       "#1c2a1e", card2: "#162019",
-  border:     "#2a3c2d", border2: "#3a5040",
-  ink:        "#e8e0d0", muted: "#8fa897", hint: "#5a7065",
-  leaf:       "#2d6a4f", leafMid: "#3d8a67", sage: "#6ab882", mint: "#4a9668",
-  terra:      "#d4733a", amber: "#e8a838",
-  accentSoft: "rgba(45,106,79,0.15)",
-  heroBg:     "#0a1a10", heroText: "rgba(255,255,255,0.5)",
+  // backgrounds
+  bg:          "#080e09",
+  bg2:         "#0d160e",
+  bg3:         "#111a12",
+  bgCard:      "#0f1a10",
+  bgCard2:     "#131f14",
+  bgGlass:     "rgba(15,26,16,0.72)",
+  // borders
+  border:      "rgba(52,84,56,0.45)",
+  borderMed:   "rgba(65,105,72,0.6)",
+  borderHi:    "rgba(85,140,95,0.8)",
+  // text
+  ink:         "#e8ede0",
+  inkMuted:    "#8aab8e",
+  inkHint:     "#4a6550",
+  // brand greens
+  leaf:        "#2d6a4f",
+  leafBright:  "#3d8a67",
+  sage:        "#52a878",
+  mint:        "#7dcfa0",
+  mintSoft:    "rgba(125,207,160,0.12)",
+  // accents
+  terra:       "#c8603a",
+  amber:       "#d4953c",
+  amberSoft:   "rgba(212,149,60,0.15)",
+  // utils
+  accentGlow:  "rgba(45,106,79,0.22)",
+  heroOverlay: "rgba(8,14,9,0.55)",
 };
 
-/* ─── Global styles ─── */
+const LIGHT = {
+  bg:          "#f3f0e8",
+  bg2:         "#ebe7db",
+  bg3:         "#e4dfd0",
+  bgCard:      "#ffffff",
+  bgCard2:     "#f7f4ed",
+  bgGlass:     "rgba(255,255,255,0.82)",
+  border:      "rgba(180,168,145,0.5)",
+  borderMed:   "rgba(160,145,118,0.65)",
+  borderHi:    "rgba(130,115,90,0.8)",
+  ink:         "#1e1c18",
+  inkMuted:    "#6a6055",
+  inkHint:     "#a8a095",
+  leaf:        "#1a5c40",
+  leafBright:  "#267a56",
+  sage:        "#4a9068",
+  mint:        "#6dc090",
+  mintSoft:    "rgba(26,92,64,0.08)",
+  terra:       "#b85030",
+  amber:       "#c08530",
+  amberSoft:   "rgba(192,133,48,0.12)",
+  accentGlow:  "rgba(26,92,64,0.18)",
+  heroOverlay: "rgba(5,20,8,0.62)",
+};
+
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL STYLES
+═══════════════════════════════════════════════════════════ */
 const GlobalStyles = ({ dark }) => {
   const T = dark ? DARK : LIGHT;
   useEffect(() => {
+    const id = "rq-global";
+    const old = document.getElementById(id);
+    if (old) old.remove();
     const s = document.createElement("style");
-    s.id = "rq-contact-styles";
+    s.id = id;
     s.textContent = `
-      *, *::before, *::after { box-sizing: border-box; }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
       html { scroll-behavior: smooth; }
-      body { margin: 0; background: ${T.bg}; transition: background .4s; }
+      body {
+        background: ${T.bg};
+        font-family: 'Instrument Sans', sans-serif;
+        transition: background 0.5s;
+        -webkit-font-smoothing: antialiased;
+      }
       a { text-decoration: none; color: inherit; }
-      input, textarea, select {
-        font-family: 'DM Sans', sans-serif; font-size: 14.5px; width: 100%;
-        background: ${T.bg2}; border: 1.5px solid ${T.border};
-        border-radius: 11px; padding: 12px 15px; color: ${T.ink};
-        outline: none; -webkit-appearance: none; appearance: none;
-        transition: border-color .25s, box-shadow .25s, background .4s, color .4s;
+      button { font-family: 'Instrument Sans', sans-serif; }
+
+      .rq-input {
+        font-family: 'Instrument Sans', sans-serif;
+        font-size: 14px;
+        width: 100%;
+        background: ${T.bg2};
+        border: 1px solid ${T.border};
+        border-radius: 10px;
+        padding: 13px 16px;
+        color: ${T.ink};
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+        transition: border-color 0.25s, box-shadow 0.25s, background 0.4s, color 0.4s;
       }
-      input::placeholder, textarea::placeholder { color: ${T.hint}; opacity: .7; }
-      input:focus, textarea:focus, select:focus {
-        border-color: ${T.leaf}; box-shadow: 0 0 0 3px ${T.leaf}20;
+      .rq-input::placeholder { color: ${T.inkHint}; }
+      .rq-input:focus {
+        border-color: ${T.sage};
+        box-shadow: 0 0 0 3px ${T.accentGlow};
+        background: ${T.bgCard2};
       }
-      textarea { resize: none; }
-      @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.38} }
-      @keyframes floatY { 0%,100%{transform:translateY(-55%)} 50%{transform:translateY(calc(-55% - 11px))} }
+      textarea.rq-input { resize: none; }
+
       @keyframes grain {
-        0%,100%{transform:translate(0,0)} 10%{transform:translate(-2%,-3%)}
-        20%{transform:translate(3%,2%)} 30%{transform:translate(-1%,4%)}
-        50%{transform:translate(-3%,3%)} 70%{transform:translate(-4%,1%)}
+        0%,100%{transform:translate(0,0)}
+        20%{transform:translate(-2%,-3%)}
+        40%{transform:translate(3%,1%)}
+        60%{transform:translate(-1%,3%)}
+        80%{transform:translate(-3%,-1%)}
       }
-      @media (max-width:900px) {
-        .rq-info-grid, .rq-split, .rq-partner-grid { grid-template-columns: 1fr 1fr !important; }
-        .rq-hero-card { display: none !important; }
+      @keyframes floatY {
+        0%,100%{transform:translateY(0px)}
+        50%{transform:translateY(-12px)}
       }
-      @media (max-width:560px) {
-        .rq-info-grid, .rq-split, .rq-partner-grid, .rq-form-row { grid-template-columns: 1fr !important; }
+      @keyframes blink {
+        0%,100%{opacity:1} 50%{opacity:0.3}
+      }
+      @keyframes spinRing {
+        from{transform:rotate(0deg)} to{transform:rotate(360deg)}
+      }
+      @keyframes drawLine {
+        from{stroke-dashoffset:400} to{stroke-dashoffset:0}
+      }
+      @keyframes pulse {
+        0%,100%{box-shadow:0 0 0 0 ${T.sage}55}
+        50%{box-shadow:0 0 0 8px ${T.sage}00}
+      }
+
+      .rq-grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+      .rq-grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+      .rq-grid-2 { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 36px; }
+      .rq-grid-2-eq { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+      @media(max-width:960px){
+        .rq-grid-4{grid-template-columns:repeat(2,1fr)!important}
+        .rq-grid-3{grid-template-columns:repeat(2,1fr)!important}
+        .rq-grid-2{grid-template-columns:1fr!important}
+        .rq-hero-float{display:none!important}
+      }
+      @media(max-width:600px){
+        .rq-grid-4,.rq-grid-3,.rq-grid-2-eq{grid-template-columns:1fr!important}
+        .rq-hero-h1{font-size:46px!important}
+        .rq-section-pad{padding-left:20px!important;padding-right:20px!important}
       }
     `;
-    const old = document.getElementById("rq-contact-styles");
-    if (old) old.remove();
     document.head.appendChild(s);
-    return () => { const el = document.getElementById("rq-contact-styles"); if (el) el.remove(); };
+    return () => { const el = document.getElementById(id); if (el) el.remove(); };
   }, [dark]);
   return null;
 };
 
-/* ─── Grain ─── */
+/* ═══════════════════════════════════════════════════════════
+   PRIMITIVES
+═══════════════════════════════════════════════════════════ */
 const Grain = () => (
   <div style={{
-    position: "fixed", inset: 0, zIndex: 999, pointerEvents: "none", opacity: .028,
-    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-    animation: "grain 4s steps(1) infinite",
+    position: "fixed", inset: 0, zIndex: 9999, pointerEvents: "none", opacity: 0.032,
+    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+    backgroundSize: "200px 200px",
+    animation: "grain 3s steps(1) infinite",
   }} />
 );
 
-/* ─── Reveal ─── */
-const Reveal = ({ children, delay = 0, y = 26 }) => {
+const Reveal = ({ children, delay = 0, y = 32, once = true }) => {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const inView = useInView(ref, { once, margin: "-60px" });
   return (
     <motion.div ref={ref}
       initial={{ opacity: 0, y }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.75, delay, ease: [0.22, 1, 0.36, 1] }}
-    >{children}</motion.div>
+      transition={{ duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.div>
   );
 };
 
-/* ─── ResQPlate SVG Logo ─── */
-const ResQPlateLogo = ({ T, size = 34 }) => (
+const Label = ({ children, T }) => (
   <div style={{
-    width: size, height: size, borderRadius: Math.round(size * 0.32),
-    background: `linear-gradient(135deg, ${T.leaf}, ${T.leafMid})`,
-    display: "flex", alignItems: "center", justifyContent: "center",
-    flexShrink: 0, boxShadow: `0 4px 12px ${T.leaf}44`,
-    transition: "background .4s",
+    display: "inline-flex", alignItems: "center", gap: 10,
+    fontFamily: "'DM Mono', monospace", fontSize: 10,
+    letterSpacing: "0.2em", textTransform: "uppercase", color: T.sage,
+    marginBottom: 14,
   }}>
-    <svg width={size * 0.58} height={size * 0.58} viewBox="0 0 24 24" fill="none">
-      <ellipse cx="12" cy="14" rx="8" ry="3.5" stroke="#95d5b2" strokeWidth="1.4" />
-      <path d="M12 13.5 C12 10 9 7 9 7 C10.5 7 13.5 8.5 13.5 11.5" fill="#52b788" opacity="0.9" />
-      <path d="M12 13.5 C12 10 15 7.5 15 7.5 C13.5 7.5 11 9 11 12" fill="#95d5b2" opacity="0.85" />
-      <path d="M12 14 L12 8" stroke="#52b788" strokeWidth="1.1" strokeLinecap="round" />
+    <span style={{ width: 20, height: 1, background: `linear-gradient(90deg,transparent,${T.sage})`, display: "inline-block" }} />
+    {children}
+    <span style={{ width: 20, height: 1, background: `linear-gradient(90deg,${T.sage},transparent)`, display: "inline-block" }} />
+  </div>
+);
+
+/* ═══════════════════════════════════════════════════════════
+   LOGO
+═══════════════════════════════════════════════════════════ */
+const Logo = ({ T, size = 36 }) => (
+  <div style={{
+    width: size, height: size, borderRadius: Math.round(size * 0.28),
+    background: `linear-gradient(135deg, ${T.leaf} 0%, ${T.leafBright} 100%)`,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    flexShrink: 0, boxShadow: `0 6px 20px ${T.leaf}55`,
+  }}>
+    <svg width={size * 0.56} height={size * 0.56} viewBox="0 0 24 24" fill="none">
+      <ellipse cx="12" cy="14.5" rx="7.5" ry="3.2" stroke="#95d5b2" strokeWidth="1.3" />
+      <path d="M12 14 C12 10.5 9.2 7.5 9.2 7.5 C10.7 7.5 13.8 9 13.8 12" fill="#52b788" opacity="0.95" />
+      <path d="M12 14 C12 10.5 14.8 8 14.8 8 C13.3 8 11 9.5 11 12.5" fill="#95d5b2" opacity="0.88" />
+      <line x1="12" y1="14.2" x2="12" y2="7.5" stroke="#52b788" strokeWidth="1" strokeLinecap="round" />
     </svg>
   </div>
 );
 
-/* ─── Theme Toggle / Navbar ─── */
-const ThemeToggle = ({ dark, onToggle, T }) => (
-  <div style={{
-    background: T.card, borderBottom: `1px solid ${T.border}`,
-    padding: "10px 40px", display: "flex", alignItems: "center",
-    justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100,
-    transition: "background .4s, border-color .4s",
-  }}>
-    <Link to="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-      <ResQPlateLogo T={T} size={34} />
-      <div style={{
-        fontFamily: "'Cormorant Garamond', serif", fontSize: 20,
-        fontWeight: 700, color: T.ink, letterSpacing: "-0.01em",
-        transition: "color .4s",
-      }}>
-        ResQ<em style={{ color: T.amber, fontStyle: "italic" }}>Plate</em>
-      </div>
-    </Link>
+/* ═══════════════════════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════════════════════ */
+const Navbar = ({ dark, onToggle, T }) => {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handler);
+    return () => window.removeEventListener("scroll", handler);
+  }, []);
 
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <span style={{
-        fontFamily: "'DM Mono', monospace", fontSize: 11,
-        letterSpacing: ".1em", color: T.muted, transition: "color .4s",
-      }}>{dark ? "DARK" : "LIGHT"}</span>
-
-      <motion.div
-        onClick={onToggle}
-        role="switch" aria-checked={dark} tabIndex={0}
-        onKeyDown={e => (e.key === " " || e.key === "Enter") && onToggle()}
-        style={{
-          width: 52, height: 28, borderRadius: 100,
-          border: `1.5px solid ${dark ? T.leafMid : T.border2}`,
-          background: dark ? T.leaf : T.bg2,
-          position: "relative", cursor: "pointer",
-          transition: "background .35s, border-color .35s",
-        }}
-      >
-        <motion.div
-          animate={{ x: dark ? 24 : 0 }}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          style={{
-            position: "absolute", top: 3, left: 3,
-            width: 18, height: 18, borderRadius: "50%",
-            background: dark ? "#e8f5ee" : T.leaf,
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}
-        >
-          {dark ? (
-            <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-              <circle cx="6" cy="6" r="2.8" fill="#1a4a2e" />
-              <line x1="6" y1="0.5" x2="6" y2="2" stroke="#1a4a2e" strokeWidth="1.3" strokeLinecap="round" />
-              <line x1="6" y1="10" x2="6" y2="11.5" stroke="#1a4a2e" strokeWidth="1.3" strokeLinecap="round" />
-              <line x1="0.5" y1="6" x2="2" y2="6" stroke="#1a4a2e" strokeWidth="1.3" strokeLinecap="round" />
-              <line x1="10" y1="6" x2="11.5" y2="6" stroke="#1a4a2e" strokeWidth="1.3" strokeLinecap="round" />
-            </svg>
-          ) : (
-            <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-              <path d="M10 6.5A4.5 4.5 0 015.5 2a4.5 4.5 0 100 9A4.5 4.5 0 0110 6.5z" fill="#e8f5ee" />
-            </svg>
-          )}
-        </motion.div>
-      </motion.div>
-    </div>
-  </div>
-);
-
-/* ─── Botanical leaf deco ─── */
-const BotLeaf = ({ style, T }) => (
-  <svg viewBox="0 0 100 160" fill="none" style={{ position: "absolute", pointerEvents: "none", ...style }}>
-    <path d="M50 155 C15 125 0 85 12 45 C22 12 50 8 76 38 C102 68 98 128 50 155Z" fill={T.sage} opacity=".18" />
-    <path d="M50 155 L50 55" stroke={T.sage} strokeWidth="1" opacity=".25" />
-  </svg>
-);
-
-const DotRing = ({ style, T }) => (
-  <svg viewBox="0 0 200 200" fill="none" style={{ position: "absolute", pointerEvents: "none", ...style }}>
-    <circle cx="100" cy="100" r="90" stroke={T.border} strokeWidth="1.2" strokeDasharray="3 7" />
-  </svg>
-);
-
-const Label = ({ children, T }) => (
-  <div style={{
-    display: "inline-flex", alignItems: "center", gap: 8,
-    fontFamily: "'DM Mono', monospace", fontSize: 10.5,
-    letterSpacing: ".17em", textTransform: "uppercase",
-    color: T.leaf, marginBottom: 12, transition: "color .4s",
-  }}>
-    <span style={{ width: 16, height: 1, background: T.leaf, display: "inline-block" }} />
-    {children}
-    <span style={{ width: 16, height: 1, background: T.leaf, display: "inline-block" }} />
-  </div>
-);
-
-/* ═══════════════════════════════ HERO ═══════════════════════════════ */
-const Hero = ({ T }) => (
-  <section style={{
-    background: T.heroBg, padding: "80px 40px 72px",
-    position: "relative", overflow: "hidden", transition: "background .4s",
-  }}>
-    <DotRing style={{ width: 260, top: -70, right: "14%", opacity: .15 }} T={T} />
-    <BotLeaf style={{ width: 160, top: 0, left: -24, transform: "rotate(-15deg)" }} T={T} />
-    <BotLeaf style={{ width: 120, bottom: 50, right: 40, transform: "rotate(160deg)", opacity: .5 }} T={T} />
-
-    <div style={{ maxWidth: 1080, margin: "0 auto", position: "relative", zIndex: 1 }}>
-      <motion.div
-        initial={{ opacity: 0, scale: .85 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: .2, duration: .6, ease: [.22, 1, .36, 1] }}
-        style={{
-          display: "inline-flex", alignItems: "center", gap: 8,
-          background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,.12)",
-          borderRadius: 100, padding: "6px 16px",
-          fontFamily: "'DM Mono', monospace", fontSize: 10.5,
-          letterSpacing: ".15em", textTransform: "uppercase", color: T.mint, marginBottom: 20,
-        }}
-      >
-        <span style={{ width: 6, height: 6, borderRadius: "50%", background: T.amber, display: "inline-block" }} />
-        Get in Touch · ResQPlate
-      </motion.div>
-
-      <motion.h1
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: .3, duration: .8, ease: [.22, 1, .36, 1] }}
-        style={{
-          fontFamily: "'Cormorant Garamond', serif",
-          fontSize: "clamp(46px,7vw,84px)", fontWeight: 700,
-          lineHeight: .93, color: "#fff", letterSpacing: "-.02em", marginBottom: 20,
-        }}
-      >
-        Let's <em style={{ color: T.amber, fontStyle: "italic" }}>rescue</em><br />food, together.
-      </motion.h1>
-
-      <motion.p
-        initial={{ opacity: 0, y: 28 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: .45, duration: .75, ease: [.22, 1, .36, 1] }}
-        style={{ fontSize: 15.5, fontWeight: 300, color: T.heroText, maxWidth: 440, lineHeight: 1.75, transition: "color .4s" }}
-      >
-        Whether you're a restaurant with surplus, an NGO serving families, or a volunteer ready to ride — this is where it starts.
-      </motion.p>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: .7, duration: .7 }}
-        style={{ display: "flex", gap: 22, flexWrap: "wrap", marginTop: 36 }}
-      >
-        {["Govt. of India Backed", "ISO 9001:2015 Certified", "2,400+ Lives Impacted"].map((t, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, color: "rgba(255,255,255,.38)", letterSpacing: ".04em" }}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <circle cx="7" cy="7" r="6" stroke={T.sage} strokeWidth="1.2" />
-              <path d="M4 7l2 2 4-4" stroke={T.sage} strokeWidth="1.3" strokeLinecap="round" />
-            </svg>
-            {t}
-          </div>
-        ))}
-      </motion.div>
-    </div>
-
-    <motion.div
-      className="rq-hero-card"
-      initial={{ opacity: 0, x: 60 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: .7, duration: 1, ease: [.22, 1, .36, 1] }}
+  return (
+    <motion.nav
+      initial={{ y: -60, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       style={{
-        position: "absolute", right: "6%", top: "50%",
-        width: 264, background: T.card, borderRadius: 20,
-        padding: 20, boxShadow: "0 40px 80px rgba(0,0,0,.28)",
-        animation: "floatY 6s ease-in-out infinite",
-        transition: "background .4s",
+        position: "sticky", top: 0, zIndex: 200,
+        padding: "0 40px",
+        height: 62,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        background: scrolled
+          ? dark ? "rgba(8,14,9,0.88)" : "rgba(243,240,232,0.88)"
+          : "transparent",
+        backdropFilter: scrolled ? "blur(18px)" : "none",
+        WebkitBackdropFilter: scrolled ? "blur(18px)" : "none",
+        borderBottom: scrolled ? `1px solid ${T.border}` : "1px solid transparent",
+        transition: "background 0.4s, border-color 0.4s",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 12 }}>
-        <div style={{ width: 36, height: 36, borderRadius: 9, background: T.mint, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, flexShrink: 0, transition: "background .4s" }}>🍱</div>
-        <div>
-          <div style={{ fontSize: 12.5, fontWeight: 500, color: T.ink, transition: "color .4s" }}>New Donation Posted</div>
-          <div style={{ fontSize: 10.5, color: T.muted, fontFamily: "'DM Mono', monospace", marginTop: 2, transition: "color .4s" }}>2 min ago · Connaught Place</div>
-        </div>
+      <Link to="/" style={{ display: "flex", alignItems: "center", gap: 11 }}>
+        <Logo T={T} size={34} />
+        <span style={{
+          fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700,
+          color: T.ink, letterSpacing: "-0.01em",
+        }}>
+          ResQ<em style={{ color: T.amber, fontStyle: "italic" }}>Plate</em>
+        </span>
+      </Link>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <span style={{
+          fontFamily: "'DM Mono', monospace", fontSize: 9.5,
+          letterSpacing: "0.14em", color: T.inkHint, textTransform: "uppercase",
+        }}>
+          {dark ? "Dark" : "Light"}
+        </span>
+
+        {/* Toggle */}
+        <motion.button
+          onClick={onToggle}
+          aria-label="Toggle theme"
+          style={{
+            width: 50, height: 27, borderRadius: 100, border: `1px solid ${T.borderMed}`,
+            background: dark ? T.bgCard2 : T.bg3,
+            position: "relative", cursor: "pointer",
+            display: "flex", alignItems: "center",
+            transition: "background 0.35s, border-color 0.35s",
+          }}
+        >
+          <motion.div
+            animate={{ x: dark ? 24 : 2 }}
+            transition={{ type: "spring", stiffness: 500, damping: 32 }}
+            style={{
+              width: 21, height: 21, borderRadius: "50%",
+              background: dark
+                ? `linear-gradient(135deg, ${T.sage}, ${T.mint})`
+                : `linear-gradient(135deg, ${T.amber}, ${T.terra})`,
+              boxShadow: dark ? `0 2px 8px ${T.sage}66` : `0 2px 8px ${T.amber}66`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            {dark ? (
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                <circle cx="6" cy="6" r="2.6" fill="#080e09" />
+                {[0,60,120,180,240,300].map(a => (
+                  <line key={a}
+                    x1={6 + 3.8*Math.cos(a*Math.PI/180)} y1={6 + 3.8*Math.sin(a*Math.PI/180)}
+                    x2={6 + 5.2*Math.cos(a*Math.PI/180)} y2={6 + 5.2*Math.sin(a*Math.PI/180)}
+                    stroke="#080e09" strokeWidth="1.2" strokeLinecap="round"
+                  />
+                ))}
+              </svg>
+            ) : (
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                <path d="M9.5 6.8A4 4 0 015.2 2.5 4 4 0 109.5 6.8z" fill="#f3f0e8" />
+              </svg>
+            )}
+          </motion.div>
+        </motion.button>
       </div>
-      <div style={{ background: T.card2, borderRadius: 9, padding: "9px 12px", marginBottom: 11, fontSize: 12, color: T.ink, lineHeight: 1.5, transition: "background .4s, color .4s" }}>
-        45 meals — Dal Makhani, Rice &amp; Sabzi<br />
-        <span style={{ fontSize: 11, color: T.muted }}>Expires in 3h · Pickup available</span>
+    </motion.nav>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════════════════ */
+const Hero = ({ T, dark }) => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+
+  return (
+    <section ref={ref} style={{
+      position: "relative", minHeight: "88vh",
+      display: "flex", alignItems: "center",
+      background: dark
+        ? `radial-gradient(ellipse at 30% 60%, rgba(29,76,50,0.35) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(45,106,79,0.18) 0%, transparent 50%), ${T.bg}`
+        : `radial-gradient(ellipse at 30% 60%, rgba(26,92,64,0.12) 0%, transparent 60%), ${T.bg}`,
+      overflow: "hidden",
+    }}>
+      {/* Animated background grid */}
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
+        <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: dark ? 0.055 : 0.04 }}
+          viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+          {Array.from({ length: 14 }, (_, i) => (
+            <line key={`v${i}`} x1={i * 110} y1={0} x2={i * 110} y2={900} stroke={T.sage} strokeWidth="0.6" />
+          ))}
+          {Array.from({ length: 10 }, (_, i) => (
+            <line key={`h${i}`} x1={0} y1={i * 100} x2={1440} y2={i * 100} stroke={T.sage} strokeWidth="0.6" />
+          ))}
+        </svg>
+
+        {/* Decorative large circle */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 90, repeat: Infinity, ease: "linear" }}
+          style={{
+            position: "absolute", right: "8%", top: "50%", transform: "translateY(-50%)",
+            width: 560, height: 560, borderRadius: "50%",
+            border: `1px dashed ${T.border}`, opacity: 0.6,
+          }}
+        />
+        <motion.div
+          animate={{ rotate: -360 }}
+          transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+          style={{
+            position: "absolute", right: "calc(8% + 60px)", top: "50%", transform: "translateY(-50%)",
+            width: 440, height: 440, borderRadius: "50%",
+            border: `1px solid ${T.border}`, opacity: 0.4,
+          }}
+        />
+
+        {/* Botanical leaf decorations */}
+        <svg viewBox="0 0 120 200" fill="none" style={{ position: "absolute", left: -20, bottom: 40, width: 180, opacity: dark ? 0.15 : 0.1, pointerEvents: "none" }}>
+          <path d="M60 190 C20 155 0 100 15 52 C28 12 60 6 88 40 C116 74 112 148 60 190Z" fill={T.sage} />
+          <path d="M60 190 L60 60" stroke={T.leaf} strokeWidth="1.2" opacity="0.7" />
+          <path d="M60 130 C40 115 30 90 38 70" stroke={T.leaf} strokeWidth="0.8" opacity="0.5" />
+          <path d="M60 150 C80 132 85 108 78 88" stroke={T.leaf} strokeWidth="0.8" opacity="0.5" />
+        </svg>
+        <svg viewBox="0 0 80 140" fill="none" style={{ position: "absolute", right: 30, bottom: 0, width: 110, opacity: dark ? 0.12 : 0.08, transform: "rotate(175deg)", pointerEvents: "none" }}>
+          <path d="M40 130 C10 105 0 70 10 38 C18 10 40 4 58 28 C76 52 74 102 40 130Z" fill={T.sage} />
+          <path d="M40 130 L40 40" stroke={T.leaf} strokeWidth="1" opacity="0.6" />
+        </svg>
       </div>
-      <div style={{ display: "flex", gap: 7 }}>
-        <button style={{ flex: 1, borderRadius: 8, padding: "7px 0", textAlign: "center", fontSize: 11.5, fontWeight: 500, background: T.leaf, color: "#fff", border: "none", cursor: "pointer", transition: "background .4s" }}>Accept</button>
-        <button style={{ flex: 1, borderRadius: 8, padding: "7px 0", textAlign: "center", fontSize: 11.5, background: T.card2, color: T.muted, border: "none", cursor: "pointer", transition: "background .4s, color .4s" }}>Later</button>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 11, paddingTop: 11, borderTop: `1px solid ${T.border}`, transition: "border-color .4s" }}>
-        <span style={{ width: 6, height: 6, borderRadius: "50%", background: T.sage, display: "inline-block", animation: "blink 1.8s ease-in-out infinite" }} />
-        <span style={{ fontSize: 11, color: T.sage, fontFamily: "'DM Mono', monospace", transition: "color .4s" }}>3 NGOs notified nearby</span>
-      </div>
-      <motion.div
-        animate={{ y: [0, 9, 0] }}
-        transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        style={{
-          position: "absolute", bottom: -22, left: -40,
-          background: T.amber, borderRadius: 13, padding: "10px 15px",
-          display: "flex", alignItems: "center", gap: 9,
-          boxShadow: "0 14px 36px rgba(0,0,0,.22)", transition: "background .4s",
-        }}
-      >
-        <span style={{ fontSize: 19 }}>🌱</span>
-        <div>
-          <div style={{ fontSize: 12.5, fontWeight: 500, color: T.leaf, transition: "color .4s" }}>500 kg CO₂ Saved</div>
-          <div style={{ fontSize: 10, color: T.leafMid, fontFamily: "'DM Mono', monospace", marginTop: 2, transition: "color .4s" }}>This month alone</div>
+
+      <motion.div style={{ y, opacity }} className="rq-section-pad" css={{}} /* motion wrapper */>
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 40 }}>
+
+          {/* Left: text */}
+          <div style={{ maxWidth: 580, flex: "0 0 auto" }}>
+            {/* Eyebrow */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 9, marginBottom: 28,
+                background: T.mintSoft, border: `1px solid ${T.border}`,
+                borderRadius: 100, padding: "6px 16px 6px 12px",
+              }}
+            >
+              <motion.div
+                animate={{ scale: [1, 1.4, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                style={{ width: 7, height: 7, borderRadius: "50%", background: T.sage, flexShrink: 0 }}
+              />
+              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10.5, letterSpacing: "0.15em", textTransform: "uppercase", color: T.mint }}>
+                Get in Touch · ResQPlate
+              </span>
+            </motion.div>
+
+            {/* Headline */}
+            <motion.h1
+              className="rq-hero-h1"
+              initial={{ opacity: 0, y: 48 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.32, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: "clamp(52px, 7.5vw, 88px)",
+                fontWeight: 900, lineHeight: 0.94,
+                color: T.ink, letterSpacing: "-0.03em",
+                marginBottom: 24,
+              }}
+            >
+              Let&apos;s{" "}
+              <em style={{
+                color: T.amber, fontStyle: "italic",
+                backgroundImage: `linear-gradient(90deg, ${T.amber}, ${T.terra})`,
+                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+              }}>rescue</em>
+              <br />food, together.
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              style={{ fontSize: 16, fontWeight: 300, color: T.inkMuted, lineHeight: 1.8, maxWidth: 420, marginBottom: 40 }}
+            >
+              Whether you&apos;re a restaurant with surplus, an NGO serving families,
+              or a volunteer ready to ride — this is where the change begins.
+            </motion.p>
+
+            {/* Trust badges */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.72, duration: 0.7 }}
+              style={{ display: "flex", gap: 24, flexWrap: "wrap" }}
+            >
+              {["Govt. of India Backed", "ISO 9001:2015", "2,400+ Lives Impacted"].map((t, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                  <div style={{
+                    width: 17, height: 17, borderRadius: "50%",
+                    border: `1.5px solid ${T.sage}`, display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
+                      <path d="M2 5.2l2 1.8 4-4" stroke={T.sage} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                  <span style={{ fontSize: 12, color: T.inkHint, fontFamily: "'DM Mono', monospace", letterSpacing: "0.04em" }}>{t}</span>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Right: floating notification card */}
+          <motion.div
+            className="rq-hero-float"
+            initial={{ opacity: 0, x: 60, y: 20 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            transition={{ delay: 0.8, duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            style={{ flexShrink: 0, position: "relative", animation: "floatY 7s ease-in-out infinite" }}
+          >
+            {/* Main donation card */}
+            <div style={{
+              width: 280, background: T.bgCard,
+              borderRadius: 22, padding: 22,
+              border: `1px solid ${T.border}`,
+              boxShadow: dark ? `0 40px 90px rgba(0,0,0,0.55), 0 0 0 1px ${T.border}` : `0 30px 70px rgba(0,0,0,0.12)`,
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                <div style={{
+                  width: 38, height: 38, borderRadius: 10,
+                  background: T.mintSoft, border: `1px solid ${T.border}`,
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0,
+                }}>🍱</div>
+                <div>
+                  <div style={{ fontSize: 12.5, fontWeight: 600, color: T.ink }}>New Donation Posted</div>
+                  <div style={{ fontSize: 10.5, color: T.inkMuted, fontFamily: "'DM Mono', monospace", marginTop: 2 }}>2 min ago · Connaught Place</div>
+                </div>
+              </div>
+              <div style={{
+                background: T.bg2, borderRadius: 10, padding: "10px 13px", marginBottom: 13,
+                fontSize: 12.5, color: T.ink, lineHeight: 1.6,
+                border: `1px solid ${T.border}`,
+              }}>
+                45 meals — Dal Makhani, Rice &amp; Sabzi
+                <div style={{ fontSize: 11, color: T.inkMuted, marginTop: 3 }}>Expires in 3h · Pickup available</div>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button style={{
+                  flex: 1, borderRadius: 9, padding: "8px 0",
+                  fontSize: 12, fontWeight: 600, color: "#fff",
+                  background: `linear-gradient(135deg, ${T.leaf}, ${T.leafBright})`,
+                  border: "none", cursor: "pointer",
+                  boxShadow: `0 4px 14px ${T.leaf}44`,
+                }}>Accept</button>
+                <button style={{
+                  flex: 1, borderRadius: 9, padding: "8px 0",
+                  fontSize: 12, color: T.inkMuted,
+                  background: T.bg2, border: `1px solid ${T.border}`, cursor: "pointer",
+                }}>Later</button>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 13, paddingTop: 13, borderTop: `1px solid ${T.border}` }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: T.sage, display: "inline-block", animation: "blink 1.8s ease-in-out infinite" }} />
+                <span style={{ fontSize: 11, color: T.sage, fontFamily: "'DM Mono', monospace" }}>3 NGOs notified nearby</span>
+              </div>
+            </div>
+
+            {/* Floating CO2 badge */}
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+              style={{
+                position: "absolute", bottom: -26, left: -44,
+                background: `linear-gradient(135deg, ${T.amber}, ${T.terra})`,
+                borderRadius: 14, padding: "11px 16px",
+                display: "flex", alignItems: "center", gap: 10,
+                boxShadow: dark ? "0 16px 40px rgba(0,0,0,0.38)" : "0 12px 30px rgba(0,0,0,0.15)",
+              }}
+            >
+              <span style={{ fontSize: 20 }}>🌱</span>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>500 kg CO₂ Saved</div>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", fontFamily: "'DM Mono', monospace", marginTop: 2 }}>This month alone</div>
+              </div>
+            </motion.div>
+
+            {/* AI match badge */}
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+              style={{
+                position: "absolute", top: -22, right: -30,
+                background: T.bgCard, border: `1px solid ${T.borderMed}`,
+                borderRadius: 12, padding: "9px 14px",
+                display: "flex", alignItems: "center", gap: 8,
+                boxShadow: dark ? "0 10px 30px rgba(0,0,0,0.35)" : "0 8px 24px rgba(0,0,0,0.1)",
+              }}
+            >
+              <div style={{ width: 24, height: 24, borderRadius: 7, background: T.mintSoft, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12 }}>⚡</div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: T.ink }}>AI Matched</div>
+                <div style={{ fontSize: 9.5, color: T.inkMuted, fontFamily: "'DM Mono', monospace" }}>in 87 sec</div>
+              </div>
+            </motion.div>
+          </motion.div>
         </div>
       </motion.div>
-    </motion.div>
 
-    <div style={{ position: "absolute", bottom: -1, left: 0, right: 0, lineHeight: 0 }}>
-      <svg viewBox="0 0 1440 70" preserveAspectRatio="none" height="70" style={{ display: "block", width: "100%" }}>
-        <path d="M0,70 Q720,0 1440,70 L1440,70 L0,70Z" fill={T.bg} />
-      </svg>
-    </div>
-  </section>
-);
+      {/* Bottom wave */}
+      <div style={{ position: "absolute", bottom: -2, left: 0, right: 0, lineHeight: 0 }}>
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: 80 }}>
+          <path d="M0,80 C360,20 1080,20 1440,80 L1440,80 L0,80Z" fill={T.bg2} />
+        </svg>
+      </div>
+    </section>
+  );
+};
 
-/* ═══════════════════════════════ INFO CARDS ═══════════════════════ */
-const infoCards = [
-  { emoji: "✉️", title: "Email Us",  lines: ["support@resqplate.org", "logistics@resqplate.org"], accent: "#b85c38" },
-  { emoji: "📞", title: "Call Us",   lines: ["+91 98765 43210", "24/7 Emergency Line"],           accent: "#d4933a" },
-  { emoji: "📍", title: "Our Hub",   lines: ["ResQPlate HQ", "Patna, Bihar — 800001"],            accent: "#2d6a4f" },
-  { emoji: "🕐", title: "Hours",     lines: ["Platform: Always On", "Support: 9 AM – 8 PM"],     accent: "#6a9e7a" },
+/* ═══════════════════════════════════════════════════════════
+   INFO CARDS
+═══════════════════════════════════════════════════════════ */
+const INFO = [
+  { icon: "✉️", title: "Email Us",   lines: ["support@resqplate.org", "logistics@resqplate.org"], accent: "#c8603a", action: { label: "Write to us", href: "mailto:support@resqplate.org" } },
+  { icon: "📞", title: "Call Us",    lines: ["+91 98765 43210", "24/7 emergency line"],           accent: "#d4953c", action: null },
+  { icon: "📍", title: "Our Hub",    lines: ["ResQPlate HQ", "Patna, Bihar — 800001"],            accent: "#3d8a67", action: { label: "View on map", to: "/map" } },
+  { icon: "🕐", title: "Hours",      lines: ["Platform: Always on", "Support: 9 AM – 8 PM"],     accent: "#6ab882", action: null },
 ];
 
 const InfoCards = ({ T }) => (
-  <section style={{ background: T.bg, padding: "0 40px 68px", transition: "background .4s" }}>
-    <div className="rq-info-grid" style={{
-      maxWidth: 1080, margin: "0 auto",
-      display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16,
-      marginTop: -38,
-    }}>
-      {infoCards.map((c, i) => (
-        <Reveal key={i} delay={i * .08}>
+  <section style={{ background: T.bg2, padding: "0 48px 72px", transition: "background 0.4s" }}>
+    <div className="rq-grid-4 rq-section-pad" style={{ maxWidth: 1100, margin: "0 auto", marginTop: -42 }}>
+      {INFO.map((c, i) => (
+        <Reveal key={i} delay={i * 0.08}>
           <motion.div
-            whileHover={{ y: -4, boxShadow: "0 20px 48px rgba(0,0,0,.1)" }}
+            whileHover={{ y: -5, boxShadow: dark => dark ? "0 24px 56px rgba(0,0,0,0.45)" : "0 18px 44px rgba(0,0,0,0.1)" }}
             style={{
-              background: T.card, borderRadius: 18, padding: 24,
-              border: `1px solid ${T.border}`, position: "relative", overflow: "hidden",
-              cursor: "default", transition: "background .4s, border-color .4s",
+              background: T.bgCard, borderRadius: 20,
+              border: `1px solid ${T.border}`,
+              padding: "28px 24px 24px",
+              position: "relative", overflow: "hidden",
+              cursor: "default",
+              transition: "background 0.4s, border-color 0.4s",
             }}
           >
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: c.accent }} />
-            <div style={{ fontSize: 25, marginBottom: 13 }}>{c.emoji}</div>
-            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 700, color: T.ink, marginBottom: 7, transition: "color .4s" }}>{c.title}</div>
+            {/* Top accent stripe */}
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: c.accent, borderRadius: "20px 20px 0 0" }} />
+
+            {/* Icon circle */}
+            <div style={{
+              width: 44, height: 44, borderRadius: 13,
+              background: `${c.accent}18`, border: `1px solid ${c.accent}30`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 22, marginBottom: 16,
+            }}>{c.icon}</div>
+
+            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 700, color: T.ink, marginBottom: 8 }}>{c.title}</h3>
             {c.lines.map((l, j) => (
-              <div key={j} style={{ fontSize: 13, color: T.muted, lineHeight: 1.6, transition: "color .4s" }}>{l}</div>
+              <div key={j} style={{ fontSize: 12.5, color: T.inkMuted, lineHeight: 1.65 }}>{l}</div>
             ))}
-            {c.title === "Email Us" && (
-              <a href="mailto:support@resqplate.org"
-                style={{ display: "block", marginTop: 12, padding: 10, borderRadius: 8, background: T.accentSoft, textAlign: "center", fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 500, color: T.leaf, textDecoration: "none", transition: "background .25s, color .25s" }}
-                onMouseEnter={e => { e.currentTarget.style.background = T.leaf; e.currentTarget.style.color = "#fff"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = T.accentSoft; e.currentTarget.style.color = T.leaf; }}
-              >Send Email →</a>
-            )}
-            {c.title === "Our Hub" && (
-              <Link to="/map"
-                style={{ display: "block", marginTop: 12, padding: 10, borderRadius: 8, background: T.accentSoft, textAlign: "center", fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 500, color: T.leaf, textDecoration: "none", transition: "background .25s, color .25s" }}
-                onMouseEnter={e => { e.currentTarget.style.background = T.leaf; e.currentTarget.style.color = "#fff"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = T.accentSoft; e.currentTarget.style.color = T.leaf; }}
-              >View on Map →</Link>
+
+            {c.action && (
+              <div style={{ marginTop: 16 }}>
+                {c.action.href ? (
+                  <a href={c.action.href} style={{
+                    display: "inline-flex", alignItems: "center", gap: 5,
+                    fontSize: 11.5, fontWeight: 500, color: c.accent,
+                    fontFamily: "'DM Mono', monospace", letterSpacing: "0.05em",
+                    padding: "7px 13px", borderRadius: 8,
+                    background: `${c.accent}12`, border: `1px solid ${c.accent}25`,
+                    transition: "background 0.2s, color 0.2s",
+                  }}
+                    onMouseEnter={e => { e.currentTarget.style.background = c.accent; e.currentTarget.style.color = "#fff"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = `${c.accent}12`; e.currentTarget.style.color = c.accent; }}
+                  >
+                    {c.action.label} →
+                  </a>
+                ) : (
+                  <Link to={c.action.to} style={{
+                    display: "inline-flex", alignItems: "center", gap: 5,
+                    fontSize: 11.5, fontWeight: 500, color: c.accent,
+                    fontFamily: "'DM Mono', monospace", letterSpacing: "0.05em",
+                    padding: "7px 13px", borderRadius: 8,
+                    background: `${c.accent}12`, border: `1px solid ${c.accent}25`,
+                    transition: "background 0.2s, color 0.2s",
+                  }}
+                    onMouseEnter={e => { e.currentTarget.style.background = c.accent; e.currentTarget.style.color = "#fff"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = `${c.accent}12`; e.currentTarget.style.color = c.accent; }}
+                  >
+                    {c.action.label} →
+                  </Link>
+                )}
+              </div>
             )}
           </motion.div>
         </Reveal>
@@ -393,219 +655,347 @@ const InfoCards = ({ T }) => (
   </section>
 );
 
-/* ═══════════════════════════════ FAQ DATA ══════════════════════════ */
-const faqs = [
-  { q: "How fast are NGOs matched to donations?",   a: "Our AI typically finds the best-fit NGO within 90 seconds — factoring distance, capacity, and food type simultaneously.", link: { to: "/dashboard/ai-matching", label: "Try AI Matching" } },
-  { q: "How is food safety maintained in transit?", a: "Volunteers use insulated carriers. If a pickup window is missed, we auto-reassign to the next nearest verified volunteer.", link: null },
-  { q: "Can NGOs specify food they need?",          a: "Yes. NGOs manage a live preference dashboard so they only receive food matching their current needs and storage capacity.", link: null },
-  { q: "Do donors receive proof of impact?",        a: "Every donor gets a digital certificate showing meals rescued, CO₂ saved, and estimated families reached.", link: { to: "/dashboard/impact-delivered", label: "View Impact Dashboard" } },
+/* ═══════════════════════════════════════════════════════════
+   FORM + SIDEBAR
+═══════════════════════════════════════════════════════════ */
+const FAQS = [
+  {
+    q: "How fast are NGOs matched to donations?",
+    a: "Our AI typically finds the best-fit NGO within 90 seconds — factoring distance, capacity, and food type simultaneously.",
+    link: { to: "/dashboard/ai-matching", label: "Try AI Matching" },
+  },
+  {
+    q: "How is food safety maintained in transit?",
+    a: "Volunteers use insulated carriers. Missed pickup windows auto-reassign to the next nearest verified volunteer.",
+    link: null,
+  },
+  {
+    q: "Can NGOs specify the food they need?",
+    a: "Yes. NGOs manage a live preference dashboard so they only receive food matching their current needs and storage capacity.",
+    link: null,
+  },
+  {
+    q: "Do donors receive proof of impact?",
+    a: "Every donor gets a digital certificate showing meals rescued, CO₂ saved, and estimated families reached.",
+    link: { to: "/dashboard/impact-delivered", label: "View Impact Dashboard" },
+  },
 ];
 
-/* ═══════════════════════════════ FORM SECTION ══════════════════════ */
 const FormSection = ({ T }) => {
   const { user } = useAuth();
   const [form, setForm] = useState({ name: "", email: "", role: "Restaurant / Donor", message: "" });
-
-  useEffect(() => {
-    if (user && user.name) {
-      setForm(prev => ({ ...prev, name: user.name || "", email: user.email || "" }));
-    }
-  }, [user]);
-
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [activeFaq, setActiveFaq] = useState(null);
+  const [focused, setFocused] = useState(null);
+
+  useEffect(() => {
+    if (user) setForm(p => ({ ...p, name: user.name || "", email: user.email || "" }));
+  }, [user]);
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_CONTACT_TEMPLATE_ID,
+        { from_name: form.name, from_email: form.email, user_role: form.role, message: form.message },
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      );
       setSent(true);
       setTimeout(() => {
         setSent(false);
         setForm({ name: "", email: "", role: "Restaurant / Donor", message: "" });
-      }, 3200);
-    }, 1500);
+      }, 3500);
+    } catch (err) {
+      console.error("EmailJS:", err);
+      alert("Message failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const fieldStyle = {
-    background: T.bg2, border: `1.5px solid ${T.border}`, borderRadius: 11,
-    padding: "12px 15px", fontFamily: "'DM Sans', sans-serif",
-    fontSize: 14.5, color: T.ink, width: "100%", outline: "none",
-    transition: "background .4s, color .4s, border-color .4s",
-  };
-
-  /* Render FAQ answer with optional trailing Link */
-  const renderFAQAnswer = (faq) => (
-    <>
-      {faq.a}
-      {faq.link && (
-        <>
-          {" "}
-          <Link to={faq.link.to} style={{ color: T.leaf, fontWeight: 700, textDecoration: "underline", textDecorationColor: T.leaf + "88", textUnderlineOffset: 3 }}>
-            {faq.link.label}
-          </Link>
-        </>
-      )}
-    </>
-  );
+  const inputStyle = (name) => ({
+    fontFamily: "'Instrument Sans', sans-serif",
+    fontSize: 14, width: "100%",
+    background: focused === name ? T.bgCard2 : T.bg2,
+    border: `1px solid ${focused === name ? T.sage : T.border}`,
+    borderRadius: 10, padding: "13px 16px", color: T.ink, outline: "none",
+    WebkitAppearance: "none", appearance: "none",
+    boxShadow: focused === name ? `0 0 0 3px ${T.accentGlow}` : "none",
+    transition: "all 0.25s",
+  });
 
   return (
-    <section style={{ background: T.bg2, padding: "68px 40px 88px", position: "relative", overflow: "hidden", transition: "background .4s" }}>
-      <DotRing style={{ width: 190, top: -36, left: -36, opacity: .3 }} T={T} />
-      <BotLeaf style={{ width: 150, bottom: 0, right: -30, transform: "rotate(145deg)", opacity: .4 }} T={T} />
+    <section style={{ background: T.bg, padding: "80px 48px 100px", position: "relative", overflow: "hidden" }}>
+      {/* Decorative elements */}
+      <div style={{ position: "absolute", top: -100, right: -100, width: 400, height: 400, borderRadius: "50%", background: `radial-gradient(circle, ${T.accentGlow} 0%, transparent 70%)`, pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: -60, left: -60, width: 300, height: 300, borderRadius: "50%", background: `radial-gradient(circle, ${T.amberSoft} 0%, transparent 70%)`, pointerEvents: "none" }} />
 
-      <div style={{ maxWidth: 1080, margin: "0 auto" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
         <Reveal>
-          <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <div style={{ textAlign: "center", marginBottom: 60 }}>
             <Label T={T}>Write to Us</Label>
-            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(30px,5vw,50px)", fontWeight: 700, color: T.ink, lineHeight: 1.05, transition: "color .4s" }}>
-              Start the <em style={{ color: T.terra, fontStyle: "italic" }}>conversation.</em>
+            <h2 style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: "clamp(32px, 5vw, 54px)", fontWeight: 700,
+              color: T.ink, lineHeight: 1.05,
+            }}>
+              Start the{" "}
+              <em style={{ fontStyle: "italic", color: T.terra }}>conversation.</em>
             </h2>
           </div>
         </Reveal>
 
-        <div className="rq-split" style={{ display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 32 }}>
-
-          {/* FORM CARD */}
+        <div className="rq-grid-2">
+          {/* ── FORM CARD ── */}
           <Reveal>
-            <div style={{ background: T.card, borderRadius: 24, padding: 40, border: `1px solid ${T.border}`, position: "relative", overflow: "hidden", transition: "background .4s, border-color .4s" }}>
-              <div style={{ position: "absolute", top: 0, left: 28, right: 28, height: 2, background: `linear-gradient(90deg,${T.terra},${T.amber})`, borderRadius: "0 0 4px 4px" }} />
+            <div style={{
+              background: T.bgCard, borderRadius: 24,
+              border: `1px solid ${T.border}`,
+              overflow: "hidden", position: "relative",
+              boxShadow: `0 2px 0 0 ${T.terra}`,
+            }}>
+              {/* Gradient header bar */}
+              <div style={{ height: 3, background: `linear-gradient(90deg, ${T.terra}, ${T.amber}, ${T.sage})` }} />
 
-              <AnimatePresence mode="wait">
-                {sent ? (
-                  <motion.div key="sent" initial={{ opacity: 0, scale: .92 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                    style={{ textAlign: "center", padding: "40px 0" }}>
-                    <div style={{ fontSize: 44, marginBottom: 14 }}>🌿</div>
-                    <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 700, color: T.leaf, marginBottom: 8, transition: "color .4s" }}>Message Received</h3>
-                    <p style={{ fontSize: 14, color: T.muted, lineHeight: 1.7, transition: "color .4s" }}>We'll get back to you within 24 hours.<br />Thank you for reaching out!</p>
-                  </motion.div>
-                ) : (
-                  <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <div style={{ marginBottom: 26 }}>
-                      <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 23, fontWeight: 700, color: T.ink, marginBottom: 5, transition: "color .4s" }}>Send a Message</h3>
-                      <p style={{ fontSize: 13, color: T.muted, transition: "color .4s" }}>For partnerships, logistics, or just a hello.</p>
-                    </div>
-                    <form onSubmit={handleSubmit}>
-                      <div className="rq-form-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 13, marginBottom: 13 }}>
-                        <div>
-                          <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, letterSpacing: ".07em", textTransform: "uppercase", marginBottom: 6, transition: "color .4s" }}>Your Name</label>
-                          <input style={fieldStyle} name="name" value={form.name} onChange={handleChange} placeholder="Priya Sharma" required />
-                        </div>
-                        <div>
-                          <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, letterSpacing: ".07em", textTransform: "uppercase", marginBottom: 6, transition: "color .4s" }}>Email Address</label>
-                          <input style={fieldStyle} type="email" name="email" value={form.email} onChange={handleChange} placeholder="priya@restaurant.com" required />
-                        </div>
-                      </div>
-                      <div style={{ marginBottom: 13 }}>
-                        <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, letterSpacing: ".07em", textTransform: "uppercase", marginBottom: 6, transition: "color .4s" }}>I am a…</label>
-                        <div style={{ position: "relative" }}>
-                          <select style={fieldStyle} name="role" value={form.role} onChange={handleChange}>
-                            <option>Restaurant / Donor</option>
-                            <option>NGO / Shelter</option>
-                            <option>Volunteer / Driver</option>
-                            <option>Corporate Partner</option>
-                            <option>Media / Press</option>
-                          </select>
-                          <svg style={{ position: "absolute", right: 13, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: T.muted }} width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                          </svg>
-                        </div>
-                      </div>
-                      <div style={{ marginBottom: 26 }}>
-                        <label style={{ display: "block", fontSize: 11, fontWeight: 500, color: T.muted, letterSpacing: ".07em", textTransform: "uppercase", marginBottom: 6, transition: "color .4s" }}>Message</label>
-                        <textarea style={fieldStyle} name="message" rows={5} value={form.message} onChange={handleChange} placeholder="Tell us about your situation, your needs, or your ideas…" required />
-                      </div>
-                      <motion.button
-                        type="submit" disabled={loading}
-                        whileHover={{ scale: 1.02, boxShadow: `0 16px 40px ${T.leaf}30` }}
-                        whileTap={{ scale: .98 }}
+              <div style={{ padding: "36px 36px 40px" }}>
+                <AnimatePresence mode="wait">
+                  {sent ? (
+                    <motion.div key="sent"
+                      initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+                      style={{ textAlign: "center", padding: "52px 0" }}
+                    >
+                      <motion.div
+                        initial={{ scale: 0 }} animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
                         style={{
-                          width: "100%", padding: "14px 0", borderRadius: 12, border: "none",
-                          background: loading ? T.sage : T.leaf, color: "#fff",
-                          fontFamily: "'DM Sans', sans-serif", fontSize: 14.5, fontWeight: 500,
-                          cursor: loading ? "not-allowed" : "pointer",
-                          display: "flex", alignItems: "center", justifyContent: "center", gap: 9,
-                          transition: "background .3s",
+                          width: 72, height: 72, borderRadius: "50%",
+                          background: `linear-gradient(135deg, ${T.leaf}, ${T.sage})`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 32, margin: "0 auto 20px",
+                          boxShadow: `0 12px 40px ${T.leaf}44`,
                         }}
-                      >
-                        {loading ? (
-                          <>
-                            <motion.span
-                              style={{ width: 16, height: 16, border: "2px solid rgba(255,255,255,.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block" }}
-                              animate={{ rotate: 360 }}
-                              transition={{ duration: .9, repeat: Infinity, ease: "linear" }}
+                      >🌿</motion.div>
+                      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: T.sage, marginBottom: 10 }}>Message Received</h3>
+                      <p style={{ fontSize: 14, color: T.inkMuted, lineHeight: 1.75 }}>
+                        We&apos;ll get back within 24 hours.<br />Thank you for reaching out!
+                      </p>
+                    </motion.div>
+                  ) : (
+                    <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                      <div style={{ marginBottom: 28 }}>
+                        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: T.ink, marginBottom: 5 }}>Send a Message</h3>
+                        <p style={{ fontSize: 13, color: T.inkMuted }}>For partnerships, logistics, or just a hello.</p>
+                      </div>
+
+                      <form onSubmit={handleSubmit}>
+                        {/* Name + Email */}
+                        <div className="rq-grid-2-eq" style={{ marginBottom: 14 }}>
+                          <div>
+                            <label style={{ display: "block", fontSize: 10.5, fontWeight: 500, color: T.inkMuted, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 7, fontFamily: "'DM Mono', monospace" }}>
+                              Your Name
+                            </label>
+                            <input
+                              className="rq-input" name="name" value={form.name} onChange={handleChange}
+                              placeholder="Priya Sharma" required
+                              style={inputStyle("name")}
+                              onFocus={() => setFocused("name")} onBlur={() => setFocused(null)}
                             />
-                            Sending…
-                          </>
-                        ) : "Send Message →"}
-                      </motion.button>
-                    </form>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                          </div>
+                          <div>
+                            <label style={{ display: "block", fontSize: 10.5, fontWeight: 500, color: T.inkMuted, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 7, fontFamily: "'DM Mono', monospace" }}>
+                              Email Address
+                            </label>
+                            <input
+                              className="rq-input" type="email" name="email" value={form.email} onChange={handleChange}
+                              placeholder="priya@restaurant.com" required
+                              style={inputStyle("email")}
+                              onFocus={() => setFocused("email")} onBlur={() => setFocused(null)}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Role select */}
+                        <div style={{ marginBottom: 14 }}>
+                          <label style={{ display: "block", fontSize: 10.5, fontWeight: 500, color: T.inkMuted, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 7, fontFamily: "'DM Mono', monospace" }}>
+                            I am a…
+                          </label>
+                          <div style={{ position: "relative" }}>
+                            <select
+                              name="role" value={form.role} onChange={handleChange}
+                              style={inputStyle("role")}
+                              onFocus={() => setFocused("role")} onBlur={() => setFocused(null)}
+                            >
+                              <option>Restaurant / Donor</option>
+                              <option>NGO / Shelter</option>
+                              <option>Volunteer / Driver</option>
+                              <option>Corporate Partner</option>
+                              <option>Media / Press</option>
+                            </select>
+                            <svg style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} width="12" height="12" viewBox="0 0 12 12" fill="none">
+                              <path d="M2.5 4.5l3.5 3.5 3.5-3.5" stroke={T.inkMuted} strokeWidth="1.4" strokeLinecap="round" />
+                            </svg>
+                          </div>
+                        </div>
+
+                        {/* Message */}
+                        <div style={{ marginBottom: 28 }}>
+                          <label style={{ display: "block", fontSize: 10.5, fontWeight: 500, color: T.inkMuted, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 7, fontFamily: "'DM Mono', monospace" }}>
+                            Message
+                          </label>
+                          <textarea
+                            name="message" rows={5} value={form.message} onChange={handleChange}
+                            placeholder="Tell us about your situation, your needs, or your ideas…"
+                            required
+                            style={inputStyle("message")}
+                            onFocus={() => setFocused("message")} onBlur={() => setFocused(null)}
+                          />
+                        </div>
+
+                        {/* Submit */}
+                        <motion.button
+                          type="submit" disabled={loading}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.97 }}
+                          style={{
+                            width: "100%", padding: "15px 0", borderRadius: 12, border: "none",
+                            background: loading
+                              ? T.sage
+                              : `linear-gradient(135deg, ${T.leaf} 0%, ${T.leafBright} 100%)`,
+                            color: "#fff", fontSize: 14.5, fontWeight: 600,
+                            cursor: loading ? "not-allowed" : "pointer",
+                            display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+                            boxShadow: `0 8px 28px ${T.leaf}44`,
+                            transition: "background 0.3s, box-shadow 0.3s",
+                            letterSpacing: "0.02em",
+                          }}
+                        >
+                          {loading ? (
+                            <>
+                              <motion.span
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
+                                style={{ width: 17, height: 17, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", flexShrink: 0 }}
+                              />
+                              Sending…
+                            </>
+                          ) : (
+                            <>
+                              Send Message
+                              <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                                <path d="M2 7.5h11M8.5 3l4.5 4.5L8.5 12" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </>
+                          )}
+                        </motion.button>
+                      </form>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </Reveal>
 
-          {/* SIDEBAR */}
+          {/* ── SIDEBAR ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-
             {/* Map card */}
-            <Reveal delay={.1}>
-              <div style={{ background: T.card, borderRadius: 20, overflow: "hidden", border: `1px solid ${T.border}`, transition: "background .4s, border-color .4s" }}>
-                <div style={{ height: 160, background: T.heroBg, position: "relative", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", transition: "background .4s" }}>
-                  <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: .08 }} viewBox="0 0 380 160" preserveAspectRatio="none">
-                    {[40, 80, 120].map(y => <line key={y} x1="0" y1={y} x2="380" y2={y} stroke="white" strokeWidth=".8" />)}
-                    {[76, 152, 228, 304].map(x => <line key={x} x1={x} y1="0" x2={x} y2="160" stroke="white" strokeWidth=".8" />)}
+            <Reveal delay={0.1}>
+              <div style={{ background: T.bgCard, borderRadius: 20, overflow: "hidden", border: `1px solid ${T.border}` }}>
+                {/* Map visual */}
+                <div style={{
+                  height: 155, position: "relative", overflow: "hidden",
+                  background: `radial-gradient(ellipse at 50% 100%, ${T.leaf}28 0%, transparent 60%), ${T.bg3}`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.12 }} viewBox="0 0 380 155" preserveAspectRatio="none">
+                    {[31, 62, 93, 124].map(y => <line key={y} x1="0" y1={y} x2="380" y2={y} stroke={T.sage} strokeWidth="0.7" />)}
+                    {[76, 152, 228, 304].map(x => <line key={x} x1={x} y1="0" x2={x} y2="155" stroke={T.sage} strokeWidth="0.7" />)}
                   </svg>
+                  {/* Pulse dot */}
                   <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
                     <motion.div
-                      animate={{ scale: [1, 2.4, 1], opacity: [.38, 0, .38] }}
+                      animate={{ scale: [1, 2.8, 1], opacity: [0.4, 0, 0.4] }}
                       transition={{ duration: 2.4, repeat: Infinity }}
-                      style={{ position: "absolute", width: 48, height: 48, borderRadius: "50%", background: T.amber, top: 0, left: "50%", transform: "translateX(-50%)" }}
+                      style={{ position: "absolute", width: 52, height: 52, borderRadius: "50%", background: T.amber, top: 0, left: "50%", transform: "translateX(-50%)" }}
                     />
-                    <div style={{ width: 48, height: 48, borderRadius: "50%", background: T.amber, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 19, margin: "0 auto 9px", position: "relative", zIndex: 1, boxShadow: `0 0 0 7px ${T.amber}33`, transition: "background .4s" }}>📍</div>
-                    <div style={{ fontSize: 11, color: "rgba(255,255,255,.7)", fontFamily: "'DM Mono', monospace", letterSpacing: ".06em" }}>PATNA, BIHAR</div>
+                    <div style={{
+                      width: 50, height: 50, borderRadius: "50%",
+                      background: `linear-gradient(135deg, ${T.amber}, ${T.terra})`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 22, margin: "0 auto 10px", position: "relative", zIndex: 1,
+                      boxShadow: `0 0 0 8px ${T.amber}22`,
+                      animation: "pulse 2.4s ease-in-out infinite",
+                    }}>📍</div>
+                    <div style={{ fontSize: 11, color: T.inkMuted, fontFamily: "'DM Mono', monospace", letterSpacing: "0.08em" }}>PATNA, BIHAR</div>
                   </div>
-                  {[{ label: "Delhi", s: { top: "18%", left: "10%" } }, { label: "Mumbai", s: { top: "70%", left: "7%" } }, { label: "Kolkata", s: { top: "19%", right: "9%" } }].map((c, i) => (
-                    <div key={i} style={{ position: "absolute", background: "rgba(255,255,255,.09)", borderRadius: 100, padding: "3px 9px", fontSize: 10, color: "rgba(255,255,255,.5)", fontFamily: "'DM Mono', monospace", ...c.s }}>{c.label}</div>
+                  {[{ label: "Delhi", s: { top: "18%", left: "8%" } }, { label: "Mumbai", s: { bottom: "14%", left: "6%" } }, { label: "Kolkata", s: { top: "18%", right: "7%" } }].map((c, i) => (
+                    <div key={i} style={{
+                      position: "absolute", background: T.bgGlass,
+                      backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
+                      border: `1px solid ${T.border}`,
+                      borderRadius: 100, padding: "3px 10px",
+                      fontSize: 10, color: T.inkMuted,
+                      fontFamily: "'DM Mono', monospace", ...c.s,
+                    }}>{c.label}</div>
                   ))}
                 </div>
-                <div style={{ padding: "17px 21px" }}>
-                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, fontWeight: 700, color: T.ink, marginBottom: 4, transition: "color .4s" }}>Central Operations Hub</div>
-                  <div style={{ fontSize: 13, color: T.muted, transition: "color .4s" }}>Boring Road, Patna, Bihar 800001</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
-                    <motion.span animate={{ opacity: [1, .38, 1] }} transition={{ duration: 1.8, repeat: Infinity }}
-                      style={{ width: 6, height: 6, borderRadius: "50%", background: T.sage, display: "inline-block", flexShrink: 0 }} />
-                    <span style={{ fontSize: 11, color: T.sage, fontFamily: "'DM Mono', monospace", transition: "color .4s" }}>All systems operational</span>
+                <div style={{ padding: "18px 22px 20px" }}>
+                  <h4 style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 700, color: T.ink, marginBottom: 4 }}>Central Operations Hub</h4>
+                  <p style={{ fontSize: 13, color: T.inkMuted }}>Boring Road, Patna, Bihar 800001</p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 10 }}>
+                    <motion.span
+                      animate={{ opacity: [1, 0.3, 1] }}
+                      transition={{ duration: 1.8, repeat: Infinity }}
+                      style={{ width: 7, height: 7, borderRadius: "50%", background: T.sage, display: "inline-block", flexShrink: 0 }}
+                    />
+                    <span style={{ fontSize: 11, color: T.sage, fontFamily: "'DM Mono', monospace" }}>All systems operational</span>
                   </div>
                 </div>
               </div>
             </Reveal>
 
-            {/* FAQ */}
-            <Reveal delay={.15}>
-              <div style={{ background: T.card, borderRadius: 20, overflow: "hidden", border: `1px solid ${T.border}`, transition: "background .4s, border-color .4s" }}>
-                <div style={{ padding: "20px 24px 16px", borderBottom: `1px solid ${T.border}`, transition: "border-color .4s" }}>
-                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 19, fontWeight: 700, color: T.ink, transition: "color .4s" }}>Common Questions</div>
+            {/* FAQ accordion */}
+            <Reveal delay={0.15}>
+              <div style={{ background: T.bgCard, borderRadius: 20, overflow: "hidden", border: `1px solid ${T.border}` }}>
+                <div style={{
+                  padding: "20px 24px 18px",
+                  borderBottom: `1px solid ${T.border}`,
+                  display: "flex", alignItems: "center", gap: 10,
+                }}>
+                  <div style={{ width: 28, height: 28, borderRadius: 8, background: T.mintSoft, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>❓</div>
+                  <h4 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: T.ink }}>Common Questions</h4>
                 </div>
-                {faqs.map((faq, i) => (
-                  <div key={i} style={{ borderBottom: i < faqs.length - 1 ? `1px solid ${T.border}` : "none", transition: "border-color .4s" }}>
+                {FAQS.map((faq, i) => (
+                  <div key={i} style={{ borderBottom: i < FAQS.length - 1 ? `1px solid ${T.border}` : "none" }}>
                     <button
                       onClick={() => setActiveFaq(activeFaq === i ? null : i)}
-                      style={{ width: "100%", padding: "15px 22px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 13, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                      style={{
+                        width: "100%", padding: "15px 22px",
+                        display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12,
+                        background: activeFaq === i ? T.mintSoft : "transparent",
+                        border: "none", cursor: "pointer", textAlign: "left",
+                        transition: "background 0.25s",
+                      }}
                     >
-                      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: activeFaq === i ? T.leaf : T.ink, lineHeight: 1.5, flex: 1, transition: "color .25s" }}>
+                      <span style={{ fontSize: 13, fontWeight: 500, color: activeFaq === i ? T.sage : T.ink, lineHeight: 1.5, flex: 1, transition: "color 0.25s" }}>
                         {faq.q}
                       </span>
-                      <motion.span
+                      <motion.div
                         animate={{ rotate: activeFaq === i ? 45 : 0 }}
-                        transition={{ duration: .22 }}
-                        style={{ width: 19, height: 19, borderRadius: "50%", border: `1.5px solid ${activeFaq === i ? T.leaf : T.border2}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: activeFaq === i ? T.leaf : T.muted, flexShrink: 0, marginTop: 1, transition: "border-color .22s, color .22s" }}
-                      >+</motion.span>
+                        transition={{ duration: 0.22 }}
+                        style={{
+                          width: 20, height: 20, borderRadius: "50%",
+                          border: `1.5px solid ${activeFaq === i ? T.sage : T.border}`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 14, color: activeFaq === i ? T.sage : T.inkMuted,
+                          flexShrink: 0, marginTop: 1,
+                          transition: "border-color 0.22s, color 0.22s",
+                        }}
+                      >+</motion.div>
                     </button>
                     <AnimatePresence initial={false}>
                       {activeFaq === i && (
@@ -614,11 +1004,14 @@ const FormSection = ({ T }) => {
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: .3, ease: [.22, 1, .36, 1] }}
+                          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                           style={{ overflow: "hidden" }}
                         >
-                          <p style={{ padding: "0 22px 16px", fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: T.muted, lineHeight: 1.72, margin: 0, transition: "color .4s" }}>
-                            {renderFAQAnswer(faq)}
+                          <p style={{ padding: "2px 22px 16px", fontSize: 13, color: T.inkMuted, lineHeight: 1.75, margin: 0 }}>
+                            {faq.a}
+                            {faq.link && (
+                              <> <Link to={faq.link.to} style={{ color: T.sage, fontWeight: 600, textDecoration: "underline", textUnderlineOffset: 3, textDecorationColor: `${T.sage}66` }}>{faq.link.label}</Link></>
+                            )}
                           </p>
                         </motion.div>
                       )}
@@ -634,73 +1027,140 @@ const FormSection = ({ T }) => {
   );
 };
 
-/* ═══════════════════════════════ PARTNERS ═══════════════════════ */
-const Partners = ({ T }) => {
-  const partners = [
-    { emoji: "🍽️", title: "Restaurants & Caterers", desc: "Post surplus in 60 seconds. We handle matching, pickup, and your digital impact certificate.", cta: "Join as Donor →",  color: "#b85c38", link: "/register?role=donor"     },
-    { emoji: "🤲", title: "NGOs & Shelters",         desc: "Register your needs and receive matched food donations with zero coordination overhead.",      cta: "Register NGO →",   color: "#2d6a4f", link: "/register?role=ngo"        },
-    { emoji: "🚴", title: "Volunteers & Drivers",    desc: "Join the fleet. Get pickup requests near you, track live deliveries, earn ResQPoints.",         cta: "Volunteer Now →",  color: "#d4933a", link: "/register?role=volunteer" },
-  ];
+/* ═══════════════════════════════════════════════════════════
+   PARTNERS SECTION
+═══════════════════════════════════════════════════════════ */
+const PARTNERS = [
+  {
+    emoji: "🍽️", title: "Restaurants & Caterers",
+    desc: "Post surplus in 60 seconds. We handle matching, pickup, and your digital impact certificate.",
+    cta: "Join as Donor", color: "#c8603a", link: "/register?role=donor",
+    stat: "1,200+ restaurants",
+  },
+  {
+    emoji: "🤲", title: "NGOs & Shelters",
+    desc: "Register your needs and receive matched food donations with zero coordination overhead.",
+    cta: "Register NGO", color: "#3d8a67", link: "/register?role=ngo",
+    stat: "340+ NGOs served",
+  },
+  {
+    emoji: "🚴", title: "Volunteers & Drivers",
+    desc: "Join the fleet. Get pickup requests near you, track live deliveries, earn ResQPoints.",
+    cta: "Volunteer Now", color: "#d4953c", link: "/register?role=volunteer",
+    stat: "860+ active riders",
+  },
+];
 
-  return (
-    <section style={{ background: T.bg, padding: "68px 40px 88px", position: "relative", overflow: "hidden", transition: "background .4s" }}>
-      <DotRing style={{ width: 200, bottom: -50, right: -50, opacity: .28 }} T={T} />
-      <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-        <Reveal>
-          <div style={{ textAlign: "center", marginBottom: 0 }}>
-            <Label T={T}>Who We Work With</Label>
-            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(30px,5vw,50px)", fontWeight: 700, color: T.ink, lineHeight: 1.05, transition: "color .4s" }}>
-              Every role in the <em style={{ color: T.terra, fontStyle: "italic" }}>rescue chain.</em>
-            </h2>
-          </div>
-        </Reveal>
-        <div className="rq-partner-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20, marginTop: 48 }}>
-          {partners.map((p, i) => (
-            <Reveal key={i} delay={i * .1}>
-              <motion.div
-                whileHover={{ y: -5 }}
-                style={{ background: T.card, borderRadius: 20, padding: 32, border: `1px solid ${T.border}`, display: "flex", flexDirection: "column", height: "100%", transition: "background .4s, border-color .4s" }}
-              >
-                <div style={{ fontSize: 32, marginBottom: 14 }}>{p.emoji}</div>
-                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 700, color: T.ink, marginBottom: 10, transition: "color .4s" }}>{p.title}</h3>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13.5, color: T.muted, lineHeight: 1.72, flex: 1, marginBottom: 20, transition: "color .4s" }}>{p.desc}</p>
-                <Link to={p.link} style={{ fontSize: 13, fontWeight: 500, color: p.color, cursor: "pointer", display: "inline-block", textDecoration: "none" }}>
-                  <motion.span whileHover={{ x: 4 }}>{p.cta}</motion.span>
-                </Link>
-              </motion.div>
-            </Reveal>
-          ))}
+const Partners = ({ T }) => (
+  <section style={{ background: T.bg2, padding: "80px 48px 100px", position: "relative", overflow: "hidden" }}>
+    <svg viewBox="0 0 120 200" fill="none" style={{ position: "absolute", right: -20, top: 40, width: 140, opacity: 0.08, pointerEvents: "none" }}>
+      <path d="M60 190 C20 155 0 100 15 52 C28 12 60 6 88 40 C116 74 112 148 60 190Z" fill={T.sage} />
+      <path d="M60 190 L60 60" stroke={T.leaf} strokeWidth="1.2" />
+    </svg>
+
+    <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+      <Reveal>
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <Label T={T}>Who We Work With</Label>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(30px, 5vw, 52px)", fontWeight: 700, color: T.ink, lineHeight: 1.05 }}>
+            Every role in the{" "}
+            <em style={{ fontStyle: "italic", color: T.terra }}>rescue chain.</em>
+          </h2>
         </div>
-      </div>
-    </section>
-  );
-};
+      </Reveal>
 
-/* ═══════════════════════════════ FOOTER ═══════════════════════ */
-const Footer = ({ T }) => (
-  <footer style={{ background: T.heroBg, padding: "34px 40px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, transition: "background .4s" }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <ResQPlateLogo T={{ ...T, leaf: "#2d6a4f", leafMid: "#3d8a67" }} size={30} />
-      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 21, fontWeight: 700, color: "#fff" }}>
-        ResQ<em style={{ color: T.amber, fontStyle: "italic" }}>Plate</em>
+      <div className="rq-grid-3">
+        {PARTNERS.map((p, i) => (
+          <Reveal key={i} delay={i * 0.1}>
+            <motion.div
+              whileHover={{ y: -6 }}
+              style={{
+                background: T.bgCard, borderRadius: 22,
+                border: `1px solid ${T.border}`,
+                padding: "32px 28px 28px",
+                display: "flex", flexDirection: "column", height: "100%",
+                position: "relative", overflow: "hidden",
+                transition: "background 0.4s, border-color 0.4s",
+              }}
+            >
+              {/* Corner accent */}
+              <div style={{
+                position: "absolute", top: 0, right: 0,
+                width: 70, height: 70,
+                background: `radial-gradient(circle at 100% 0%, ${p.color}18 0%, transparent 70%)`,
+              }} />
+
+              <div style={{ fontSize: 36, marginBottom: 18 }}>{p.emoji}</div>
+
+              {/* Stat pill */}
+              <div style={{
+                display: "inline-flex", alignItems: "center",
+                background: `${p.color}14`, border: `1px solid ${p.color}28`,
+                borderRadius: 100, padding: "3px 11px", marginBottom: 14,
+                fontSize: 10.5, color: p.color, fontFamily: "'DM Mono', monospace",
+                letterSpacing: "0.05em", alignSelf: "flex-start",
+              }}>{p.stat}</div>
+
+              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: T.ink, marginBottom: 10 }}>{p.title}</h3>
+              <p style={{ fontSize: 13.5, color: T.inkMuted, lineHeight: 1.75, flex: 1, marginBottom: 22 }}>{p.desc}</p>
+
+              <Link to={p.link}>
+                <motion.div
+                  whileHover={{ x: 4 }}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 7,
+                    fontSize: 13, fontWeight: 600, color: p.color,
+                  }}
+                >
+                  {p.cta}
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                    <path d="M2 6.5h9M7 2.5l4 4-4 4" stroke={p.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </motion.div>
+              </Link>
+            </motion.div>
+          </Reveal>
+        ))}
       </div>
     </div>
-    <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11.5, color: "rgba(255,255,255,.4)" }}>
+  </section>
+);
+
+/* ═══════════════════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════════════════ */
+const Footer = ({ T }) => (
+  <footer style={{
+    background: T.bg,
+    borderTop: `1px solid ${T.border}`,
+    padding: "28px 48px",
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    flexWrap: "wrap", gap: 14,
+  }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
+      <Logo T={T} size={30} />
+      <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 19, fontWeight: 700, color: T.ink }}>
+        ResQ<em style={{ color: T.amber, fontStyle: "italic" }}>Plate</em>
+      </span>
+    </div>
+    <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11.5, color: T.inkHint }}>
       © 2026 ResQPlate · Built for Social Good
     </div>
-    <div style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: "'DM Mono', monospace", fontSize: 11, color: T.mint, transition: "color .4s" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <motion.span
-        animate={{ opacity: [1, .38, 1] }}
+        animate={{ opacity: [1, 0.35, 1] }}
         transition={{ duration: 1.8, repeat: Infinity }}
-        style={{ width: 6, height: 6, borderRadius: "50%", background: T.sage, display: "inline-block" }}
+        style={{ width: 7, height: 7, borderRadius: "50%", background: T.sage, display: "inline-block" }}
       />
-      Carbon-neutral operations
+      <span style={{ fontSize: 11.5, color: T.inkMuted, fontFamily: "'DM Mono', monospace" }}>Carbon-neutral operations</span>
     </div>
   </footer>
 );
 
-/* ═══════════════════════════════ ROOT ════════════════════════════ */
-const Contact = () => {
+/* ═══════════════════════════════════════════════════════════
+   ROOT
+═══════════════════════════════════════════════════════════ */
+export default function Contact() {
   const [dark, setDark] = useState(true);
   const T = dark ? DARK : LIGHT;
 
@@ -709,9 +1169,9 @@ const Contact = () => {
       <FontLoader />
       <GlobalStyles dark={dark} />
       <Grain />
-      <div style={{ background: T.bg, transition: "background .4s" }}>
-        <ThemeToggle dark={dark} onToggle={() => setDark(d => !d)} T={T} />
-        <Hero T={T} />
+      <div style={{ background: T.bg, transition: "background 0.5s", minHeight: "100vh" }}>
+        <Navbar dark={dark} onToggle={() => setDark(d => !d)} T={T} />
+        <Hero T={T} dark={dark} />
         <InfoCards T={T} />
         <FormSection T={T} />
         <Partners T={T} />
@@ -719,6 +1179,4 @@ const Contact = () => {
       </div>
     </>
   );
-};
-
-export default Contact;
+}

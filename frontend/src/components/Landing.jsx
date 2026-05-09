@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, useCallback } from "react";
+import emailjs from "@emailjs/browser";
 
 /* ══════════════════════════════════════════════════
    FONT LOADER
@@ -1195,12 +1196,44 @@ const Testimonials = ({ c }) => (
 /* ══════════════════════════════════════════════════
    NEWSLETTER
 ══════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════
+   NEWSLETTER — PERSISTENT LAYOUT & REAL EMAILJS
+══════════════════════════════════════════════════ */
 const Newsletter = ({ c }) => {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubscribe = async () => {
+    if (!email.includes('@')) {
+      alert('Please enter a valid email');
+      return;
+    }
+    setLoading(true);
+    const templateParams = {
+      user_email: email,
+      project_name: "ResQPlate",
+      signup_date: new Date().toLocaleDateString(),
+    };
+    try {
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        templateParams,
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      );
+      setSent(true);
+    } catch (error) {
+      console.error('EmailJS Error:', error);
+      alert('Subscription failed. Please check your connection.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section style={{ background: c.bg, padding: "80px 32px", borderTop: `1px solid ${c.border}`, borderBottom: `1px solid ${c.border}` }}>
-      <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center" }}>
+      <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center", minHeight: "320px" }}>
         <Reveal>
           <span style={{
             display: "inline-block", background: c.leafm, color: "#fff",
@@ -1214,43 +1247,76 @@ const Newsletter = ({ c }) => {
           <p style={{ fontSize: 15, color: c.text2, marginBottom: 36, lineHeight: 1.75 }}>
             Monthly reports on meals rescued, CO₂ saved, and communities served — no spam, ever.
           </p>
-          <AnimatePresence mode="wait">
-            {!sent ? (
+          {/* THE FORM CONTAINER — NO Conditional Wrapper */}
+          <div className="rq-nl-form" style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+            maxWidth: 460,
+            margin: "0 auto 20px"
+          }}>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              readOnly={sent}
+              style={{
+                flex: 1,
+                padding: "13px 20px",
+                borderRadius: 100,
+                border: `1.5px solid ${sent ? c.leafm : c.border2}`,
+                background: c.surface,
+                fontFamily: "'Cabinet Grotesk', sans-serif",
+                fontSize: 14,
+                color: sent ? c.text3 : c.text,
+                outline: "none",
+                transition: "all 0.3s ease"
+              }}
+            />
+            <motion.button
+              whileHover={!sent && !loading ? { background: c.leaf, scale: 1.02 } : {}}
+              whileTap={!sent && !loading ? { scale: 0.98 } : {}}
+              onClick={handleSubscribe}
+              disabled={loading || sent}
+              style={{
+                background: sent ? c.leaf : c.leafm,
+                color: "#fff",
+                border: "none",
+                padding: "13px 28px",
+                borderRadius: 100,
+                fontFamily: "'Cabinet Grotesk', sans-serif",
+                fontWeight: 600,
+                fontSize: 14,
+                cursor: loading || sent ? "default" : "pointer",
+                whiteSpace: "nowrap",
+                minWidth: "140px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "background 0.5s ease"
+              }}
+            >
+              {loading ? "Joining..." : sent ? "Subscribed! 🎉" : "Subscribe"}
+            </motion.button>
+          </div>
+          {/* Success Message — Appears separately */}
+          <AnimatePresence>
+            {sent && (
               <motion.div
-                key="form" initial={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="rq-nl-form"
-                style={{ display: "flex", gap: 10, maxWidth: 440, margin: "0 auto" }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{
+                  fontFamily: "'Fraunces', serif",
+                  fontSize: 18,
+                  fontWeight: 700,
+                  color: c.leafm,
+                  marginTop: 15
+                }}
               >
-                <input
-                  type="email" value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  style={{
-                    flex: 1, padding: "13px 20px", borderRadius: 100,
-                    border: `1.5px solid ${c.border2}`, background: c.surface,
-                    fontFamily: "'Cabinet Grotesk', sans-serif", fontSize: 14,
-                    color: c.text, outline: "none",
-                  }}
-                />
-                <motion.button
-                  whileHover={{ background: c.leaf, transform: "scale(1.04)" }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => email.includes("@") && setSent(true)}
-                  style={{
-                    background: c.leafm, color: "#fff", border: "none",
-                    padding: "13px 26px", borderRadius: 100,
-                    fontFamily: "'Cabinet Grotesk', sans-serif",
-                    fontWeight: 600, fontSize: 14, cursor: "pointer", whiteSpace: "nowrap",
-                  }}
-                >Subscribe</motion.button>
+                🎉 Welcome to the movement! Check your inbox.
               </motion.div>
-            ) : (
-              <motion.div
-                key="thanks"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                style={{ fontFamily: "'Fraunces', serif", fontSize: 22, fontWeight: 700, color: c.sage }}
-              >🎉 Welcome to the movement!</motion.div>
             )}
           </AnimatePresence>
         </Reveal>
