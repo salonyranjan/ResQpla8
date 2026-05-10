@@ -1,10 +1,10 @@
-# ResQPlate Frontend
-
+# 🌿ResQPlate 
 <p align="center">
-  <img src="./public/logo.png" alt="ResQPlate Logo" width="120" />
+  <img src="./screen/hero.png" alt="ResQPlate Hero Banner" width="800" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);" />
 </p>
 
 <h1 align="center">ResQPlate</h1>
+
 <p align="center">
   🍽️ A modern, AI-powered food rescue platform connecting donors, recipients, and volunteers to reduce food waste and fight hunger.
 </p>
@@ -18,8 +18,6 @@
   <img src="https://img.shields.io/badge/Llama-3.2%20Vision-blue?logo=meta&logoColor=white" />
   <img src="https://img.shields.io/badge/Framer%20Motion-12-0055FF?logo=framer&logoColor=white" />
 </p>
-
----
 
 ## Table of Contents
 
