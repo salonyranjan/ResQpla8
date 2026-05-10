@@ -111,7 +111,7 @@
 
 ### 🏠 Dashboard — *Command Centre*
 
-<img src="./screen/hero.png" width="100%" alt="ResQPlate Dashboard" style="border-radius:12px;" />
+<img src="./screen/dashb.png" width="100%" alt="ResQPlate Dashboard" style="border-radius:12px;" />
 
 > ⚡ **Quick Action Cards** animate with botanical growth UI · **Impact stats** update in real-time · **Smart Alerts** pulse for nearby donations
 
@@ -119,7 +119,7 @@
 
 ### 📸 Post in 60 Seconds — *AI-Powered Donation Flow*
 
-<img src="./screen/donate.png" width="100%" alt="ResQPlate — Post in 60s" style="border-radius:12px;" />
+<img src="./screen/post.png" width="100%" alt="ResQPlate — Post in 60s" style="border-radius:12px;" />
 
 > 🤖 **Groq Vision** reads the food photo instantly · **Gemini** auto-fills Title, Quantity, Expiry · Zero manual typing required
 
@@ -127,7 +127,7 @@
 
 ### 🗺️ Live Order Tracking — *Real-Time Map*
 
-<img src="./screen/tracking.png" width="100%" alt="ResQPlate — Order Tracking" style="border-radius:12px;" />
+<img src="./screen/order.png" width="100%" alt="ResQPlate — Order Tracking" style="border-radius:12px;" />
 
 > 📍 **Leaflet** maps volunteer position in real-time · **Route optimisation** for fastest pickup · Status updates ping donor and recipient simultaneously
 
@@ -135,7 +135,7 @@
 
 ### 📊 Impact Analytics — *Community Leaderboard*
 
-<img src="./screen/analytics.png" width="100%" alt="ResQPlate — Analytics" style="border-radius:12px;" />
+<img src="./screen/impact.png" width="100%" alt="ResQPlate — Analytics" style="border-radius:12px;" />
 
 > 🌍 **Carbon saved** calculated per donation · **Meals rescued** counter · Eco-heatmaps show hunger vs. waste zones geospatially
 
