@@ -1486,7 +1486,7 @@ const Footer = ({ c }) => (
           Connecting surplus food with families in need. Building a hunger-free India, one rescue at a time.
         </p>
         <div style={{ display: "flex", gap: 10 }}>
-          {[{ icon: "🐦", href: "https://twitter.com" }, { icon: "📸", href: "https://instagram.com" }, { icon: "💼", href: "https://linkedin.com" }].map(({ icon, href }) => (
+          {[{ icon: "🐦", href: "https://x.com/itsSalonyy" }, { icon: "📸", href: "https://salonyranjan.github.io/" }, { icon: "💼", href: "https://www.linkedin.com/in/salony-ranjan-b63200280/" }].map(({ icon, href }) => (
             <motion.a
               key={icon} href={href} target="_blank" rel="noopener noreferrer"
               whileHover={{ scale: 1.15, background: "rgba(255,255,255,0.14)" }}

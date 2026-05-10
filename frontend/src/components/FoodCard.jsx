@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useCart } from "../context/CartContext";
 
 /* ═══════════════════════════════════════════════
    FOODCARD — Standalone, no router/context deps
@@ -453,7 +454,6 @@ const injectStyles = () => {
 ══════════════════════════════════════════ */
 const FoodCard = ({
   item = {},
-  onAdd,
   onClick,
   externalDark,
   onDarkToggle,
@@ -461,6 +461,7 @@ const FoodCard = ({
   const [added, setAdded] = useState(false);
   const [dark, setDark] = useState(true); // ← dark mode is now DEFAULT
   const cardRef = useRef(null);
+  const { addItem } = useCart();
 
   // Allow external dark control or internal
   const isDark = externalDark !== undefined ? externalDark : dark;
@@ -476,7 +477,14 @@ const FoodCard = ({
   const handleAdd = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onAdd) onAdd(item);
+    // Map Appwrite document fields to the context's Product type
+    addItem({
+      id: item.$id,
+      name: item.foodItem || "Surplus Meal",
+      price: 0, // Since ResQPlate is for donation
+      restaurant: item.restaurant,
+      image: item.imageUrl
+    }, 1);
     setAdded(true);
     setTimeout(() => setAdded(false), 1400);
   };

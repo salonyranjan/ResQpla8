@@ -12,7 +12,7 @@ import {
 import { useOrderTracking } from "../hooks/useOrderTracking";
 
 export default function OrderTracking() {
-  const ctx = useOutletContext?.() ?? {};
+  const ctx = useOutletContext() || {};
   const dark = ctx?.dark ?? true;
   const T = dark
     ? {
@@ -38,7 +38,7 @@ export default function OrderTracking() {
   const STEP_ICONS = {
     order_placed: HiOutlineShoppingBag,
     confirmed: HiOutlineCheckCircle,
-    preaping: HiOutlineFire,
+    preparing: HiOutlineFire,
     out_for_delivery: HiOutlineTruck,
     delivered: HiOutlineCheckCircle,
   };

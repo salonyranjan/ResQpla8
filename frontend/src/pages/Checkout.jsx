@@ -8,10 +8,11 @@ import {
   HiOutlineLocationMarker,
   HiOutlineCreditCard,
   HiOutlineShieldCheck,
+  HiOutlineClock,
 } from "react-icons/hi";
 
 export default function CheckoutPage() {
-  const ctx = useOutletContext?.() ?? {};
+  const ctx = useOutletContext() || {};
   const dark = ctx?.dark ?? true;
   const T = dark
     ? {
@@ -37,9 +38,21 @@ export default function CheckoutPage() {
   const [orderId, setOrderId] = useState("");
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     const id = `ORD-${Date.now().toString().slice(-6)}`;
     setOrderId(id);
+
+    // CSBS Pro-Tip: Save order to Appwrite
+    // Replace these with your actual Appwrite Database ID and Collection ID
+    // const DATABASE_ID = "your_database_id";
+    // const ORDERS_COLLECTION_ID = "orders";
+    // await databases.createDocument(DATABASE_ID, ORDERS_COLLECTION_ID, id, {
+    //   userId: user?.$id,
+    //   items: JSON.stringify(items),
+    //   status: "pending_pickup",
+    //   address: address.street
+    // });
+
     clearCart();
     setStep(3);
   };
@@ -131,7 +144,7 @@ export default function CheckoutPage() {
           key={step}
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -24 }}
+          exit={{ opacity: 0, x: -24, rotate: -5, transition: { duration: 0.2 } }}
           transition={{ duration: 0.25 }}
           style={{ padding: "0 16px" }}
         >
@@ -263,6 +276,39 @@ export default function CheckoutPage() {
                 <p style={{ fontFamily: "monospace", fontSize: 14, color: T.accent, fontWeight: 700 }}>{orderId}</p>
               </div>
               <p style={{ fontSize: 13, color: T.textMuted, marginBottom: 32 }}>You'll receive updates about your delivery soon.</p>
+
+              {/* Reservation Timer */}
+              <div style={{
+                marginTop: 12,
+                padding: "10px",
+                background: T.accentSoft,
+                borderRadius: "12px",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                maxWidth: 300,
+                margin: "0 auto 32px"
+              }}>
+                <HiOutlineClock style={{ color: T.accent }} />
+                <span style={{ fontSize: "11px", color: T.textMuted }}>
+                  Items reserved for <b>14:59</b> minutes
+                </span>
+              </div>
+
+              {/* CO2 Savings Badge */}
+              <div style={{
+                background: T.amber + "15",
+                border: `1px solid ${T.amber}44`,
+                borderRadius: 12,
+                padding: "10px 16px",
+                marginBottom: 32,
+                maxWidth: 280,
+                margin: "0 auto 32px"
+              }}>
+                <p style={{ fontSize: 12, color: T.amber, fontWeight: 700, fontFamily: "monospace" }}>
+                  This rescue saved 1.2kg of CO₂ emissions
+                </p>
+              </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <motion.button
