@@ -1,10 +1,10 @@
-# ResQPlate Frontend
-
+# 🌿ResQPlate 
 <p align="center">
-  <img src="./public/logo.png" alt="ResQPlate Logo" width="120" />
+  <img src="./screen/hero.png" alt="ResQPlate Hero Banner" width="800" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);" />
 </p>
 
 <h1 align="center">ResQPlate</h1>
+
 <p align="center">
   🍽️ A modern, AI-powered food rescue platform connecting donors, recipients, and volunteers to reduce food waste and fight hunger.
 </p>
@@ -18,8 +18,6 @@
   <img src="https://img.shields.io/badge/Llama-3.2%20Vision-blue?logo=meta&logoColor=white" />
   <img src="https://img.shields.io/badge/Framer%20Motion-12-0055FF?logo=framer&logoColor=white" />
 </p>
-
----
 
 ## Table of Contents
 
@@ -224,32 +222,37 @@ sequenceDiagram
 ## 3D System Architecture
 
 ```
-                         ┌─────────────────────────────────────────────┐
-                        ╱                                             ╲
-                       ╱   🌐  FRONTEND LAYER  (React 19 + Vite)     ╲
-                      ╱  ┌─────────────────────────────────────────┐  ╲
-                     ╱   │  Pages │ Components │ Hooks │ Contexts   │   ╲
-                    ╱    └─────────────────────────────────────────┘    ╲
-                   ╱                                                         ╲
-                  ╱       ┌──────────────────────────────────────┐          ╲
-                 ╱        │  🤖 AI LAYER (Groq + Gemini)        │           ╲
-                ╱         │  Vision │ Matching │ Chatbot │ Alerts │            ╲
-               ╱          └──────────────────────────────────────┘             ╲
-              ╱                                                                 ╲
-             ╱      ┌──────────────────────────────────────────────────┐       ╲
-            ╱       │  🗺️ MAPS LAYER (Leaflet + React Leaflet)        │        ╲
-           ╱        │  Tracking │ Routing │ Volunteers │ Live Updates  │         ╲
-          ╱         └──────────────────────────────────────────────────┘          ╲
-         ╱                                                                       ╲
-        ╱    ┌──────────────────────────────────────────────────────────┐        ╲
-       ╱     │  🔐 BACKEND LAYER (Appwrite)                            │         ╲
-      ╱      │  Auth │ Database │ Storage │ Functions │ Realtime       │          ╲
-     ╱       └──────────────────────────────────────────────────────────┘           ╲
-    └───────────────────────────────────────────────────────────────────────────────┘
-                                    ▲
-                                    │
-                              🌍 Community Impact
-                              (Food Waste ↓, Hunger ↓)
+          ┌───────────────────────────────────────────────────────────────────┐
+          │                  🌐 FRONTEND LAYER (React 19 + Vite)              |
+          │    ┌─────────────────────────────────────────────────────────┐    │
+          │    │      Pages  •  Components  •  Hooks  •  Contexts        │    │
+          │    └─────────────────────────────────────────────────────────┘    │
+          └─────────────────────────────────┬─────────────────────────────────┘
+                                            │
+          ┌─────────────────────────────────▼─────────────────────────────────┐
+          │                   🤖 AI LAYER (Groq + Gemini)                     │
+          │    ┌─────────────────────────────────────────────────────────┐    │
+          │    │      Vision  •  Matching  •  Chatbot  •  Alerts         │    │
+          │    └─────────────────────────────────────────────────────────┘    │
+          └─────────────────────────────────┬─────────────────────────────────┘
+                                            │
+          ┌─────────────────────────────────▼─────────────────────────────────┐
+          │             🗺️ MAPS LAYER (Leaflet + React Leaflet)               │
+          │    ┌─────────────────────────────────────────────────────────┐    │
+          │    │    Tracking  •  Routing  •  Volunteers  •  Live Updates │    │
+          │    └─────────────────────────────────────────────────────────┘    │
+          └─────────────────────────────────┬─────────────────────────────────┘
+                                            │
+          ┌─────────────────────────────────▼─────────────────────────────────┐
+          │                   🔐 BACKEND LAYER (Appwrite)                     │
+          │    ┌─────────────────────────────────────────────────────────┐    │
+          │    │    Auth  •  Database  •  Storage  •  Functions  •  Realtime  │ 
+          │    └─────────────────────────────────────────────────────────┘    │
+          └─────────────────────────────────┬─────────────────────────────────┘
+                                            │
+                                            ▼
+                                   🌍 Community Impact
+                                (Food Waste ↓, Hunger ↓)
 ```
 
 ### 3D Layer Breakdown
@@ -362,16 +365,19 @@ The app will be running at `http://localhost:5173`
 Create a `.env` file in the `frontend/` root directory:
 
 ```env
-# Appwrite Configuration
+# Appwrite (Backend)
 VITE_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
-VITE_APPWRITE_PROJECT_ID=your_project_id
+VITE_APPWRITE_PROJECT_ID=your_id
+VITE_APPWRITE_DATABASE_ID=your_db_id
 
-# AI Services (Groq is required for vision; Gemini is optional – used only for chatbot & matching)
-VITE_GROQ_API_KEY=your_groq_api_key
-VITE_GEMINI_API_KEY=your_gemini_api_key      # optional
+# AI Services (Groq + Gemini)
+VITE_GROQ_API_KEY=your_key
+VITE_GEMINI_API_KEY=your_key
 
-# Optional: Maps
-VITE_MAPBOX_TOKEN=your_mapbox_token  # if using Mapbox
+# Communications (EmailJS)
+VITE_EMAILJS_PUBLIC_KEY=your_key
+VITE_EMAILJS_SERVICE_ID=your_service_id
+VITE_EMAILJS_CONTACT_TEMPLATE_ID=your_template_id
 ```
 
 > **Note:** Never commit your `.env` file. A `.env.example` is provided as a template.
@@ -471,7 +477,7 @@ Distributed under the **MIT License**. See `LICENSE` for more information.
 
 **Project Maintainer:** Salony Ranjan
 
-**Project Link:** [https://github.com/yourusername/ResQPlate_frontend](https://github.com/yourusername/ResQPlate_frontend)
+**Project Link:**( https://github.com/salonyranjan/frontend-ResQplate-)
 
 ---
 
