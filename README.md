@@ -140,7 +140,9 @@
 
 ### 📊 Impact Analytics — *Community Leaderboard*
 
-<img src="./screen/impact.png" width="100%" alt="ResQPlate — Analytics" style="border-radius:12px;" />
+<img src="./screen/impact1.png" width="100%" alt="ResQPlate — Analytics" style="border-radius:12px;" />
+<img src="./screen/impact2.png" width="100%" alt="ResQPlate — Analytics" style="border-radius:12px;" />
+<img src="./screen/impact3.png" width="100%" alt="ResQPlate — Analytics" style="border-radius:12px;" />
 
 > 🌍 **Carbon saved** calculated per donation · **Meals rescued** counter · Eco-heatmaps show hunger vs. waste zones geospatially
 <br/>
