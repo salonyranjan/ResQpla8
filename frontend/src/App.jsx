@@ -65,8 +65,10 @@ function App() {
               <Route path="smart-alerts" element={<SmartAlerts />} />
               <Route path="post-60" element={<PostIn60Seconds />} />
               <Route path="volunteer" element={<VolunteerPickup />} />
+               <Route path="volunteer-pickups" element={<VolunteerPickup />} />
               <Route path="impact-delivered" element={<ImpactDelivered />} />
               <Route path="leader-board" element={<Leaderboard />} />
+               <Route path="leaderboard" element={<Leaderboard />} />
             </Route>
           </Route>
 
