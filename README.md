@@ -111,7 +111,11 @@
 
 ### 🏠 Dashboard — *Command Centre*
 
-<img src="./screen/dasshb1.png" width="100%" alt="ResQPlate Dashboard" style="border-radius:12px;" />
+<img src="./screen/d1.png" width="100%" alt="ResQPlate Dashboard" style="border-radius:12px;" />
+<img src="./screen/d2.png" width="100%" alt="ResQPlate Dashboard" style="border-radius:12px;" />
+<img src="./screen/d3.png" width="100%" alt="ResQPlate Dashboard" style="border-radius:12px;" />
+<img src="./screen/d4.png" width="100%" alt="ResQPlate Dashboard" style="border-radius:12px;" />
+<img src="./screen/d5.png" width="100%" alt="ResQPlate Dashboard" style="border-radius:12px;" />
 
 > ⚡ **Quick Action Cards** animate with botanical growth UI · **Impact stats** update in real-time · **Smart Alerts** pulse for nearby donations
 
