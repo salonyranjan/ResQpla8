@@ -2,11 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="/logo2.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <meta name="google-site-verification" content="f95427f5ed88e89c" />
@@ -15,6 +10,16 @@
     <title>ResQPlate | AI-Powered Food Rescue</title>
     <meta name="title" content="ResQPlate | Rescue Food, Together" />
     <meta name="description" content="Snap a photo, save a meal. ResQPlate uses Groq Vision and Gemini AI to connect surplus food with those in need in under 60 seconds. 🌿" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <link rel="icon" type="image/png" href="/logo2.png" />
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://res-q-plate-klisn6lby-salonyranjans-projects.vercel.app/" />
@@ -29,16 +34,18 @@
     <meta name="twitter:image" content="https://raw.githubusercontent.com/salonyranjan/frontend-ResQplate-/main/screen/hero.png" />
 
     <style>
-      /* Global Reset for a smooth start */
+      /* 🎨 Global Styles & Botanical Theme */
       body {
         margin: 0;
         padding: 0;
-        background-color: #050a06; /* Matches your botanical dark theme */
+        background-color: #050a06; /* Matches botanical dark theme */
         font-family: 'DM Sans', sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         overflow-x: hidden;
       }
+      /* Prevent CLS (Cumulative Layout Shift) for images */
+      img { max-width: 100%; height: auto; display: block; }
     </style>
   </head>
   <body>
