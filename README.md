@@ -147,9 +147,10 @@
 
 ### 🤖 ResQBot — *Your Intelligent  Agent*
 
-<img src="./screen/bot.png" width="100%" alt="ResQPlate — Analytics" style="border-radius:12px;" />
+<img src="./screen/bot.png" width="50%" alt="ResQPlate — Analytics" style="border-radius:12px;" />
+<img src="./screen/bot1.png" width="20%" alt="ResQPlate — Analytics" style="border-radius:10px;" />
 
-> 🌍 **🧠 Instant Query Resolution** via Groq · **Real-time Logistics Tracking** via Appwrite · Sub-200ms Inference powered by Groq LPU technology
+> 🧠 **Instant Query Resolution** via Groq · **Real-time Logistics Tracking** via Appwrite · Sub-200ms Inference powered by Groq LPU technology
 
 </div>
 
