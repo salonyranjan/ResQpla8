@@ -22,32 +22,26 @@ const FontLoader = () => {
    THEME TOKENS
 ═══════════════════════════════════════════════════════════ */
 const DARK = {
-  // backgrounds
   bg:          "#080e09",
   bg2:         "#0d160e",
   bg3:         "#111a12",
   bgCard:      "#0f1a10",
   bgCard2:     "#131f14",
   bgGlass:     "rgba(15,26,16,0.72)",
-  // borders
   border:      "rgba(52,84,56,0.45)",
   borderMed:   "rgba(65,105,72,0.6)",
   borderHi:    "rgba(85,140,95,0.8)",
-  // text
   ink:         "#e8ede0",
   inkMuted:    "#8aab8e",
   inkHint:     "#4a6550",
-  // brand greens
   leaf:        "#2d6a4f",
   leafBright:  "#3d8a67",
   sage:        "#52a878",
   mint:        "#7dcfa0",
   mintSoft:    "rgba(125,207,160,0.12)",
-  // accents
   terra:       "#c8603a",
   amber:       "#d4953c",
   amberSoft:   "rgba(212,149,60,0.15)",
-  // utils
   accentGlow:  "rgba(45,106,79,0.22)",
   heroOverlay: "rgba(8,14,9,0.55)",
 };
@@ -210,7 +204,7 @@ const Label = ({ children, T }) => (
 );
 
 /* ═══════════════════════════════════════════════════════════
-   LOGO
+   LOGO (kept for Footer)
 ═══════════════════════════════════════════════════════════ */
 const Logo = ({ T, size = 36 }) => (
   <div style={{
@@ -229,7 +223,7 @@ const Logo = ({ T, size = 36 }) => (
 );
 
 /* ═══════════════════════════════════════════════════════════
-   NAVBAR
+   NAVBAR — logo & name removed, toggle only
 ═══════════════════════════════════════════════════════════ */
 const Navbar = ({ dark, onToggle, T }) => {
   const [scrolled, setScrolled] = useState(false);
@@ -248,7 +242,7 @@ const Navbar = ({ dark, onToggle, T }) => {
         position: "sticky", top: 0, zIndex: 200,
         padding: "0 40px",
         height: 62,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
+        display: "flex", alignItems: "center", justifyContent: "flex-end",
         background: scrolled
           ? dark ? "rgba(8,14,9,0.88)" : "rgba(243,240,232,0.88)"
           : "transparent",
@@ -258,16 +252,6 @@ const Navbar = ({ dark, onToggle, T }) => {
         transition: "background 0.4s, border-color 0.4s",
       }}
     >
-      <Link to="/" style={{ display: "flex", alignItems: "center", gap: 11 }}>
-        <Logo T={T} size={34} />
-        <span style={{
-          fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700,
-          color: T.ink, letterSpacing: "-0.01em",
-        }}>
-          ResQ<em style={{ color: T.amber, fontStyle: "italic" }}>Plate</em>
-        </span>
-      </Link>
-
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
         <span style={{
           fontFamily: "'DM Mono', monospace", fontSize: 9.5,
@@ -386,7 +370,7 @@ const Hero = ({ T, dark }) => {
         </svg>
       </div>
 
-      <motion.div style={{ y, opacity }} className="rq-section-pad" css={{}} /* motion wrapper */>
+      <motion.div style={{ y, opacity }} className="rq-section-pad">
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 40 }}>
 
           {/* Left: text */}
