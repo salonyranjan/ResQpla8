@@ -575,19 +575,23 @@ cp .env.example .env
 ```
 
 ```env
-# ── Appwrite (Backend) ──────────────────────────────────────────────
-VITE_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
-VITE_APPWRITE_PROJECT_ID=your_project_id
-VITE_APPWRITE_DATABASE_ID=your_database_id
+# Appwrite Configuration
+VITE_APPWRITE_ENDPOINT="https://fra.cloud.appwrite.io/v1"
+VITE_APPWRITE_PROJECT_ID="your_project_id"
+VITE_APPWRITE_PROJECT_NAME="ResQPlate"
+VITE_APPWRITE_DATABASE_ID="your_database_id"
+VITE_APPWRITE_PICKUPS_COLLECTION_ID="pickups"
+VITE_APPWRITE_BUCKET_ID="your_bucket_id"
 
-# ── AI Services ─────────────────────────────────────────────────────
-VITE_GROQ_API_KEY=your_groq_key
-VITE_GEMINI_API_KEY=your_gemini_key
+# AI Inference (Groq LPU)
+# IMPORTANT: Do not share your real key in public repositories.
+VITE_GROQ_API_KEY="gsk_your_secret_key_here"
 
-# ── EmailJS (Contact Form) ──────────────────────────────────────────
-VITE_EMAILJS_PUBLIC_KEY=your_emailjs_public_key
-VITE_EMAILJS_SERVICE_ID=your_service_id
-VITE_EMAILJS_CONTACT_TEMPLATE_ID=your_template_id
+# Email Notification Service (EmailJS)
+VITE_EMAILJS_PUBLIC_KEY="your_public_key"
+VITE_EMAILJS_SERVICE_ID="your_service_id"
+VITE_EMAILJS_NEWSLETTER_TEMPLATE_ID="your_newsletter_template_id"
+VITE_EMAILJS_CONTACT_TEMPLATE_ID="your_contact_template_id"
 ```
 
 > 🔐 **Security note:** `.env` is git-ignored. Never commit real keys. A `.env.example` template is provided — copy it and fill in your values.
