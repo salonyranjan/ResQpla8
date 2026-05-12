@@ -18,10 +18,10 @@ const FontLoader = () => {
 };
 
 /* ══════════════════════════════════════════════════
-   DARK MODE HOOK — dark is now DEFAULT (true)
+   DARK MODE HOOK
 ══════════════════════════════════════════════════ */
 const useDarkMode = () => {
-  const [dark, setDark] = useState(true); // ← changed from false to true
+  const [dark, setDark] = useState(true);
   const toggle = useCallback(() => setDark((d) => !d), []);
   return { dark, toggle };
 };
@@ -105,7 +105,6 @@ const GlobalStyles = ({ c }) => {
         .rq-feat-grid { grid-template-columns: 1fr !important; }
         .rq-how-grid { grid-template-columns: 1fr !important; }
         .rq-footer-grid { grid-template-columns: 1fr !important; }
-        .rq-btn-login { display: none !important; }
       }
     `;
     document.head.appendChild(style);
@@ -190,10 +189,10 @@ const DarkToggle = ({ dark, toggle, c }) => (
     whileHover={{ scale: 1.1 }}
     whileTap={{ scale: 0.9 }}
     style={{
-      width: 40, height: 40, borderRadius: 12,
-      border: `1px solid ${c.border2}`, background: c.surface,
+      width: 36, height: 36, borderRadius: 10,
+      border: `1px solid ${c.border2}`, background: "transparent",
       display: "flex", alignItems: "center", justifyContent: "center",
-      fontSize: 17, color: c.text2, flexShrink: 0,
+      fontSize: 15, color: c.text2, flexShrink: 0,
     }}
   >
     <AnimatePresence mode="wait" initial={false}>
@@ -206,13 +205,13 @@ const DarkToggle = ({ dark, toggle, c }) => (
         style={{ display: "flex" }}
       >
         {dark ? (
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
             <circle cx="12" cy="12" r="5" stroke={c.amber} strokeWidth="2" />
             <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
               stroke={c.amber} strokeWidth="1.8" strokeLinecap="round" />
           </svg>
         ) : (
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
             <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"
               stroke={c.text2} strokeWidth="1.8" strokeLinecap="round" />
           </svg>
@@ -308,121 +307,407 @@ const Particles = ({ c }) => {
 };
 
 /* ══════════════════════════════════════════════════
-   NAVBAR — all links wired
+   NAVBAR — bioluminescent forest · world-class
 ══════════════════════════════════════════════════ */
 const NAV_LINKS = [
-  { label: "Home",         href: "#hero"     },
-  { label: "Features",     href: "#features" },
-  { label: "How It Works", href: "#how"      },
-  { label: "Impact",       href: "#impact"   },
-  { label: "Stories",      href: "#stories"  },
+  { label: "Home",         href: "#hero",     icon: "⬡" },
+  { label: "Features",     href: "#features", icon: "◈" },
+  { label: "How It Works", href: "#how",      icon: "◎" },
+  { label: "Impact",       href: "#impact",   icon: "◉" },
+  { label: "Stories",      href: "#stories",  icon: "◇" },
 ];
+
+/* Magnetic link — cursor pulls the label toward it */
+const MagneticLink = ({ children, href, isActive, onClick, c, dark }) => {
+  const ref = useRef(null);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [hovered, setHovered] = useState(false);
+
+  const handleMouseMove = (e) => {
+    const rect = ref.current.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    setPos({ x: (e.clientX - cx) * 0.28, y: (e.clientY - cy) * 0.28 });
+  };
+  const handleMouseLeave = () => { setPos({ x: 0, y: 0 }); setHovered(false); };
+
+  return (
+    <a href={href} style={{ textDecoration: "none", position: "relative" }}>
+      <motion.button
+        ref={ref}
+        onClick={onClick}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={handleMouseLeave}
+        animate={{ x: pos.x, y: pos.y }}
+        transition={{ type: "spring", stiffness: 500, damping: 28, mass: 0.4 }}
+        style={{
+          position: "relative", border: "none", background: "transparent",
+          padding: "10px 18px", cursor: "pointer", display: "flex",
+          alignItems: "center", gap: 6, borderRadius: 14,
+          fontFamily: "'Cabinet Grotesk', sans-serif",
+          fontSize: 13, fontWeight: isActive ? 600 : 400,
+          color: isActive
+            ? (dark ? "#95d5b2" : "#1a4a2e")
+            : (dark ? "rgba(110,231,183,0.5)" : "rgba(74,94,82,0.6)"),
+          letterSpacing: "0.02em",
+          transition: "color 0.25s",
+          overflow: "visible",
+        }}
+      >
+        {/* Glow blob behind active/hovered item */}
+        <AnimatePresence>
+          {(isActive || hovered) && (
+            <motion.div
+              key="glow"
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.6 }}
+              transition={{ duration: 0.28 }}
+              style={{
+                position: "absolute", inset: 0, borderRadius: 14,
+                background: isActive
+                  ? (dark
+                    ? "linear-gradient(135deg,rgba(45,106,79,0.55),rgba(82,183,136,0.18))"
+                    : "linear-gradient(135deg,rgba(45,106,79,0.12),rgba(82,183,136,0.08))")
+                  : (dark
+                    ? "rgba(82,183,136,0.07)"
+                    : "rgba(26,74,46,0.05)"),
+                border: isActive
+                  ? `1px solid ${dark ? "rgba(82,183,136,0.28)" : "rgba(26,74,46,0.18)"}`
+                  : "1px solid transparent",
+                pointerEvents: "none",
+              }}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Spore dot — pulses only on active */}
+        <motion.span
+          animate={isActive
+            ? { scale: [1, 1.6, 1], opacity: [0.9, 0.4, 0.9] }
+            : { scale: 1, opacity: hovered ? 0.6 : 0 }}
+          transition={isActive
+            ? { duration: 2.4, repeat: Infinity }
+            : { duration: 0.2 }}
+          style={{
+            width: 5, height: 5, borderRadius: "50%", flexShrink: 0,
+            background: dark ? "#52b788" : "#2d6a4f",
+            display: "inline-block",
+            boxShadow: isActive && dark ? "0 0 8px #52b788" : "none",
+          }}
+        />
+
+        <span style={{ position: "relative", zIndex: 1 }}>{children}</span>
+
+        {/* Active underline — shimmer gradient */}
+        {isActive && (
+          <motion.div
+            layoutId="nav-shimmer-line"
+            style={{
+              position: "absolute", bottom: 4, left: 18, right: 18, height: 1.5, borderRadius: 2,
+              background: dark
+                ? "linear-gradient(90deg, transparent, #52b788, #95d5b2, #52b788, transparent)"
+                : "linear-gradient(90deg, transparent, #2d6a4f, #52b788, #2d6a4f, transparent)",
+              backgroundSize: "200% 100%",
+              animation: "rqNavShimmer 2.2s linear infinite",
+            }}
+            transition={{ type: "spring", stiffness: 400, damping: 32 }}
+          />
+        )}
+      </motion.button>
+    </a>
+  );
+};
+
+/* Firefly particle that floats inside the nav */
+const NavFirefly = ({ c, dark, index }) => {
+  const x = 15 + index * 18 + Math.random() * 8;
+  return (
+    <motion.div
+      style={{
+        position: "absolute",
+        left: `${x}%`,
+        top: "50%",
+        width: 3, height: 3, borderRadius: "50%",
+        background: dark ? "#52b788" : "#2d6a4f",
+        pointerEvents: "none",
+        boxShadow: dark ? "0 0 6px #52b788" : "0 0 4px #2d6a4f",
+      }}
+      animate={{
+        y: [-8, 8, -8],
+        x: [-4, 4, -4],
+        opacity: [0, 0.7, 0],
+        scale: [0.5, 1, 0.5],
+      }}
+      transition={{
+        duration: 3 + index * 0.7,
+        repeat: Infinity,
+        delay: index * 0.9,
+        ease: "easeInOut",
+      }}
+    />
+  );
+};
 
 const NavBar = ({ c, dark, toggleDark }) => {
   const [scrolled, setScrolled] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [scrollPct, setScrollPct] = useState(0);
+  const navRef = useRef(null);
 
   useEffect(() => {
-    const h = () => setScrolled(window.scrollY > 20);
+    const h = () => {
+      const sy = window.scrollY;
+      setScrolled(sy > 20);
+      const maxScroll = document.body.scrollHeight - window.innerHeight;
+      setScrollPct(maxScroll > 0 ? (sy / maxScroll) * 100 : 0);
+    };
     window.addEventListener("scroll", h, { passive: true });
     return () => window.removeEventListener("scroll", h);
   }, []);
 
+  /* inject keyframes for shimmer + aurora */
+  useEffect(() => {
+    const existing = document.getElementById("rq-nav-kf");
+    if (existing) existing.remove();
+    const s = document.createElement("style");
+    s.id = "rq-nav-kf";
+    s.textContent = `
+      @keyframes rqNavShimmer {
+        0%   { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+      @keyframes rqAurora {
+        0%,100% { transform: translateX(-30%) scaleY(1); opacity:0.18; }
+        33%      { transform: translateX(10%)  scaleY(1.4); opacity:0.26; }
+        66%      { transform: translateX(-10%) scaleY(0.8); opacity:0.14; }
+      }
+      @keyframes rqOrb {
+        0%,100% { transform: translate(-50%,-50%) scale(1);   opacity:0.22; }
+        50%      { transform: translate(-50%,-50%) scale(1.3); opacity:0.34; }
+      }
+      @keyframes rqSeedFloat {
+        0%   { transform: translateY(0px)  rotate(0deg)   scale(1);   opacity:0; }
+        15%  { opacity:0.55; }
+        85%  { opacity:0.35; }
+        100% { transform: translateY(-38px) rotate(180deg) scale(0.4); opacity:0; }
+      }
+      @media (max-width:860px) {
+        .rq-nav-links { display: none !important; }
+      }
+    `;
+    document.head.appendChild(s);
+    return () => document.getElementById("rq-nav-kf")?.remove();
+  }, [dark]);
+
+  const aurora1 = dark ? "rgba(45,106,79,0.35)"  : "rgba(45,106,79,0.18)";
+  const aurora2 = dark ? "rgba(82,183,136,0.22)" : "rgba(82,183,136,0.12)";
+  const aurora3 = dark ? "rgba(149,213,178,0.12)": "rgba(149,213,178,0.08)";
+
   return (
     <motion.nav
-      initial={{ y: -80, opacity: 0 }}
+      ref={navRef}
+      initial={{ y: -90, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 240, damping: 26, delay: 0.05 }}
+      transition={{ type: "spring", stiffness: 220, damping: 24, delay: 0.08 }}
       style={{
-        position: "sticky", top: 0, zIndex: 1000, height: 66,
-        background: c.navBg,
-        backdropFilter: "blur(22px) saturate(180%)",
-        WebkitBackdropFilter: "blur(22px) saturate(180%)",
-        borderBottom: `1px solid ${scrolled ? c.border : "transparent"}`,
-        boxShadow: scrolled ? `0 4px 28px ${c.shadow}` : "none",
-        transition: "border-color 0.35s, box-shadow 0.35s, background 0.45s",
+        position: "sticky", top: 0, zIndex: 1000,
+        height: 68,
+        /* layered glass: dark border → inner glow → frosted bg */
+        background: scrolled
+          ? (dark
+            ? "rgba(5,12,7,0.82)"
+            : "rgba(245,240,230,0.82)")
+          : "transparent",
+        backdropFilter: scrolled ? "blur(28px) saturate(200%) brightness(1.04)" : "none",
+        WebkitBackdropFilter: scrolled ? "blur(28px) saturate(200%) brightness(1.04)" : "none",
+        borderBottom: scrolled
+          ? `1px solid ${dark ? "rgba(82,183,136,0.16)" : "rgba(26,74,46,0.12)"}`
+          : "1px solid transparent",
+        boxShadow: scrolled
+          ? (dark
+            ? "0 1px 0 rgba(82,183,136,0.06), 0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(82,183,136,0.08)"
+            : "0 1px 0 rgba(26,74,46,0.05), 0 8px 32px rgba(26,74,46,0.10), inset 0 1px 0 rgba(82,183,136,0.06)")
+          : "none",
+        transition: "background 0.5s, border-color 0.5s, box-shadow 0.5s",
+        overflow: "hidden",
       }}
     >
-      <div style={{
-        maxWidth: 1240, margin: "0 auto", padding: "0 28px", height: "100%",
-        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
-      }}>
-        {/* Logo → home */}
-        <Link to="/" style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-          <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }}>
-            <div style={{
-              display: "flex", alignItems: "center", gap: 10,
-              fontFamily: "'Fraunces', serif", fontSize: 21, fontWeight: 900,
-              letterSpacing: "-0.02em", color: c.text,
-            }}>
-              <div style={{
-                width: 34, height: 34, borderRadius: 11,
-                background: `linear-gradient(135deg, ${c.leaf}, ${c.leafm})`,
-                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17,
-              }}>🍃</div>
-              ResQ<span style={{ color: c.amber }}>Plate</span>
-            </div>
-          </motion.div>
-        </Link>
 
-        {/* Pill nav — smooth-scroll anchors */}
+      {/* ── Aurora sweep (slow horizontal drift) ── */}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden",
+        opacity: scrolled ? 1 : 0, transition: "opacity 0.6s",
+      }}>
+        {/* wide aurora band */}
+        <div style={{
+          position: "absolute", top: "-60%", left: "0%",
+          width: "140%", height: "220%", borderRadius: "50%",
+          background: `radial-gradient(ellipse 60% 50% at 35% 50%, ${aurora1}, ${aurora2} 40%, ${aurora3} 65%, transparent 80%)`,
+          animation: "rqAurora 9s ease-in-out infinite",
+          filter: "blur(18px)",
+        }} />
+        {/* secondary orb — amber accent */}
+        <div style={{
+          position: "absolute", top: "50%", right: "18%",
+          width: 220, height: 220, borderRadius: "50%",
+          background: dark
+            ? "radial-gradient(circle, rgba(245,158,11,0.09) 0%, transparent 70%)"
+            : "radial-gradient(circle, rgba(232,168,56,0.07) 0%, transparent 70%)",
+          animation: "rqOrb 7s ease-in-out infinite 2s",
+          transform: "translate(-50%,-50%)",
+          filter: "blur(10px)",
+        }} />
+      </div>
+
+      {/* ── Floating spore seeds (subtle, only when scrolled) ── */}
+      {scrolled && [0,1,2,3,4].map(i => (
+        <div key={i} style={{
+          position: "absolute",
+          left: `${10 + i * 18}%`,
+          bottom: 0,
+          width: 4, height: 4,
+          borderRadius: "50%",
+          background: dark ? "rgba(82,183,136,0.6)" : "rgba(45,106,79,0.5)",
+          pointerEvents: "none",
+          animation: `rqSeedFloat ${3.5 + i * 0.8}s ease-in-out infinite ${i * 1.1}s`,
+        }} />
+      ))}
+
+      {/* ── Bottom progress filament ── */}
+      <motion.div style={{
+        position: "absolute", bottom: 0, left: 0,
+        height: 1.5, borderRadius: 1,
+        background: dark
+          ? "linear-gradient(90deg, transparent, #2d6a4f, #52b788, #95d5b2, #52b788, #2d6a4f, transparent)"
+          : "linear-gradient(90deg, transparent, #1a4a2e, #2d6a4f, #52b788, #2d6a4f, #1a4a2e, transparent)",
+        width: `${scrollPct}%`,
+        boxShadow: dark ? "0 0 8px #52b788, 0 0 18px rgba(82,183,136,0.4)" : "0 0 6px #2d6a4f",
+        transition: "width 0.12s linear",
+        opacity: scrolled ? 1 : 0,
+      }} />
+
+      {/* ── Main row ── */}
+      <div style={{
+        maxWidth: 1240, margin: "0 auto", padding: "0 32px", height: "100%",
+        display: "grid", gridTemplateColumns: "1fr auto 1fr",
+        alignItems: "center",
+        position: "relative", zIndex: 2,
+      }}>
+
+        {/* LEFT — spacer keeps centre truly centred */}
+        <div />
+
+        {/* CENTRE — nav links */}
         <div
-          className="rq-nav-pills"
-          style={{
-            display: "flex", alignItems: "center", gap: 2,
-            background: dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
-            border: `1px solid ${c.border}`, borderRadius: 100, padding: 4,
-          }}
+          className="rq-nav-links"
+          style={{ display: "flex", alignItems: "center", gap: 2, justifyContent: "center" }}
         >
           {NAV_LINKS.map((l, i) => (
-            <a key={l.label} href={l.href}>
-              <motion.button
-                onClick={() => setActiveIdx(i)}
-                whileTap={{ scale: 0.96 }}
-                style={{
-                  padding: "7px 17px", borderRadius: 100, border: "none",
-                  fontFamily: "'Cabinet Grotesk', sans-serif", fontSize: 13,
-                  color: activeIdx === i ? (dark ? "#0d1f12" : "#fff") : c.text2,
-                  background: activeIdx === i ? (dark ? c.sage : c.leaf) : "transparent",
-                  fontWeight: activeIdx === i ? 500 : 400,
-                  cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.2s",
-                }}
-              >{l.label}</motion.button>
-            </a>
+            <MagneticLink
+              key={l.label}
+              href={l.href}
+              isActive={activeIdx === i}
+              onClick={() => setActiveIdx(i)}
+              c={c}
+              dark={dark}
+            >
+              {l.label}
+            </MagneticLink>
           ))}
         </div>
 
-        {/* Right cluster */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-          <DarkToggle dark={dark} toggle={toggleDark} c={c} />
+        {/* RIGHT — fireflies cluster + dark toggle */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14, justifyContent: "flex-end" }}>
 
-          {/* Log in → /login */}
-          <Link to="/login">
-            <motion.button
-              whileHover={{ borderColor: c.sage, color: c.text }}
-              className="rq-btn-login"
-              style={{
-                padding: "7px 18px", borderRadius: 100,
-                border: `1px solid ${c.border2}`, background: "transparent",
-                fontFamily: "'Cabinet Grotesk', sans-serif", fontSize: 13,
-                color: c.text2, cursor: "pointer", transition: "all 0.2s",
-              }}
-            >Log in</motion.button>
-          </Link>
+          {/* Firefly cluster — decorative living element */}
+          <div style={{
+            position: "relative", width: 48, height: 36,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            {[0, 1, 2].map(i => <NavFirefly key={i} c={c} dark={dark} index={i} />)}
+          </div>
 
-          {/* Donate Food → /register */}
-          <Link to="/register">
-            <motion.button
-              whileHover={{ background: c.gold, transform: "scale(1.04)" }}
-              whileTap={{ scale: 0.97 }}
+          {/* ── Dark toggle — orbital ring design ── */}
+          <motion.button
+            onClick={toggleDark}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92, rotate: 15 }}
+            style={{
+              position: "relative",
+              width: 44, height: 44, borderRadius: "50%",
+              border: "none", background: "transparent",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", flexShrink: 0, overflow: "visible",
+            }}
+          >
+            {/* Ring */}
+            <motion.div
+              animate={{ rotate: dark ? 0 : 180 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               style={{
-                padding: "9px 20px", borderRadius: 100, border: "none",
-                background: c.amber, fontFamily: "'Cabinet Grotesk', sans-serif",
-                fontSize: 13, fontWeight: 700, color: c.leaf,
-                cursor: "pointer", whiteSpace: "nowrap",
+                position: "absolute", inset: 0, borderRadius: "50%",
+                border: `1.5px solid ${dark ? "rgba(82,183,136,0.35)" : "rgba(26,74,46,0.25)"}`,
               }}
-            >Donate Food →</motion.button>
-          </Link>
+            >
+              {/* Orbit dot */}
+              <motion.div
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                style={{
+                  position: "absolute", inset: 0, borderRadius: "50%",
+                }}
+              >
+                <div style={{
+                  position: "absolute", top: -3, left: "50%", transform: "translateX(-50%)",
+                  width: 6, height: 6, borderRadius: "50%",
+                  background: dark ? "#f59e0b" : "#2d6a4f",
+                  boxShadow: dark
+                    ? "0 0 8px #f59e0b, 0 0 16px rgba(245,158,11,0.5)"
+                    : "0 0 6px #2d6a4f",
+                }} />
+              </motion.div>
+            </motion.div>
+
+            {/* Inner surface */}
+            <div style={{
+              width: 32, height: 32, borderRadius: "50%",
+              background: dark
+                ? "linear-gradient(135deg, rgba(15,26,18,0.9), rgba(30,50,35,0.8))"
+                : "linear-gradient(135deg, rgba(255,255,255,0.9), rgba(230,240,232,0.8))",
+              border: `1px solid ${dark ? "rgba(82,183,136,0.2)" : "rgba(26,74,46,0.15)"}`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: dark
+                ? "inset 0 1px 0 rgba(82,183,136,0.15), 0 2px 8px rgba(0,0,0,0.4)"
+                : "inset 0 1px 0 rgba(255,255,255,0.8), 0 2px 6px rgba(26,74,46,0.12)",
+            }}>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={dark ? "sun" : "moon"}
+                  initial={{ rotate: -120, opacity: 0, scale: 0.3 }}
+                  animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                  exit={{ rotate: 120, opacity: 0, scale: 0.3 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                >
+                  {dark ? (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="4.5" fill="#f59e0b" opacity="0.9"/>
+                      <circle cx="12" cy="12" r="4.5" stroke="#fbbf24" strokeWidth="1.5" fill="none"/>
+                      <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                        stroke="#f59e0b" strokeWidth="1.6" strokeLinecap="round"/>
+                    </svg>
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                        fill="#2d6a4f" opacity="0.2" stroke="#2d6a4f" strokeWidth="1.6" strokeLinecap="round"/>
+                    </svg>
+                  )}
+                </motion.span>
+              </AnimatePresence>
+            </div>
+          </motion.button>
         </div>
       </div>
     </motion.nav>
@@ -457,7 +742,7 @@ const FoodCard = ({ c }) => {
         </span>
       </motion.div>
 
-      {/* Main card — click → /dashboard/search */}
+      {/* Main card */}
       <motion.div
         animate={{ y: [0, -14, 0] }}
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
@@ -493,7 +778,6 @@ const FoodCard = ({ c }) => {
         </div>
 
         <div style={{ display: "flex", gap: 8 }}>
-          {/* Accept → /dashboard/search */}
           <motion.div
             whileHover={{ opacity: 0.88 }}
             onClick={(e) => { e.stopPropagation(); navigate("/dashboard/search"); }}
@@ -504,7 +788,6 @@ const FoodCard = ({ c }) => {
               fontFamily: "'Cabinet Grotesk', sans-serif",
             }}
           >Accept</motion.div>
-          {/* Later → /dashboard */}
           <motion.div
             whileHover={{ opacity: 0.88 }}
             onClick={(e) => { e.stopPropagation(); navigate("/dashboard"); }}
@@ -559,7 +842,7 @@ const FoodCard = ({ c }) => {
 };
 
 /* ══════════════════════════════════════════════════
-   HERO — all CTAs linked
+   HERO
 ══════════════════════════════════════════════════ */
 const Hero = ({ c }) => {
   const ref = useRef(null);
@@ -578,7 +861,6 @@ const Hero = ({ c }) => {
         padding: "80px 32px", transition: "background 0.45s",
       }}
     >
-      {/* Deco layer */}
       <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 0 }}>
         <div style={{
           position: "absolute", width: 800, height: 800, borderRadius: "50%",
@@ -601,7 +883,6 @@ const Hero = ({ c }) => {
             gap: 56, alignItems: "center",
           }}
         >
-          {/* TEXT */}
           <div>
             <motion.div
               initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -661,7 +942,6 @@ const Hero = ({ c }) => {
               className="rq-hero-btns"
               style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 48 }}
             >
-              {/* Donate Food → /register (donor role) */}
               <Link to="/register?role=donor">
                 <motion.button
                   whileHover={{ background: c.gold, transform: "translateY(-3px)", boxShadow: "0 20px 48px rgba(232,168,56,0.42)" }}
@@ -674,7 +954,6 @@ const Hero = ({ c }) => {
                 >Donate Food →</motion.button>
               </Link>
 
-              {/* Request Food → /register (ngo role) */}
               <Link to="/register?role=ngo">
                 <motion.button
                   whileHover={{ background: "rgba(255,255,255,0.14)" }}
@@ -712,7 +991,6 @@ const Hero = ({ c }) => {
             </motion.div>
           </div>
 
-          {/* FOOD CARD */}
           <motion.div
             initial={{ opacity: 0, x: 80 }}
             animate={{ opacity: 1, x: 0 }}
@@ -723,7 +1001,6 @@ const Hero = ({ c }) => {
         </div>
       </motion.div>
 
-      {/* Scroll cue */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -747,7 +1024,7 @@ const Hero = ({ c }) => {
 };
 
 /* ══════════════════════════════════════════════════
-   STATS — stat cards link to /dashboard
+   STATS
 ══════════════════════════════════════════════════ */
 const STATS = [
   { value: "1200", suffix: "+",   label: "Meals Rescued",     icon: "🍽️", color: "#52b788", to: "/dashboard"        },
@@ -771,10 +1048,7 @@ const Stats = ({ c }) => (
         {STATS.map((s, i) => (
           <Reveal key={i} delay={i * 0.1}>
             <Link to={s.to}>
-              <motion.div
-                whileHover={{ scale: 1.04, y: -4 }}
-                style={{ textAlign: "center", cursor: "pointer" }}
-              >
+              <motion.div whileHover={{ scale: 1.04, y: -4 }} style={{ textAlign: "center", cursor: "pointer" }}>
                 <motion.div
                   whileHover={{ scale: 1.15, rotate: [0, -10, 10, 0] }}
                   transition={{ duration: 0.4 }}
@@ -799,7 +1073,7 @@ const Stats = ({ c }) => (
 );
 
 /* ══════════════════════════════════════════════════
-   MISSION — links to /about
+   MISSION
 ══════════════════════════════════════════════════ */
 const Mission = ({ c }) => (
   <section style={{ background: c.bg2, padding: "80px 32px", textAlign: "center", position: "relative", overflow: "hidden" }}>
@@ -855,7 +1129,7 @@ const Mission = ({ c }) => (
 );
 
 /* ══════════════════════════════════════════════════
-   FEATURES — each card links to /dashboard
+   FEATURES
 ══════════════════════════════════════════════════ */
 const FEATURES = [
   { emoji: "⚡", title: "AI-Powered Matching",  desc: "Our algorithm matches surplus food to the nearest verified NGO in under 90 seconds, factoring in distance, capacity, and food type.", tag: "NEW", accent: "#52b788", to: "/dashboard/ai-matching" },
@@ -942,7 +1216,7 @@ const Features = ({ c }) => (
 );
 
 /* ══════════════════════════════════════════════════
-   HOW IT WORKS — steps link to /register
+   HOW IT WORKS
 ══════════════════════════════════════════════════ */
 const HOW_STEPS = [
   { num: "01", emoji: "📸", title: "Post in 60 Seconds", desc: "Snap a photo, add quantity and pickup window. No forms, no friction — just impact.", color: "#52b788", to: "/dashboard/post-60" },
@@ -1001,7 +1275,7 @@ const HowItWorks = ({ c }) => (
 );
 
 /* ══════════════════════════════════════════════════
-   IMPACT MAP — bar rows link to /dashboard
+   IMPACT MAP
 ══════════════════════════════════════════════════ */
 const CITIES = [
   { city: "New Delhi",  meals: 124, color: "#52b788", pct: 100 },
@@ -1040,13 +1314,9 @@ const ImpactMap = ({ c }) => (
             and delivery completed — city by city, minute by minute.
           </p>
 
-          {/* City rows → /map */}
           {CITIES.map((ct, i) => (
             <Link key={i} to="/map">
-              <motion.div
-                whileHover={{ x: 4 }}
-                style={{ marginBottom: 18, cursor: "pointer" }}
-              >
+              <motion.div whileHover={{ x: 4 }} style={{ marginBottom: 18, cursor: "pointer" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <div style={{ width: 9, height: 9, borderRadius: "50%", background: ct.color }} />
@@ -1069,7 +1339,6 @@ const ImpactMap = ({ c }) => (
             </Link>
           ))}
 
-          {/* Full map CTA */}
           <Link to="/map">
             <motion.button
               whileHover={{ background: c.leafm, transform: "translateY(-2px)" }}
@@ -1078,8 +1347,7 @@ const ImpactMap = ({ c }) => (
                 marginTop: 28, padding: "12px 28px", borderRadius: 100,
                 border: `1.5px solid ${c.border2}`, background: "transparent",
                 fontFamily: "'Cabinet Grotesk', sans-serif", fontSize: 14,
-                fontWeight: 600, color: c.text2, cursor: "pointer",
-                transition: "all 0.25s",
+                fontWeight: 600, color: c.text2, cursor: "pointer", transition: "all 0.25s",
               }}
             >View Live Map →</motion.button>
           </Link>
@@ -1107,8 +1375,6 @@ const ImpactMap = ({ c }) => (
               </g>
             ))}
           </svg>
-
-          {/* Live badge */}
           <motion.div
             animate={{ y: [0, -8, 0] }}
             transition={{ duration: 3.5, repeat: Infinity }}
@@ -1196,19 +1462,13 @@ const Testimonials = ({ c }) => (
 /* ══════════════════════════════════════════════════
    NEWSLETTER
 ══════════════════════════════════════════════════ */
-/* ══════════════════════════════════════════════════
-   NEWSLETTER — PERSISTENT LAYOUT & REAL EMAILJS
-══════════════════════════════════════════════════ */
 const Newsletter = ({ c }) => {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubscribe = async () => {
-    if (!email.includes('@')) {
-      alert('Please enter a valid email');
-      return;
-    }
+    if (!email.includes('@')) { alert('Please enter a valid email'); return; }
     setLoading(true);
     const templateParams = {
       user_email: email,
@@ -1247,73 +1507,39 @@ const Newsletter = ({ c }) => {
           <p style={{ fontSize: 15, color: c.text2, marginBottom: 36, lineHeight: 1.75 }}>
             Monthly reports on meals rescued, CO₂ saved, and communities served — no spam, ever.
           </p>
-          {/* THE FORM CONTAINER — NO Conditional Wrapper */}
           <div className="rq-nl-form" style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 10,
-            maxWidth: 460,
-            margin: "0 auto 20px"
+            display: "flex", alignItems: "center", justifyContent: "center",
+            gap: 10, maxWidth: 460, margin: "0 auto 20px",
           }}>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              readOnly={sent}
+              type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com" readOnly={sent}
               style={{
-                flex: 1,
-                padding: "13px 20px",
-                borderRadius: 100,
+                flex: 1, padding: "13px 20px", borderRadius: 100,
                 border: `1.5px solid ${sent ? c.leafm : c.border2}`,
-                background: c.surface,
-                fontFamily: "'Cabinet Grotesk', sans-serif",
-                fontSize: 14,
-                color: sent ? c.text3 : c.text,
-                outline: "none",
-                transition: "all 0.3s ease"
+                background: c.surface, fontFamily: "'Cabinet Grotesk', sans-serif",
+                fontSize: 14, color: sent ? c.text3 : c.text, outline: "none", transition: "all 0.3s ease",
               }}
             />
             <motion.button
               whileHover={!sent && !loading ? { background: c.leaf, scale: 1.02 } : {}}
               whileTap={!sent && !loading ? { scale: 0.98 } : {}}
-              onClick={handleSubscribe}
-              disabled={loading || sent}
+              onClick={handleSubscribe} disabled={loading || sent}
               style={{
-                background: sent ? c.leaf : c.leafm,
-                color: "#fff",
-                border: "none",
-                padding: "13px 28px",
-                borderRadius: 100,
-                fontFamily: "'Cabinet Grotesk', sans-serif",
-                fontWeight: 600,
-                fontSize: 14,
-                cursor: loading || sent ? "default" : "pointer",
-                whiteSpace: "nowrap",
-                minWidth: "140px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: "background 0.5s ease"
+                background: sent ? c.leaf : c.leafm, color: "#fff", border: "none",
+                padding: "13px 28px", borderRadius: 100,
+                fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 600, fontSize: 14,
+                cursor: loading || sent ? "default" : "pointer", whiteSpace: "nowrap",
+                minWidth: "140px", display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "background 0.5s ease",
               }}
-            >
-              {loading ? "Joining..." : sent ? "Subscribed! 🎉" : "Subscribe"}
-            </motion.button>
+            >{loading ? "Joining..." : sent ? "Subscribed! 🎉" : "Subscribe"}</motion.button>
           </div>
-          {/* Success Message — Appears separately */}
           <AnimatePresence>
             {sent && (
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                style={{
-                  fontFamily: "'Fraunces', serif",
-                  fontSize: 18,
-                  fontWeight: 700,
-                  color: c.leafm,
-                  marginTop: 15
-                }}
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                style={{ fontFamily: "'Fraunces', serif", fontSize: 18, fontWeight: 700, color: c.leafm, marginTop: 15 }}
               >
                 🎉 Welcome to the movement! Check your inbox.
               </motion.div>
@@ -1357,7 +1583,7 @@ const Partners = ({ c }) => (
 );
 
 /* ══════════════════════════════════════════════════
-   CTA — both buttons fully linked
+   CTA
 ══════════════════════════════════════════════════ */
 const CTA = ({ c }) => (
   <section style={{
@@ -1386,7 +1612,6 @@ const CTA = ({ c }) => (
           Join 1,200+ donors and 50 NGOs already making India's food system more human.
         </p>
         <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-          {/* Start Donating → /register (donor) */}
           <Link to="/register?role=donor">
             <motion.button
               whileHover={{ background: c.gold, transform: "translateY(-3px)", boxShadow: "0 24px 56px rgba(232,168,56,0.45)" }}
@@ -1398,8 +1623,6 @@ const CTA = ({ c }) => (
               }}
             >Start Donating →</motion.button>
           </Link>
-
-          {/* Request Food → /register (ngo) */}
           <Link to="/register?role=ngo">
             <motion.button
               whileHover={{ background: "rgba(255,255,255,0.14)" }}
@@ -1413,12 +1636,10 @@ const CTA = ({ c }) => (
             >Request Food</motion.button>
           </Link>
         </div>
-
-        {/* Secondary links */}
         <div style={{ display: "flex", gap: 28, justifyContent: "center", marginTop: 36, flexWrap: "wrap" }}>
           {[
-            { label: "Learn More", to: "/about" },
-            { label: "Contact Us", to: "/contact" },
+            { label: "Learn More",     to: "/about"           },
+            { label: "Contact Us",     to: "/contact"         },
             { label: "Browse Listings", to: "/dashboard/search" },
           ].map((l) => (
             <Link key={l.label} to={l.to}>
@@ -1439,34 +1660,34 @@ const CTA = ({ c }) => (
 );
 
 /* ══════════════════════════════════════════════════
-   FOOTER — every link wired
+   FOOTER
 ══════════════════════════════════════════════════ */
 const FOOTER_COLS = [
   {
     title: "Platform",
     links: [
-      { label: "How it Works", to: "#how"                  },
-      { label: "Browse Food",  to: "/dashboard/search"     },
-      { label: "Volunteer",    to: "/register?role=volunteer" },
-      { label: "Live Map",     to: "/map"                  },
+      { label: "How it Works", to: "#how"                     },
+      { label: "Browse Food",  to: "/dashboard/search"        },
+      { label: "Volunteer",    to: "/register?role=volunteer"  },
+      { label: "Live Map",     to: "/map"                     },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "About",    to: "/about"   },
-      { label: "Contact",  to: "/contact" },
-      { label: "Blog",     to: "/about"   },
-      { label: "Careers",  to: "/contact" },
+      { label: "About",   to: "/about"   },
+      { label: "Contact", to: "/contact" },
+      { label: "Blog",    to: "/about"   },
+      { label: "Careers", to: "/contact" },
     ],
   },
   {
     title: "Account",
     links: [
-      { label: "Sign Up",        to: "/register"         },
-      { label: "Log In",         to: "/login"            },
-      { label: "Dashboard",      to: "/dashboard"        },
-      { label: "Order History",  to: "/dashboard/orders" },
+      { label: "Sign Up",       to: "/register"         },
+      { label: "Log In",        to: "/login"            },
+      { label: "Dashboard",     to: "/dashboard"        },
+      { label: "Order History", to: "/dashboard/orders" },
     ],
   },
 ];
@@ -1474,7 +1695,6 @@ const FOOTER_COLS = [
 const Footer = ({ c }) => (
   <footer style={{ background: "#0a1a0d", color: "rgba(255,255,255,0.4)", padding: "76px 32px 44px" }}>
     <div className="rq-footer-grid" style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 44, marginBottom: 56 }}>
-      {/* Brand */}
       <div>
         <Link to="/">
           <div style={{ fontFamily: "'Fraunces', serif", fontSize: 25, fontWeight: 900, color: "#fff", marginBottom: 14, display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
@@ -1518,16 +1738,11 @@ const Footer = ({ c }) => (
       ))}
     </div>
 
-    {/* Bottom bar */}
     <div style={{ maxWidth: 1100, margin: "0 auto", borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 28, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
       <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12 }}>© 2026 ResQPlate · Built for Social Good</span>
       <div style={{ display: "flex", gap: 20 }}>
-        <Link to="/contact">
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, cursor: "pointer" }}>Privacy</span>
-        </Link>
-        <Link to="/contact">
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, cursor: "pointer" }}>Terms</span>
-        </Link>
+        <Link to="/contact"><span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, cursor: "pointer" }}>Privacy</span></Link>
+        <Link to="/contact"><span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, cursor: "pointer" }}>Terms</span></Link>
         <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: c.sage }}>🌿 Carbon-neutral operations</span>
       </div>
     </div>
