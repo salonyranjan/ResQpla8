@@ -5,14 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 const MotionLink = motion(Link);
 
 /* ═══════════════════════════════════════════════════
-   PALETTE — matches Landing.jsx exactly
+   NAV LINKS
 ═══════════════════════════════════════════════════ */
 const ABOUT_NAV_LINKS = [
-  { label: "About",        href: "#hero"         },
-  { label: "Mission",      href: "#mission"      },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Impact",       href: "#impact"       },
-  { label: "Values",       href: "#values"       },
+  { label: "About",        href: "#hero",         emoji: "✦" },
+  { label: "Mission",      href: "#mission",       emoji: "🎯" },
+  { label: "How It Works", href: "#how-it-works",  emoji: "⚙️" },
+  { label: "Impact",       href: "#impact",        emoji: "📊" },
+  { label: "Values",       href: "#values",        emoji: "💚" },
 ];
 
 /* ═══════════════════════════════════════════════════
@@ -73,6 +73,10 @@ const GLOBAL_CSS = (dark) => `
     0%   { background-position: -200% 0; }
     100% { background-position:  200% 0; }
   }
+  @keyframes drawer-shimmer {
+    0%   { opacity: 0; transform: translateX(-8px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
 
   /* ── Reveal ── */
   .rv {
@@ -88,10 +92,192 @@ const GLOBAL_CSS = (dark) => `
   .rv-d4 { transition-delay: 0.46s; }
   .rv-d5 { transition-delay: 0.58s; }
 
-  /* ── Nav hide on mobile ── */
+  /* ── Nav: desktop links always shown, burger ONLY on mobile ── */
+  .ab-nav-links-desktop { display: flex !important; }
+  .ab-nav-burger         { display: none !important; }
+
   @media (max-width: 860px) {
-    .ab-nav-links { display: none !important; }
+    .ab-nav-links-desktop { display: none !important; }
+    .ab-nav-burger         { display: flex !important; }
   }
+
+  /* ── Mobile drawer overlay ── */
+  .ab-drawer-overlay {
+    position: fixed; inset: 0; z-index: 998;
+    background: ${dark ? "rgba(4,8,5,0.72)" : "rgba(10,22,8,0.55)"};
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  /* ── Mobile drawer panel ── */
+  .ab-drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; z-index: 999;
+    width: min(340px, 88vw);
+    background: ${dark
+      ? "linear-gradient(160deg, #080f0a 0%, #0c1710 60%, #081209 100%)"
+      : "linear-gradient(160deg, #f2ede0 0%, #e8e3d5 60%, #ede8d8 100%)"};
+    border-left: 1px solid ${dark ? "rgba(82,183,136,0.18)" : "rgba(26,74,46,0.16)"};
+    display: flex; flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .ab-drawer-head {
+    display: flex; align-items: center; justify-content: flex-end;
+    padding: 22px 24px 20px;
+    border-bottom: 1px solid ${dark ? "rgba(82,183,136,0.10)" : "rgba(26,74,46,0.10)"};
+  }
+
+  .ab-drawer-close {
+    width: 38px; height: 38px; border-radius: 12px;
+    border: 1px solid ${dark ? "rgba(82,183,136,0.18)" : "rgba(26,74,46,0.15)"};
+    background: ${dark ? "rgba(82,183,136,0.06)" : "rgba(26,74,46,0.05)"};
+    display: flex; align-items: center; justify-content: center;
+    color: ${dark ? "#52b788" : "#2d6a4f"};
+    font-size: 18px; cursor: pointer;
+    transition: background 0.22s, transform 0.22s;
+  }
+  .ab-drawer-close:hover {
+    background: ${dark ? "rgba(82,183,136,0.14)" : "rgba(26,74,46,0.10)"};
+    transform: rotate(90deg);
+  }
+
+  .ab-drawer-nav {
+    flex: 1; padding: 20px 16px;
+    display: flex; flex-direction: column; gap: 6px;
+    overflow-y: auto;
+  }
+
+  .ab-drawer-link {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px; border-radius: 16px;
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 15px; font-weight: 500;
+    color: ${dark ? "rgba(110,231,183,0.65)" : "rgba(26,74,46,0.65)"};
+    text-decoration: none; cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative; overflow: hidden;
+  }
+  .ab-drawer-link:hover, .ab-drawer-link.active {
+    background: ${dark ? "rgba(82,183,136,0.09)" : "rgba(26,74,46,0.07)"};
+    border-color: ${dark ? "rgba(82,183,136,0.20)" : "rgba(26,74,46,0.16)"};
+    color: ${dark ? "#95d5b2" : "#1a4a2e"};
+    transform: translateX(4px);
+  }
+  .ab-drawer-link.active {
+    background: ${dark ? "rgba(82,183,136,0.13)" : "rgba(26,74,46,0.09)"};
+    border-color: ${dark ? "rgba(82,183,136,0.28)" : "rgba(26,74,46,0.22)"};
+    color: ${dark ? "#52b788" : "#1a4a2e"};
+  }
+  .ab-drawer-link-emoji {
+    font-size: 18px; width: 36px; height: 36px;
+    border-radius: 10px;
+    background: ${dark ? "rgba(82,183,136,0.08)" : "rgba(26,74,46,0.06)"};
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.25s;
+  }
+  .ab-drawer-link:hover .ab-drawer-link-emoji,
+  .ab-drawer-link.active .ab-drawer-link-emoji {
+    background: ${dark ? "rgba(82,183,136,0.16)" : "rgba(26,74,46,0.12)"};
+  }
+  .ab-drawer-link-arrow {
+    margin-left: auto;
+    font-size: 14px;
+    color: ${dark ? "rgba(82,183,136,0.30)" : "rgba(26,74,46,0.30)"};
+    transition: transform 0.25s, color 0.25s;
+  }
+  .ab-drawer-link:hover .ab-drawer-link-arrow,
+  .ab-drawer-link.active .ab-drawer-link-arrow {
+    transform: translateX(3px);
+    color: ${dark ? "rgba(82,183,136,0.70)" : "rgba(26,74,46,0.60)"};
+  }
+  .ab-drawer-link-active-bar {
+    position: absolute; left: 0; top: 20%; bottom: 20%;
+    width: 3px; border-radius: 0 3px 3px 0;
+    background: #52b788;
+  }
+
+  .ab-drawer-divider {
+    height: 1px;
+    background: ${dark ? "rgba(82,183,136,0.09)" : "rgba(26,74,46,0.09)"};
+    margin: 8px 16px;
+  }
+
+  .ab-drawer-foot {
+    padding: 20px 24px 32px;
+    border-top: 1px solid ${dark ? "rgba(82,183,136,0.10)" : "rgba(26,74,46,0.10)"};
+    display: flex; flex-direction: column; gap: 12px;
+  }
+
+  .ab-drawer-cta-primary {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: #52b788; color: #070f09;
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 14px; font-weight: 700; letter-spacing: 0.02em;
+    padding: 14px 24px; border-radius: 100px; border: none;
+    text-decoration: none;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s;
+    box-shadow: 0 4px 20px rgba(82,183,136,0.35);
+  }
+  .ab-drawer-cta-primary:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 10px 32px rgba(82,183,136,0.50);
+  }
+
+  .ab-drawer-cta-ghost {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: transparent;
+    border: 1px solid ${dark ? "rgba(82,183,136,0.20)" : "rgba(26,74,46,0.18)"};
+    color: ${dark ? "rgba(149,213,178,0.75)" : "rgba(26,74,46,0.70)"};
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 14px; font-weight: 600;
+    padding: 13px 24px; border-radius: 100px;
+    text-decoration: none;
+    transition: background 0.25s, border-color 0.25s;
+  }
+  .ab-drawer-cta-ghost:hover {
+    background: ${dark ? "rgba(82,183,136,0.08)" : "rgba(26,74,46,0.06)"};
+    border-color: ${dark ? "rgba(82,183,136,0.35)" : "rgba(26,74,46,0.28)"};
+  }
+
+  .ab-drawer-theme-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0 0;
+  }
+  .ab-drawer-theme-label {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: ${dark ? "rgba(110,231,183,0.35)" : "rgba(74,94,82,0.40)"};
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── Burger button — mobile only, NEVER shown on desktop ── */
+  .ab-burger-btn {
+    width: 44px; height: 44px; border-radius: 14px;
+    border: 1px solid ${dark ? "rgba(82,183,136,0.22)" : "rgba(26,74,46,0.18)"};
+    background: ${dark ? "rgba(82,183,136,0.06)" : "rgba(26,74,46,0.05)"};
+    display: none;
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 5px; cursor: pointer;
+    transition: background 0.25s, border-color 0.25s;
+  }
+  @media (max-width: 860px) {
+    .ab-burger-btn { display: flex !important; }
+  }
+  .ab-burger-btn:hover {
+    background: ${dark ? "rgba(82,183,136,0.12)" : "rgba(26,74,46,0.10)"};
+    border-color: ${dark ? "rgba(82,183,136,0.35)" : "rgba(26,74,46,0.28)"};
+  }
+  .ab-burger-line {
+    display: block; width: 18px; height: 1.5px; border-radius: 2px;
+    background: ${dark ? "#52b788" : "#2d6a4f"};
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s, width 0.3s;
+  }
+  .ab-burger-btn.open .ab-burger-line:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  .ab-burger-btn.open .ab-burger-line:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .ab-burger-btn.open .ab-burger-line:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
 
   /* ── Hero ── */
   .ab-hero {
@@ -177,7 +363,6 @@ const GLOBAL_CSS = (dark) => `
     margin: 28px auto 0; line-height: 1.65;
   }
 
-  /* Hero stats */
   .ab-stats {
     display: flex; gap: 0; justify-content: center; flex-wrap: wrap;
     margin-top: 56px;
@@ -203,6 +388,10 @@ const GLOBAL_CSS = (dark) => `
     font-family: 'DM Mono', monospace;
   }
 
+  @media (max-width: 600px) {
+    .ab-stat { padding: 12px 20px; }
+  }
+
   .ab-scroll-cue {
     position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
     z-index: 2; display: flex; flex-direction: column; align-items: center;
@@ -216,7 +405,6 @@ const GLOBAL_CSS = (dark) => `
     animation: scroll-line 2.4s ease-in-out infinite;
   }
 
-  /* ── Separator ── */
   .ab-sep {
     height: 1px;
     background: linear-gradient(90deg, transparent,
@@ -224,7 +412,6 @@ const GLOBAL_CSS = (dark) => `
       transparent);
   }
 
-  /* ── Section base ── */
   .ab-section { padding: 120px 24px; }
 
   .ab-tag {
@@ -561,7 +748,7 @@ function useReveal() {
 }
 
 /* ═══════════════════════════════════════════════════
-   MAGNETIC LINK — cursor-pull physics
+   MAGNETIC NAV LINK (desktop only)
 ═══════════════════════════════════════════════════ */
 const MagneticNavLink = ({ children, href, isActive, onClick, dark }) => {
   const ref = useRef(null);
@@ -575,8 +762,6 @@ const MagneticNavLink = ({ children, href, isActive, onClick, dark }) => {
     setPos({ x: (e.clientX - cx) * 0.28, y: (e.clientY - cy) * 0.28 });
   };
   const handleMouseLeave = () => { setPos({ x: 0, y: 0 }); setHovered(false); };
-
-  const isHash = href.startsWith("#");
 
   const inner = (
     <motion.button
@@ -657,7 +842,7 @@ const MagneticNavLink = ({ children, href, isActive, onClick, dark }) => {
     </motion.button>
   );
 
-  if (isHash) return <a href={href} style={{ textDecoration: "none" }}>{inner}</a>;
+  if (href.startsWith("#")) return <a href={href} style={{ textDecoration: "none" }}>{inner}</a>;
   return <Link to={href} style={{ textDecoration: "none" }}>{inner}</Link>;
 };
 
@@ -682,11 +867,182 @@ const NavFirefly = ({ dark, index }) => {
 };
 
 /* ═══════════════════════════════════════════════════
-   WORLD-CLASS NAVBAR
+   ORBITAL DARK MODE TOGGLE
+═══════════════════════════════════════════════════ */
+const DarkToggle = ({ dark, toggleDark }) => (
+  <motion.button
+    onClick={toggleDark}
+    whileHover={{ scale: 1.08 }}
+    whileTap={{ scale: 0.92, rotate: 15 }}
+    style={{
+      position: "relative", width: 44, height: 44, borderRadius: "50%",
+      border: "none", background: "transparent",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      cursor: "pointer", flexShrink: 0, overflow: "visible",
+    }}
+  >
+    <motion.div
+      animate={{ rotate: dark ? 0 : 180 }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        position: "absolute", inset: 0, borderRadius: "50%",
+        border: `1.5px solid ${dark ? "rgba(82,183,136,0.35)" : "rgba(26,74,46,0.25)"}`,
+      }}
+    >
+      <motion.div
+        animate={{ rotate: [0, 360] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+        style={{ position: "absolute", inset: 0, borderRadius: "50%" }}
+      >
+        <div style={{
+          position: "absolute", top: -3, left: "50%", transform: "translateX(-50%)",
+          width: 6, height: 6, borderRadius: "50%",
+          background: dark ? "#f59e0b" : "#2d6a4f",
+          boxShadow: dark ? "0 0 8px #f59e0b, 0 0 16px rgba(245,158,11,0.5)" : "0 0 6px #2d6a4f",
+        }} />
+      </motion.div>
+    </motion.div>
+    <div style={{
+      width: 32, height: 32, borderRadius: "50%",
+      background: dark
+        ? "linear-gradient(135deg, rgba(15,26,18,0.9), rgba(30,50,35,0.8))"
+        : "linear-gradient(135deg, rgba(255,255,255,0.9), rgba(230,240,232,0.8))",
+      border: `1px solid ${dark ? "rgba(82,183,136,0.2)" : "rgba(26,74,46,0.15)"}`,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      boxShadow: dark
+        ? "inset 0 1px 0 rgba(82,183,136,0.15), 0 2px 8px rgba(0,0,0,0.4)"
+        : "inset 0 1px 0 rgba(255,255,255,0.8), 0 2px 6px rgba(26,74,46,0.12)",
+    }}>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.span
+          key={dark ? "sun" : "moon"}
+          initial={{ rotate: -120, opacity: 0, scale: 0.3 }}
+          animate={{ rotate: 0, opacity: 1, scale: 1 }}
+          exit={{ rotate: 120, opacity: 0, scale: 0.3 }}
+          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+        >
+          {dark ? (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="4.5" fill="#f59e0b" opacity="0.9"/>
+              <circle cx="12" cy="12" r="4.5" stroke="#fbbf24" strokeWidth="1.5" fill="none"/>
+              <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                stroke="#f59e0b" strokeWidth="1.6" strokeLinecap="round"/>
+            </svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                fill="#2d6a4f" opacity="0.25" stroke="#2d6a4f" strokeWidth="1.6" strokeLinecap="round"/>
+            </svg>
+          )}
+        </motion.span>
+      </AnimatePresence>
+    </div>
+  </motion.button>
+);
+
+/* ═══════════════════════════════════════════════════
+   MOBILE DRAWER
+═══════════════════════════════════════════════════ */
+const MobileDrawer = ({ dark, toggleDark, activeIdx, setActiveIdx, open, onClose }) => {
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Overlay */}
+          <motion.div
+            className="ab-drawer-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.28 }}
+            onClick={onClose}
+          />
+
+          {/* Drawer panel */}
+          <motion.div
+            className="ab-drawer"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", stiffness: 320, damping: 34, mass: 0.9 }}
+          >
+            {/* Header — close button only, no logo/name */}
+            <div className="ab-drawer-head">
+              <button className="ab-drawer-close" onClick={onClose} aria-label="Close menu">
+                ✕
+              </button>
+            </div>
+
+            {/* Nav links */}
+            <nav className="ab-drawer-nav" aria-label="Mobile navigation">
+              {ABOUT_NAV_LINKS.map((link, i) => (
+                <motion.a
+                  key={link.label}
+                  href={link.href}
+                  className={`ab-drawer-link${activeIdx === i ? " active" : ""}`}
+                  initial={{ opacity: 0, x: 24 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.08 + i * 0.06, type: "spring", stiffness: 340, damping: 28 }}
+                  onClick={() => { setActiveIdx(i); onClose(); }}
+                >
+                  {activeIdx === i && <div className="ab-drawer-link-active-bar" />}
+                  <span className="ab-drawer-link-emoji">{link.emoji}</span>
+                  <span style={{ flex: 1 }}>{link.label}</span>
+                  <span className="ab-drawer-link-arrow">→</span>
+                </motion.a>
+              ))}
+
+              <div className="ab-drawer-divider" />
+
+              {/* Theme toggle row */}
+              <div className="ab-drawer-theme-row">
+                <span className="ab-drawer-theme-label">
+                  {dark ? "Dark mode" : "Light mode"}
+                </span>
+                <DarkToggle dark={dark} toggleDark={toggleDark} />
+              </div>
+            </nav>
+
+            {/* Footer CTAs */}
+            <motion.div
+              className="ab-drawer-foot"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.38, duration: 0.4 }}
+            >
+              <Link to="/register" className="ab-drawer-cta-primary" onClick={onClose}>
+                Get Started Free →
+              </Link>
+              <Link to="/dashboard/search" className="ab-drawer-cta-ghost" onClick={onClose}>
+                Browse Listings
+              </Link>
+            </motion.div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+};
+
+/* ═══════════════════════════════════════════════════
+   ABOUT PAGE SECONDARY NAVBAR
+   — No logo/brand name (main navbar handles that)
+   — Burger only appears on mobile (≤860px)
 ═══════════════════════════════════════════════════ */
 const AboutNavBar = ({ dark, toggleDark, activeIdx, setActiveIdx }) => {
   const [scrolled, setScrolled] = useState(false);
   const [scrollPct, setScrollPct] = useState(0);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     const h = () => {
@@ -699,194 +1055,147 @@ const AboutNavBar = ({ dark, toggleDark, activeIdx, setActiveIdx }) => {
     return () => window.removeEventListener("scroll", h);
   }, []);
 
+  /* Close drawer on resize to desktop */
+  useEffect(() => {
+    const h = () => { if (window.innerWidth > 860) setDrawerOpen(false); };
+    window.addEventListener("resize", h);
+    return () => window.removeEventListener("resize", h);
+  }, []);
+
   const aurora1 = dark ? "rgba(45,106,79,0.35)"   : "rgba(45,106,79,0.18)";
   const aurora2 = dark ? "rgba(82,183,136,0.22)"  : "rgba(82,183,136,0.12)";
   const aurora3 = dark ? "rgba(149,213,178,0.12)" : "rgba(149,213,178,0.08)";
 
   return (
-    <motion.nav
-      initial={{ y: -90, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 220, damping: 24, delay: 0.08 }}
-      style={{
-        position: "sticky", top: 0, zIndex: 1000, height: 68,
-        background: scrolled
-          ? (dark ? "rgba(5,12,7,0.88)" : "rgba(245,240,230,0.88)")
-          : "transparent",
-        backdropFilter: scrolled ? "blur(28px) saturate(200%) brightness(1.04)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(28px) saturate(200%) brightness(1.04)" : "none",
-        borderBottom: scrolled
-          ? `1px solid ${dark ? "rgba(82,183,136,0.16)" : "rgba(26,74,46,0.12)"}`
-          : "1px solid transparent",
-        boxShadow: scrolled
-          ? (dark
-            ? "0 1px 0 rgba(82,183,136,0.06), 0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(82,183,136,0.08)"
-            : "0 1px 0 rgba(26,74,46,0.05), 0 8px 32px rgba(26,74,46,0.10)")
-          : "none",
-        transition: "background 0.5s, border-color 0.5s, box-shadow 0.5s",
-        overflow: "hidden",
-      }}
-    >
-      {/* Aurora sweep */}
-      <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden",
-        opacity: scrolled ? 1 : 0, transition: "opacity 0.6s",
-      }}>
+    <>
+      <motion.nav
+        initial={{ y: -90, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 220, damping: 24, delay: 0.08 }}
+        style={{
+          position: "sticky", top: 0, zIndex: 1000, height: 62,
+          background: scrolled
+            ? (dark ? "rgba(5,12,7,0.88)" : "rgba(245,240,230,0.88)")
+            : "transparent",
+          backdropFilter: scrolled ? "blur(28px) saturate(200%) brightness(1.04)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(28px) saturate(200%) brightness(1.04)" : "none",
+          borderBottom: scrolled
+            ? `1px solid ${dark ? "rgba(82,183,136,0.16)" : "rgba(26,74,46,0.12)"}`
+            : "1px solid transparent",
+          boxShadow: scrolled
+            ? (dark
+              ? "0 1px 0 rgba(82,183,136,0.06), 0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(82,183,136,0.08)"
+              : "0 1px 0 rgba(26,74,46,0.05), 0 8px 32px rgba(26,74,46,0.10)")
+            : "none",
+          transition: "background 0.5s, border-color 0.5s, box-shadow 0.5s",
+          overflow: "visible",
+        }}
+      >
+        {/* Aurora sweep */}
         <div style={{
-          position: "absolute", top: "-60%", left: "0%",
-          width: "140%", height: "220%", borderRadius: "50%",
-          background: `radial-gradient(ellipse 60% 50% at 35% 50%, ${aurora1}, ${aurora2} 40%, ${aurora3} 65%, transparent 80%)`,
-          animation: "rqAurora 9s ease-in-out infinite",
-          filter: "blur(18px)",
-        }} />
-        <div style={{
-          position: "absolute", top: "50%", right: "18%",
-          width: 220, height: 220, borderRadius: "50%",
-          background: dark
-            ? "radial-gradient(circle, rgba(245,158,11,0.09) 0%, transparent 70%)"
-            : "radial-gradient(circle, rgba(232,168,56,0.07) 0%, transparent 70%)",
-          animation: "rqOrb 7s ease-in-out infinite 2s",
-          transform: "translate(-50%,-50%)",
-          filter: "blur(10px)",
-        }} />
-      </div>
-
-      {/* Spore seeds */}
-      {scrolled && [0,1,2,3,4].map(i => (
-        <div key={i} style={{
-          position: "absolute", left: `${10 + i * 18}%`, bottom: 0,
-          width: 4, height: 4, borderRadius: "50%",
-          background: dark ? "rgba(82,183,136,0.6)" : "rgba(45,106,79,0.5)",
-          pointerEvents: "none",
-          animation: `rqSeedFloat ${3.5 + i * 0.8}s ease-in-out infinite ${i * 1.1}s`,
-        }} />
-      ))}
-
-      {/* Progress filament */}
-      <motion.div style={{
-        position: "absolute", bottom: 0, left: 0, height: 1.5, borderRadius: 1,
-        background: dark
-          ? "linear-gradient(90deg, transparent, #2d6a4f, #52b788, #95d5b2, #52b788, #2d6a4f, transparent)"
-          : "linear-gradient(90deg, transparent, #1a4a2e, #2d6a4f, #52b788, #2d6a4f, #1a4a2e, transparent)",
-        width: `${scrollPct}%`,
-        boxShadow: dark ? "0 0 8px #52b788, 0 0 18px rgba(82,183,136,0.4)" : "0 0 6px #2d6a4f",
-        transition: "width 0.12s linear",
-        opacity: scrolled ? 1 : 0,
-      }} />
-
-      {/* Main row — 3-col grid for true centring */}
-      <div style={{
-        maxWidth: 1240, margin: "0 auto", padding: "0 32px", height: "100%",
-        display: "grid", gridTemplateColumns: "1fr auto 1fr",
-        alignItems: "center", position: "relative", zIndex: 2,
-      }}>
-
-        {/* LEFT spacer */}
-        <div />
-
-        {/* CENTRE — nav links */}
-        <div
-          className="ab-nav-links"
-          style={{ display: "flex", alignItems: "center", gap: 2, justifyContent: "center" }}
-        >
-          {ABOUT_NAV_LINKS.map((l, i) => (
-            <MagneticNavLink
-              key={l.label}
-              href={l.href}
-              isActive={activeIdx === i}
-              onClick={() => setActiveIdx(i)}
-              dark={dark}
-            >
-              {l.label}
-            </MagneticNavLink>
-          ))}
+          position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden",
+          opacity: scrolled ? 1 : 0, transition: "opacity 0.6s",
+        }}>
+          <div style={{
+            position: "absolute", top: "-60%", left: "0%",
+            width: "140%", height: "220%", borderRadius: "50%",
+            background: `radial-gradient(ellipse 60% 50% at 35% 50%, ${aurora1}, ${aurora2} 40%, ${aurora3} 65%, transparent 80%)`,
+            animation: "rqAurora 9s ease-in-out infinite",
+            filter: "blur(18px)",
+          }} />
         </div>
 
-        {/* RIGHT — fireflies + orbital dark toggle */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14, justifyContent: "flex-end" }}>
+        {/* Spore seeds */}
+        {scrolled && [0,1,2,3,4].map(i => (
+          <div key={i} style={{
+            position: "absolute", left: `${10 + i * 18}%`, bottom: 0,
+            width: 4, height: 4, borderRadius: "50%",
+            background: dark ? "rgba(82,183,136,0.6)" : "rgba(45,106,79,0.5)",
+            pointerEvents: "none",
+            animation: `rqSeedFloat ${3.5 + i * 0.8}s ease-in-out infinite ${i * 1.1}s`,
+          }} />
+        ))}
 
-          <div style={{ position: "relative", width: 48, height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            {[0,1,2].map(i => <NavFirefly key={i} dark={dark} index={i} />)}
+        {/* Progress filament */}
+        <motion.div style={{
+          position: "absolute", bottom: 0, left: 0, height: 1.5, borderRadius: 1,
+          background: dark
+            ? "linear-gradient(90deg, transparent, #2d6a4f, #52b788, #95d5b2, #52b788, #2d6a4f, transparent)"
+            : "linear-gradient(90deg, transparent, #1a4a2e, #2d6a4f, #52b788, #2d6a4f, #1a4a2e, transparent)",
+          width: `${scrollPct}%`,
+          boxShadow: dark ? "0 0 8px #52b788, 0 0 18px rgba(82,183,136,0.4)" : "0 0 6px #2d6a4f",
+          transition: "width 0.12s linear",
+          opacity: scrolled ? 1 : 0,
+        }} />
+
+        {/* Main row — centered nav with right-side controls */}
+        <div style={{
+          maxWidth: 1240, margin: "0 auto", padding: "0 20px", height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          position: "relative", zIndex: 2,
+        }}>
+
+          {/* CENTER — desktop nav links (takes natural width, pushed to center via flex) */}
+          <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+            <div
+              className="ab-nav-links-desktop"
+              style={{ alignItems: "center", gap: 2 }}
+            >
+              {ABOUT_NAV_LINKS.map((l, i) => (
+                <MagneticNavLink
+                  key={l.label}
+                  href={l.href}
+                  isActive={activeIdx === i}
+                  onClick={() => setActiveIdx(i)}
+                  dark={dark}
+                >
+                  {l.label}
+                </MagneticNavLink>
+              ))}
+            </div>
           </div>
 
-          {/* Orbital ring toggle */}
-          <motion.button
-            onClick={toggleDark}
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.92, rotate: 15 }}
-            style={{
-              position: "relative", width: 44, height: 44, borderRadius: "50%",
-              border: "none", background: "transparent",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", flexShrink: 0, overflow: "visible",
-            }}
-          >
-            {/* Spinning ring */}
-            <motion.div
-              animate={{ rotate: dark ? 0 : 180 }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              style={{
-                position: "absolute", inset: 0, borderRadius: "50%",
-                border: `1.5px solid ${dark ? "rgba(82,183,136,0.35)" : "rgba(26,74,46,0.25)"}`,
-              }}
-            >
-              <motion.div
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-                style={{ position: "absolute", inset: 0, borderRadius: "50%" }}
-              >
-                <div style={{
-                  position: "absolute", top: -3, left: "50%", transform: "translateX(-50%)",
-                  width: 6, height: 6, borderRadius: "50%",
-                  background: dark ? "#f59e0b" : "#2d6a4f",
-                  boxShadow: dark
-                    ? "0 0 8px #f59e0b, 0 0 16px rgba(245,158,11,0.5)"
-                    : "0 0 6px #2d6a4f",
-                }} />
-              </motion.div>
-            </motion.div>
+          {/* RIGHT — fireflies + dark toggle (desktop) | dark toggle + burger (mobile) */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
 
-            {/* Inner surface */}
-            <div style={{
-              width: 32, height: 32, borderRadius: "50%",
-              background: dark
-                ? "linear-gradient(135deg, rgba(15,26,18,0.9), rgba(30,50,35,0.8))"
-                : "linear-gradient(135deg, rgba(255,255,255,0.9), rgba(230,240,232,0.8))",
-              border: `1px solid ${dark ? "rgba(82,183,136,0.2)" : "rgba(26,74,46,0.15)"}`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: dark
-                ? "inset 0 1px 0 rgba(82,183,136,0.15), 0 2px 8px rgba(0,0,0,0.4)"
-                : "inset 0 1px 0 rgba(255,255,255,0.8), 0 2px 6px rgba(26,74,46,0.12)",
+            {/* Fireflies — desktop only */}
+            <div className="ab-nav-links-desktop" style={{
+              position: "relative", width: 48, height: 36,
+              alignItems: "center", justifyContent: "center",
             }}>
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.span
-                  key={dark ? "sun" : "moon"}
-                  initial={{ rotate: -120, opacity: 0, scale: 0.3 }}
-                  animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                  exit={{ rotate: 120, opacity: 0, scale: 0.3 }}
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-                >
-                  {dark ? (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="4.5" fill="#f59e0b" opacity="0.9"/>
-                      <circle cx="12" cy="12" r="4.5" stroke="#fbbf24" strokeWidth="1.5" fill="none"/>
-                      <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
-                        stroke="#f59e0b" strokeWidth="1.6" strokeLinecap="round"/>
-                    </svg>
-                  ) : (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
-                        fill="#2d6a4f" opacity="0.25" stroke="#2d6a4f" strokeWidth="1.6" strokeLinecap="round"/>
-                    </svg>
-                  )}
-                </motion.span>
-              </AnimatePresence>
+              {[0,1,2].map(i => <NavFirefly key={i} dark={dark} index={i} />)}
             </div>
-          </motion.button>
+
+            {/* Dark toggle — always visible */}
+            <DarkToggle dark={dark} toggleDark={toggleDark} />
+
+            {/* Burger — mobile only, hidden on desktop via CSS */}
+            <button
+              className={`ab-burger-btn${drawerOpen ? " open" : ""}`}
+              onClick={() => setDrawerOpen(o => !o)}
+              aria-label={drawerOpen ? "Close menu" : "Open menu"}
+              aria-expanded={drawerOpen}
+            >
+              <span className="ab-burger-line" />
+              <span className="ab-burger-line" />
+              <span className="ab-burger-line" />
+            </button>
+          </div>
         </div>
-      </div>
-    </motion.nav>
+      </motion.nav>
+
+      {/* Mobile Drawer */}
+      <MobileDrawer
+        dark={dark}
+        toggleDark={toggleDark}
+        activeIdx={activeIdx}
+        setActiveIdx={setActiveIdx}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      />
+    </>
   );
 };
 
@@ -899,7 +1208,6 @@ export default function About() {
   const toggleDark = useCallback(() => setDark(d => !d), []);
   useReveal();
 
-  /* Inject / update global CSS when dark changes */
   useEffect(() => {
     document.getElementById("ab-global")?.remove();
     const style = document.createElement("style");
@@ -909,7 +1217,6 @@ export default function About() {
     return () => document.getElementById("ab-global")?.remove();
   }, [dark]);
 
-  /* ── Data ── */
   const HOW_STEPS = [
     { emoji: "🍽️", title: "Food Listed",    body: "Restaurants, events & households list surplus food with expiry time and quantity.", color: "step-green", to: "/dashboard/donate" },
     { emoji: "📍", title: "Smart Matched",  body: "Our algorithm instantly notifies the nearest verified NGO or volunteer.", color: "step-teal", to: "/dashboard/ai-matching" },
@@ -940,7 +1247,6 @@ export default function About() {
 
   return (
     <>
-      {/* ── World-class Navbar ── */}
       <AboutNavBar
         dark={dark}
         toggleDark={toggleDark}
