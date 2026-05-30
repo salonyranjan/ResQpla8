@@ -9,7 +9,7 @@
 <br/>
 
 <!-- ── Hero Image ── -->
-<a href="https://github.com/salonyranjan/frontend-ResQplate-">
+<a href="https://github.com/salonyranjan/ResQpla8">
   <img src="./screen/hero.png" alt="ResQPlate — AI Food Rescue Platform" width="100%" style="border-radius:16px; box-shadow: 0 0 50px #16a34a55, 0 0 100px #06b6d440;" />
 </a>
 
@@ -37,10 +37,10 @@
 <br/>
 
 <!-- ── Social Badges ── -->
-<img src="https://img.shields.io/github/stars/salonyranjan/frontend-ResQplate-?style=for-the-badge&color=16a34a" />
-<img src="https://img.shields.io/github/forks/salonyranjan/frontend-ResQplate-?style=for-the-badge&color=06b6d4" />
-<img src="https://img.shields.io/github/issues/salonyranjan/frontend-ResQplate-?style=for-the-badge&color=84cc16" />
-<img src="https://img.shields.io/github/last-commit/salonyranjan/frontend-ResQplate-?style=for-the-badge&color=16a34a" />
+<img src="https://img.shields.io/github/stars/salonyranjan/ResQpla8?style=for-the-badge&color=16a34a" />
+<img src="https://img.shields.io/github/forks/salonyranjan/ResQpla8?style=for-the-badge&color=06b6d4" />
+<img src="https://img.shields.io/github/issues/salonyranjan/ResQpla8?style=for-the-badge&color=84cc16" />
+<img src="https://img.shields.io/github/last-commit/salonyranjan/ResQpla8?style=for-the-badge&color=16a34a" />
 
 <br/><br/>
 
@@ -48,7 +48,7 @@
 
 <br/>
 
-<a href="https://github.com/salonyranjan/frontend-ResQplate-"><img src="https://img.shields.io/badge/🚀_View_Repo-16a34a?style=for-the-badge" /></a>
+<a href="https://github.com/salonyranjan/ResQpla8"><img src="https://img.shields.io/badge/🚀_View_Repo-16a34a?style=for-the-badge" /></a>
 &nbsp;
 <a href="#10--getting-started"><img src="https://img.shields.io/badge/📦_Quick_Setup-06b6d4?style=for-the-badge" /></a>
 &nbsp;
@@ -147,10 +147,10 @@
 > 🌍 **Carbon saved** calculated per donation · **Meals rescued** counter · Eco-heatmaps show hunger vs. waste zones geospatially
 <br/>
 
-### 🤖 ResQBot — *Your Intelligent  Agent*
+### 🤖 ResQBot — *Your Intelligent Agent*
 
-<img src="./screen/bot.png" width="50%" alt="ResQPlate — Analytics" style="border-radius:12px;" />
-<img src="./screen/bot1.png" width="20%" alt="ResQPlate — Analytics" style="border-radius:10px;" />
+<img src="./screen/bot.png" width="50%" alt="ResQPlate — ResQBot" style="border-radius:12px;" />
+<img src="./screen/bot1.png" width="20%" alt="ResQPlate — ResQBot Mobile" style="border-radius:10px;" />
 
 > 🧠 **Instant Query Resolution** via Groq · **Real-time Logistics Tracking** via Appwrite · Sub-200ms Inference powered by Groq LPU technology
 
@@ -556,8 +556,8 @@ sequenceDiagram
 **📥 Step 1 — Clone**
 
 ```bash
-git clone https://github.com/salonyranjan/frontend-ResQplate-.git
-cd frontend-ResQplate-/frontend
+git clone https://github.com/salonyranjan/ResQpla8.git
+cd ResQpla8/frontend
 ```
 
 **📦 Step 2 — Install dependencies**
@@ -641,7 +641,7 @@ VITE_EMAILJS_CONTACT_TEMPLATE_ID="your_contact_template_id"
 | 💡 | **AR Food Scanner** — camera overlay for food ID | 🔵 Idea |
 | 💡 | **Voice Commands** — donate by speaking | 🔵 Idea |
 
-> 💬 [Open a feature request →](https://github.com/salonyranjan/ResQpla8-/issues/new)
+> 💬 [Open a feature request →](https://github.com/salonyranjan/ResQpla8/issues/new)
 
 ---
 
@@ -750,13 +750,13 @@ If ResQPlate inspired you, taught you something new, or made you think about foo
 
 > 💡 **Pro Tip:** Go to GitHub repo **Settings → Social Preview** and upload the hero screenshot. When you share on LinkedIn, your beautiful Cyber-Green UI shows instead of a generic GitHub card — perfect for a social impact project.
 
-<a href="https://github.com/salonyranjan/frontend-ResQplate-/stargazers"><img src="https://img.shields.io/badge/⭐_Star_This_Repo-16a34a?style=for-the-badge&logo=github&logoColor=white" /></a>
+<a href="https://github.com/salonyranjan/ResQpla8/stargazers"><img src="https://img.shields.io/badge/⭐_Star_This_Repo-16a34a?style=for-the-badge&logo=github&logoColor=white" /></a>
 &nbsp;
-<a href="https://github.com/salonyranjan/frontend-ResQplate-/fork"><img src="https://img.shields.io/badge/🍴_Fork_&_Build-06b6d4?style=for-the-badge&logo=github&logoColor=white" /></a>
+<a href="https://github.com/salonyranjan/ResQpla8/fork"><img src="https://img.shields.io/badge/🍴_Fork_&_Build-06b6d4?style=for-the-badge&logo=github&logoColor=white" /></a>
 &nbsp;
-<a href="https://github.com/salonyranjan/frontend-ResQplate-"><img src="https://img.shields.io/badge/🌿_View_Project-84cc16?style=for-the-badge&logoColor=black" /></a>
+<a href="https://github.com/salonyranjan/ResQpla8"><img src="https://img.shields.io/badge/🌿_View_Project-84cc16?style=for-the-badge&logoColor=black" /></a>
 &nbsp;
-<a href="https://github.com/salonyranjan/frontend-ResQplate-/issues/new"><img src="https://img.shields.io/badge/💡_Feature_Request-16a34a?style=for-the-badge" /></a>
+<a href="https://github.com/salonyranjan/ResQpla8/issues/new"><img src="https://img.shields.io/badge/💡_Feature_Request-16a34a?style=for-the-badge" /></a>
 
 <br/><br/>
 
