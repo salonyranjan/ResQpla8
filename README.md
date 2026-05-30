@@ -641,7 +641,7 @@ VITE_EMAILJS_CONTACT_TEMPLATE_ID="your_contact_template_id"
 | 💡 | **AR Food Scanner** — camera overlay for food ID | 🔵 Idea |
 | 💡 | **Voice Commands** — donate by speaking | 🔵 Idea |
 
-> 💬 [Open a feature request →](https://github.com/salonyranjan/frontend-ResQplate-/issues/new)
+> 💬 [Open a feature request →](https://github.com/salonyranjan/ResQpla8-/issues/new)
 
 ---
 
