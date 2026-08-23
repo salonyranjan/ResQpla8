@@ -99,6 +99,7 @@ const GlobalStyles = ({ dark }) => {
         outline: none;
         -webkit-appearance: none;
         appearance: none;
+        box-sizing: border-box;
         transition: border-color 0.25s, box-shadow 0.25s, background 0.4s, color 0.4s;
       }
       .rq-input::placeholder { color: ${T.inkHint}; }
@@ -138,17 +139,41 @@ const GlobalStyles = ({ dark }) => {
       .rq-grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
       .rq-grid-2 { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 36px; }
       .rq-grid-2-eq { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      .rq-grid-2 > *, .rq-grid-2-eq > * { min-width: 0; }
+      .rq-contact-page { width: 100%; overflow-x: clip; }
+      .rq-hero-inner { width: 100%; box-sizing: border-box; }
+      .rq-hero-copy { min-width: 0; }
 
       @media(max-width:960px){
         .rq-grid-4{grid-template-columns:repeat(2,1fr)!important}
         .rq-grid-3{grid-template-columns:repeat(2,1fr)!important}
         .rq-grid-2{grid-template-columns:1fr!important}
         .rq-hero-float{display:none!important}
+        .rq-hero-inner{padding-left:32px!important;padding-right:32px!important}
       }
       @media(max-width:600px){
         .rq-grid-4,.rq-grid-3,.rq-grid-2-eq{grid-template-columns:1fr!important}
-        .rq-hero-h1{font-size:46px!important}
+        .rq-contact-hero{min-height:auto!important;padding:86px 0 64px;align-items:flex-start!important}
+        .rq-hero-inner{display:block!important;padding:0 20px!important}
+        .rq-hero-copy{max-width:none!important;width:100%}
+        .rq-hero-h1{font-size:clamp(40px,12vw,48px)!important;line-height:.98!important;letter-spacing:-.04em!important;margin-bottom:20px!important}
+        .rq-hero-copy p{font-size:14.5px!important;line-height:1.7!important;max-width:34ch!important}
+        .rq-hero-eyebrow{margin-bottom:22px!important;padding:6px 12px!important}
+        .rq-hero-eyebrow span{font-size:9px!important;letter-spacing:.11em!important}
         .rq-section-pad{padding-left:20px!important;padding-right:20px!important}
+        .rq-form-section{padding:48px 16px 64px!important}
+        .rq-form-heading{margin-bottom:26px!important}
+        .rq-form-heading h2{font-size:clamp(34px,10vw,43px)!important;line-height:1.02!important;overflow-wrap:anywhere}
+        .rq-form-heading h2 em{display:block;margin-top:3px}
+        .rq-form-card{border-radius:18px!important}
+        .rq-form-card,.rq-form-card-body{width:100%;min-width:0}
+        .rq-form-card-body{padding:26px 18px 28px!important}
+        .rq-form-card-body textarea{min-height:128px}
+      }
+      @media(max-width:380px){
+        .rq-hero-h1{font-size:38px!important}
+        .rq-hero-inner{padding-left:16px!important;padding-right:16px!important}
+        .rq-form-section{padding-left:12px!important;padding-right:12px!important}
       }
     `;
     document.head.appendChild(s);
@@ -298,7 +323,7 @@ const Hero = ({ T, dark }) => {
   const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
   return (
-    <section ref={ref} style={{
+    <section ref={ref} className="rq-contact-hero" style={{
       position: "relative", minHeight: 620,
       display: "flex", alignItems: "center",
       background: dark
@@ -352,12 +377,13 @@ const Hero = ({ T, dark }) => {
       </div>
 
       <Motion.div style={{ y, opacity }} className="rq-section-pad">
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 40 }}>
+        <div className="rq-hero-inner" style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 40 }}>
 
           {/* Left: text */}
-          <div style={{ maxWidth: 580, flex: "0 0 auto" }}>
+          <div className="rq-hero-copy" style={{ maxWidth: 580, flex: "0 1 580px" }}>
             {/* Eyebrow */}
             <Motion.div
+              className="rq-hero-eyebrow"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
@@ -692,14 +718,14 @@ const FormSection = ({ T }) => {
   });
 
   return (
-    <section id="contact-form" style={{ background: T.bg, padding: "58px 48px 70px", position: "relative", overflow: "hidden", scrollMarginTop: 72 }}>
+    <section id="contact-form" className="rq-form-section" style={{ background: T.bg, padding: "58px 48px 70px", position: "relative", overflow: "hidden", scrollMarginTop: 72 }}>
       {/* Decorative elements */}
       <div style={{ position: "absolute", top: -100, right: -100, width: 400, height: 400, borderRadius: "50%", background: `radial-gradient(circle, ${T.accentGlow} 0%, transparent 70%)`, pointerEvents: "none" }} />
       <div style={{ position: "absolute", bottom: -60, left: -60, width: 300, height: 300, borderRadius: "50%", background: `radial-gradient(circle, ${T.amberSoft} 0%, transparent 70%)`, pointerEvents: "none" }} />
 
       <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
         <Reveal>
-          <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <div className="rq-form-heading" style={{ textAlign: "center", marginBottom: 36 }}>
             <Label T={T}>Write to Us</Label>
             <h2 style={{
               fontFamily: "'Playfair Display', serif",
@@ -715,7 +741,7 @@ const FormSection = ({ T }) => {
         <div className="rq-grid-2" style={{ gridTemplateColumns: "1fr", maxWidth: 760, margin: "0 auto" }}>
           {/* ── FORM CARD ── */}
           <Reveal>
-            <div style={{
+            <div className="rq-form-card" style={{
               background: T.bgCard, borderRadius: 24,
               border: `1px solid ${T.border}`,
               overflow: "hidden", position: "relative",
@@ -724,7 +750,7 @@ const FormSection = ({ T }) => {
               {/* Gradient header bar */}
               <div style={{ height: 3, background: `linear-gradient(90deg, ${T.terra}, ${T.amber}, ${T.sage})` }} />
 
-              <div style={{ padding: "36px 36px 40px" }}>
+              <div className="rq-form-card-body" style={{ padding: "36px 36px 40px" }}>
                 <AnimatePresence mode="wait">
                   {sent ? (
                     <Motion.div key="sent"
@@ -1117,7 +1143,7 @@ export default function Contact() {
       <FontLoader />
       <GlobalStyles dark={dark} />
       <Grain />
-      <div style={{ background: T.bg, transition: "background 0.5s", minHeight: "100vh" }}>
+      <div className="rq-contact-page" style={{ background: T.bg, transition: "background 0.5s", minHeight: "100vh" }}>
         <Hero T={T} dark={dark} />
         <FormSection T={T} />
       </div>
