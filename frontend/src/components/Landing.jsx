@@ -1015,123 +1015,136 @@ const NavBar = ({ c, dark, toggleDark }) => {
 /* ══════════════════════════════════════════════════
    FOOD CARD (hero visual)
 ══════════════════════════════════════════════════ */
-const FoodCard = ({ c }) => {
+const LegacyFoodCard = () => {
   const navigate = useNavigate();
   return (
-    <div
-      className="rq-card-col"
-      style={{ position: "relative", paddingTop: 44, paddingBottom: 52, paddingLeft: 20 }}
-    >
+    <div className="rq-card-col" style={{ position: "relative", padding: "26px 8px 38px 24px" }}>
       <motion.div
-        animate={{ y: [0, -9, 0] }}
-        transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+        animate={{ y: [0, -8, 0], rotate: [0, 1, 0] }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+        onClick={() => navigate("/dashboard")}
         style={{
-          position: "absolute", top: 4, right: 0,
-          background: "rgba(255,255,255,0.97)", borderRadius: 14, padding: "9px 14px",
-          display: "flex", alignItems: "center", gap: 8,
-          boxShadow: "0 10px 32px rgba(0,0,0,0.16)", border: "1px solid rgba(82,183,136,0.22)",
-          zIndex: 4, whiteSpace: "nowrap",
+          position: "relative", zIndex: 2, overflow: "hidden", cursor: "pointer",
+          borderRadius: 30, padding: 24, color: "#f5fff8",
+          background: "linear-gradient(145deg, rgba(10,44,28,.98), rgba(20,91,58,.96))",
+          border: "1px solid rgba(183,228,199,.26)",
+          boxShadow: "0 48px 110px rgba(0,0,0,.32), inset 0 1px rgba(255,255,255,.12)",
         }}
       >
-        <span style={{ fontSize: 16 }}>🚴</span>
-        <span style={{ fontSize: 11.5, fontWeight: 600, color: "#1a4a2e", fontFamily: "'Cabinet Grotesk', sans-serif" }}>
-          Volunteer 0.8 km away
-        </span>
-      </motion.div>
-
-      <motion.div
-        animate={{ y: [0, -14, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        onClick={() => navigate("/dashboard/search")}
-        style={{
-          background: "rgba(255,255,255,0.97)", borderRadius: 26, padding: 24,
-          boxShadow: "0 48px 110px rgba(0,0,0,0.30), 0 8px 24px rgba(0,0,0,0.10)",
-          position: "relative", zIndex: 2, cursor: "pointer",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-          <div style={{
-            width: 44, height: 44, borderRadius: 13, background: "#d1fae5",
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 21, flexShrink: 0,
-          }}>🍱</div>
+        <div style={{ position: "absolute", width: 230, height: 230, borderRadius: "50%", right: -95, top: -110, background: "rgba(149,213,178,.14)", filter: "blur(2px)" }} />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative" }}>
           <div>
-            <div style={{ fontSize: 13.5, fontWeight: 600, color: "#111c15", fontFamily: "'Cabinet Grotesk', sans-serif" }}>
-              New Donation Posted
+            <div style={{ display: "flex", alignItems: "center", gap: 7, color: "#95d5b2", font: "600 10px 'DM Mono', monospace", letterSpacing: ".12em", textTransform: "uppercase" }}>
+              <motion.span animate={{ opacity: [.35, 1, .35] }} transition={{ duration: 1.8, repeat: Infinity }} style={{ width: 7, height: 7, borderRadius: "50%", background: "#74c69d", boxShadow: "0 0 0 5px rgba(116,198,157,.12)" }} /> Live rescue
             </div>
-            <div style={{ fontSize: 11, color: "#6b7a6d", fontFamily: "'DM Mono', monospace", marginTop: 2 }}>
-              2 min ago · Connaught Place
-            </div>
+            <div style={{ marginTop: 7, font: "700 20px 'Cabinet Grotesk', sans-serif", letterSpacing: "-.02em" }}>Tonight&apos;s journey</div>
+          </div>
+          <div style={{ width: 42, height: 42, borderRadius: 14, display: "grid", placeItems: "center", background: "rgba(255,255,255,.09)", border: "1px solid rgba(255,255,255,.12)", fontSize: 19 }}>↗</div>
+        </div>
+
+        <div style={{ marginTop: 26, padding: "20px 16px", borderRadius: 20, background: "rgba(4,25,15,.34)", border: "1px solid rgba(255,255,255,.08)", position: "relative" }}>
+          <div style={{ position: "absolute", left: 31, right: 31, top: 36, height: 2, background: "rgba(149,213,178,.22)" }}>
+            <motion.div animate={{ width: ["8%", "92%"] }} transition={{ duration: 3.2, repeat: Infinity, repeatDelay: 1.1, ease: "easeInOut" }} style={{ height: "100%", background: "linear-gradient(90deg,#74c69d,#ffd166)", boxShadow: "0 0 12px #74c69d" }} />
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", position: "relative" }}>
+            {[{ icon: "✦", label: "Surplus", sub: "Collected" }, { icon: "⌁", label: "On the way", sub: "12 min" }, { icon: "♡", label: "Community", sub: "Next stop" }].map((step, index) => (
+              <div key={step.label} style={{ width: "31%", textAlign: index === 0 ? "left" : index === 2 ? "right" : "center" }}>
+                <motion.div animate={index === 1 ? { scale: [1, 1.12, 1] } : {}} transition={{ duration: 2, repeat: Infinity }} style={{ width: 34, height: 34, margin: index === 0 ? "0" : index === 2 ? "0 0 0 auto" : "0 auto", borderRadius: 12, display: "grid", placeItems: "center", background: index === 2 ? "#ffd166" : "#74c69d", color: "#123622", boxShadow: "0 7px 20px rgba(0,0,0,.24)", fontWeight: 800 }}>{step.icon}</motion.div>
+                <div style={{ marginTop: 10, fontSize: 11, fontWeight: 700 }}>{step.label}</div>
+                <div style={{ marginTop: 2, color: "rgba(225,245,232,.56)", font: "9px 'DM Mono', monospace" }}>{step.sub}</div>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div style={{ background: "#f7f3ec", borderRadius: 12, padding: "11px 14px", marginBottom: 14 }}>
-          <div style={{ fontSize: 13.5, fontWeight: 500, color: "#111c15", fontFamily: "'Cabinet Grotesk', sans-serif" }}>
-            45 meals — Dal Makhani, Rice, Sabzi
-          </div>
-          <div style={{ fontSize: 11, color: "#6b7a6d", fontFamily: "'DM Mono', monospace", marginTop: 4 }}>
-            Expires in 3h · Pickup available
-          </div>
-        </div>
-
-        <div style={{ display: "flex", gap: 8 }}>
-          <motion.div
-            whileHover={{ opacity: 0.88 }}
-            onClick={(e) => { e.stopPropagation(); navigate("/dashboard/search"); }}
-            style={{
-              flex: 1, background: "#2d6a4f", color: "#fff",
-              borderRadius: 11, padding: "9px 0", textAlign: "center",
-              fontSize: 12.5, fontWeight: 600, cursor: "pointer",
-              fontFamily: "'Cabinet Grotesk', sans-serif",
-            }}
-          >Accept</motion.div>
-          <motion.div
-            whileHover={{ opacity: 0.88 }}
-            onClick={(e) => { e.stopPropagation(); navigate("/dashboard"); }}
-            style={{
-              flex: 1, background: "#f0ebe0", color: "#6b7a6d",
-              borderRadius: 11, padding: "9px 0", textAlign: "center",
-              fontSize: 12.5, cursor: "pointer",
-              fontFamily: "'Cabinet Grotesk', sans-serif",
-            }}
-          >Later</motion.div>
-        </div>
-
-        <div style={{
-          display: "flex", alignItems: "center", gap: 6,
-          marginTop: 14, paddingTop: 14, borderTop: "1px solid #f0ebe0",
-        }}>
-          <motion.div
-            animate={{ scale: [1, 1.4, 1], opacity: [1, 0.4, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            style={{ width: 6, height: 6, borderRadius: "50%", background: "#52b788", flexShrink: 0 }}
-          />
-          <span style={{ fontSize: 11, color: "#52b788", fontFamily: "'DM Mono', monospace" }}>
-            3 NGOs notified nearby
-          </span>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12 }}>
+          <div style={{ padding: "13px 14px", borderRadius: 16, background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.08)" }}><div style={{ font: "800 22px 'Cabinet Grotesk', sans-serif" }}>45</div><div style={{ color: "rgba(225,245,232,.58)", font: "9px 'DM Mono', monospace", textTransform: "uppercase", letterSpacing: ".08em" }}>meals moving</div></div>
+          <div style={{ padding: "13px 14px", borderRadius: 16, background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.08)" }}><div style={{ font: "800 22px 'Cabinet Grotesk', sans-serif" }}>18<span style={{ fontSize: 12, color: "#95d5b2" }}> kg</span></div><div style={{ color: "rgba(225,245,232,.58)", font: "9px 'DM Mono', monospace", textTransform: "uppercase", letterSpacing: ".08em" }}>waste avoided</div></div>
         </div>
       </motion.div>
 
+      <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }} style={{ position: "absolute", zIndex: 4, left: 0, bottom: 6, padding: "11px 15px", borderRadius: 16, background: "#fff8e8", color: "#6f4700", border: "1px solid rgba(255,209,102,.5)", boxShadow: "0 16px 38px rgba(54,30,0,.2)", font: "700 11px 'Cabinet Grotesk', sans-serif" }}>☀ 127 plates served today</motion.div>
+      <motion.div animate={{ y: [0, -7, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: .6 }} style={{ position: "absolute", zIndex: 4, right: -6, top: 4, padding: "10px 13px", borderRadius: 15, background: "rgba(255,255,255,.96)", color: "#184d33", border: "1px solid rgba(82,183,136,.25)", boxShadow: "0 14px 34px rgba(0,0,0,.18)", font: "700 10.5px 'Cabinet Grotesk', sans-serif" }}>● Rescue network active</motion.div>
+    </div>
+  );
+};
+
+const GAME_ITEMS = [
+  { id: "rice", icon: "🍚", label: "Rice", points: 10 },
+  { id: "dal", icon: "🥣", label: "Dal", points: 10 },
+  { id: "veg", icon: "🥕", label: "Veggies", points: 10 },
+  { id: "bread", icon: "🥖", label: "Bread", points: 10 },
+  { id: "spoiled", icon: "🗑️", label: "Spoiled", hazard: true },
+  { id: "plastic", icon: "🥤", label: "Plastic", hazard: true },
+];
+
+const FoodCard = () => {
+  const [rescued, setRescued] = useState([]);
+  const [message, setMessage] = useState("Tap edible food. Skip the waste!");
+  const completed = rescued.length === 4;
+
+  const chooseItem = (item) => {
+    if (completed) return;
+    if (item.hazard) {
+      setMessage("Not for the plate — try another!");
+      return;
+    }
+    if (rescued.includes(item.id)) return;
+    const next = [...rescued, item.id];
+    setRescued(next);
+    setMessage(next.length === 4 ? "Meal rescued! You made an impact." : `${next.length} of 4 foods rescued`);
+  };
+
+  const resetGame = () => {
+    setRescued([]);
+    setMessage("Tap edible food. Skip the waste!");
+  };
+
+  return (
+    <div className="rq-card-col" style={{ position: "relative", padding: "18px 8px 30px 22px" }}>
       <motion.div
-        animate={{ y: [0, 11, 0] }}
-        transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
-        style={{
-          position: "absolute", bottom: 4, left: 0,
-          background: "linear-gradient(135deg, #d97706, #f59e0b)",
-          borderRadius: 18, padding: "13px 18px",
-          display: "flex", alignItems: "center", gap: 10,
-          boxShadow: "0 18px 48px rgba(217,119,6,0.38)", zIndex: 4,
-        }}
+        initial={{ opacity: 0, scale: .94, rotate: 2 }}
+        animate={{ opacity: 1, scale: 1, rotate: 0 }}
+        transition={{ duration: .65, ease: [0.22, 1, 0.36, 1] }}
+        style={{ position: "relative", overflow: "hidden", borderRadius: 30, padding: 22, background: "rgba(255,255,255,.97)", border: "1px solid rgba(255,255,255,.55)", boxShadow: "0 42px 100px rgba(0,0,0,.28)", color: "#173222" }}
       >
-        <span style={{ fontSize: 22 }}>🌱</span>
-        <div>
-          <div style={{ fontSize: 13.5, fontWeight: 700, color: "#fff", fontFamily: "'Cabinet Grotesk', sans-serif" }}>
-            500 kg CO₂ Saved
+        <div style={{ position: "absolute", width: 180, height: 180, right: -80, top: -95, borderRadius: "50%", background: "rgba(82,183,136,.14)" }} />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative" }}>
+          <div>
+            <div style={{ color: "#2d6a4f", font: "700 9px 'DM Mono', monospace", letterSpacing: ".14em", textTransform: "uppercase" }}>30-second game</div>
+            <h3 style={{ margin: "6px 0 0", font: "800 20px 'Cabinet Grotesk', sans-serif", letterSpacing: "-.02em" }}>Build a rescue plate</h3>
           </div>
-          <div style={{ fontSize: 10, color: "rgba(255,255,255,0.75)", fontFamily: "'DM Mono', monospace", marginTop: 2 }}>
-            This month alone
-          </div>
+          <div style={{ padding: "7px 10px", borderRadius: 12, background: "#e8f5ec", color: "#246044", font: "800 11px 'DM Mono', monospace" }}>{rescued.length * 10} pts</div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 9, marginTop: 19 }}>
+          {GAME_ITEMS.map((item) => {
+            const selected = rescued.includes(item.id);
+            return (
+              <motion.button
+                key={item.id}
+                type="button"
+                whileHover={{ y: -3, scale: 1.02 }}
+                whileTap={{ scale: .92 }}
+                onClick={() => chooseItem(item)}
+                aria-label={`${selected ? "Rescued" : "Choose"} ${item.label}`}
+                style={{ position: "relative", minHeight: 76, padding: "10px 6px", borderRadius: 16, border: selected ? "2px solid #52b788" : "1px solid #e5e9e3", background: selected ? "#e4f5e9" : "#faf9f5", color: "#26392c", cursor: completed ? "default" : "pointer", fontFamily: "inherit" }}
+              >
+                <span style={{ display: "block", fontSize: 26, filter: selected ? "none" : item.hazard ? "grayscale(.7)" : "none" }}>{selected ? "✓" : item.icon}</span>
+                <span style={{ display: "block", marginTop: 5, fontSize: 9.5, fontWeight: 700 }}>{selected ? "Rescued" : item.label}</span>
+              </motion.button>
+            );
+          })}
+        </div>
+
+        <div aria-live="polite" style={{ display: "flex", alignItems: "center", gap: 8, minHeight: 42, marginTop: 12, padding: "10px 12px", borderRadius: 13, background: completed ? "#2d6a4f" : "#f3f0e8", color: completed ? "#fff" : "#637068", font: "600 10px 'DM Mono', monospace" }}>
+          <motion.span animate={completed ? { rotate: [0, -12, 12, 0], scale: [1, 1.25, 1] } : {}} transition={{ duration: .55 }} style={{ fontSize: 16 }}>{completed ? "🎉" : "💡"}</motion.span>
+          <span style={{ flex: 1 }}>{message}</span>
+          {completed && <button type="button" onClick={resetGame} style={{ border: 0, borderRadius: 9, padding: "6px 9px", background: "rgba(255,255,255,.15)", color: "#fff", cursor: "pointer", font: "700 9px 'DM Mono', monospace" }}>Play again</button>}
         </div>
       </motion.div>
+
+      <motion.div animate={{ y: [0, 7, 0], rotate: [-1, 1, -1] }} transition={{ duration: 4.4, repeat: Infinity, ease: "easeInOut" }} style={{ position: "absolute", right: -8, bottom: 5, zIndex: 3, padding: "10px 14px", borderRadius: 14, background: "linear-gradient(135deg,#f59e0b,#e67908)", color: "#fff", boxShadow: "0 15px 34px rgba(190,105,8,.3)", font: "800 10.5px 'Cabinet Grotesk', sans-serif" }}>Every plate counts ✦</motion.div>
     </div>
   );
 };

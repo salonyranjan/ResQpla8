@@ -454,13 +454,68 @@ const Hero = ({ T, dark }) => {
             </motion.div>
           </div>
 
-          {/* Right: floating notification card */}
+          {/* Right: audience-first response hub */}
+          <motion.div
+            className="rq-hero-float"
+            initial={{ opacity: 0, x: 60, y: 20 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            transition={{ delay: 0.75, duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            style={{ width: 310, flexShrink: 0, position: "relative" }}
+          >
+            <motion.div
+              animate={{ y: [0, -7, 0] }}
+              transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
+              style={{
+                overflow: "hidden", position: "relative", padding: 22, borderRadius: 26,
+                background: dark ? "linear-gradient(145deg,#10251a,#0b1710)" : "linear-gradient(145deg,#fffdf8,#f1f6ef)",
+                border: `1px solid ${T.borderMed}`,
+                boxShadow: dark ? "0 40px 90px rgba(0,0,0,.5)" : "0 34px 80px rgba(24,61,38,.16)",
+              }}
+            >
+              <div style={{ position: "absolute", width: 150, height: 150, right: -65, top: -70, borderRadius: "50%", background: `${T.sage}22` }} />
+              <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div>
+                  <div style={{ color: T.sage, font: "600 9px 'DM Mono', monospace", letterSpacing: ".14em", textTransform: "uppercase" }}>Response hub</div>
+                  <div style={{ marginTop: 6, color: T.ink, font: "700 18px 'Cabinet Grotesk', sans-serif" }}>How can we help?</div>
+                </div>
+                <div style={{ width: 40, height: 40, borderRadius: 14, display: "grid", placeItems: "center", color: "#fff", background: `linear-gradient(135deg,${T.leaf},${T.leafBright})`, boxShadow: `0 8px 22px ${T.leaf}44`, fontSize: 18 }}>✦</div>
+              </div>
+
+              <div style={{ display: "grid", gap: 8, marginTop: 20 }}>
+                {[
+                  { icon: "↗", title: "Share surplus food", meta: "Donor support", time: "~5 min" },
+                  { icon: "♡", title: "Request food support", meta: "NGO & community", time: "Priority" },
+                  { icon: "◎", title: "Partner with ResQPlate", meta: "Teams & institutions", time: "1 day" },
+                ].map((item, index) => (
+                  <motion.a
+                    key={item.title}
+                    href="#contact-form"
+                    whileHover={{ x: 4 }}
+                    style={{ display: "grid", gridTemplateColumns: "38px 1fr auto", alignItems: "center", gap: 10, padding: "10px", borderRadius: 14, color: T.ink, background: index === 1 ? `${T.sage}16` : T.bg2, border: `1px solid ${index === 1 ? T.borderMed : T.border}`, textDecoration: "none" }}
+                  >
+                    <span style={{ width: 38, height: 38, display: "grid", placeItems: "center", borderRadius: 12, background: index === 1 ? T.sage : T.mintSoft, color: index === 1 ? "#fff" : T.leaf, fontWeight: 800 }}>{item.icon}</span>
+                    <span><strong style={{ display: "block", fontSize: 11.5 }}>{item.title}</strong><small style={{ display: "block", marginTop: 3, color: T.inkMuted, font: "9px 'DM Mono', monospace" }}>{item.meta}</small></span>
+                    <small style={{ color: T.sage, font: "8.5px 'DM Mono', monospace" }}>{item.time}</small>
+                  </motion.a>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16, paddingTop: 14, borderTop: `1px solid ${T.border}` }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 7, color: T.inkMuted, font: "9.5px 'DM Mono', monospace" }}><motion.i animate={{ opacity: [.4, 1, .4] }} transition={{ duration: 1.8, repeat: Infinity }} style={{ width: 7, height: 7, borderRadius: "50%", background: T.sage }} />Human team online</span>
+                <span style={{ color: T.ink, fontSize: 10, fontWeight: 700 }}>Mon–Sat · 9–6</span>
+              </div>
+            </motion.div>
+
+            <motion.div animate={{ y: [0, 7, 0] }} transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }} style={{ position: "absolute", right: -22, bottom: -24, padding: "10px 14px", borderRadius: 14, background: `linear-gradient(135deg,${T.amber},${T.terra})`, color: "#fff", boxShadow: "0 14px 34px rgba(176,100,15,.28)", font: "700 10.5px 'Cabinet Grotesk', sans-serif" }}>Average reply · 12 min</motion.div>
+          </motion.div>
+
+          {/* Legacy visual retained off-screen for reference */}
           <motion.div
             className="rq-hero-float"
             initial={{ opacity: 0, x: 60, y: 20 }}
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ delay: 0.8, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            style={{ flexShrink: 0, position: "relative", animation: "floatY 7s ease-in-out infinite" }}
+            style={{ display: "none", flexShrink: 0, position: "relative", animation: "floatY 7s ease-in-out infinite" }}
           >
             {/* Main donation card */}
             <div style={{
@@ -716,7 +771,7 @@ const FormSection = ({ T }) => {
   });
 
   return (
-    <section style={{ background: T.bg, padding: "80px 48px 100px", position: "relative", overflow: "hidden" }}>
+    <section id="contact-form" style={{ background: T.bg, padding: "80px 48px 100px", position: "relative", overflow: "hidden", scrollMarginTop: 72 }}>
       {/* Decorative elements */}
       <div style={{ position: "absolute", top: -100, right: -100, width: 400, height: 400, borderRadius: "50%", background: `radial-gradient(circle, ${T.accentGlow} 0%, transparent 70%)`, pointerEvents: "none" }} />
       <div style={{ position: "absolute", bottom: -60, left: -60, width: 300, height: 300, borderRadius: "50%", background: `radial-gradient(circle, ${T.amberSoft} 0%, transparent 70%)`, pointerEvents: "none" }} />
