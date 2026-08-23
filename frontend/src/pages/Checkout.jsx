@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Link, useNavigate, useOutletContext } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../context/CartContext";
+import { useTheme } from "../context/ThemeContext";
+import { claimFood } from "../services/foodService";
 import {
   HiOutlineArrowLeft,
   HiOutlineCheckCircle,
@@ -12,8 +14,7 @@ import {
 } from "react-icons/hi";
 
 export default function CheckoutPage() {
-  const ctx = useOutletContext() || {};
-  const dark = ctx?.dark ?? true;
+  const { dark } = useTheme();
   const T = dark
     ? {
         bg: "#080e0a", bgAlt: "#0d1710", bgCard: "#111c14", border: "rgba(34,197,94,0.09)",
@@ -34,27 +35,30 @@ export default function CheckoutPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [address, setAddress] = useState({ street: "", city: "", state: "", zip: "" });
-  const [paymentMethod, setPaymentMethod] = useState("free");
   const [orderId, setOrderId] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const handlePlaceOrder = async () => {
-    const id = `ORD-${Date.now().toString().slice(-6)}`;
-    setOrderId(id);
-
-    // CSBS Pro-Tip: Save order to Appwrite
-    // Replace these with your actual Appwrite Database ID and Collection ID
-    // const DATABASE_ID = "your_database_id";
-    // const ORDERS_COLLECTION_ID = "orders";
-    // await databases.createDocument(DATABASE_ID, ORDERS_COLLECTION_ID, id, {
-    //   userId: user?.$id,
-    //   items: JSON.stringify(items),
-    //   status: "pending_pickup",
-    //   address: address.street
-    // });
-
-    clearCart();
-    setStep(3);
+    const fullAddress = [address.street, address.city, address.state, address.zip].map(value => value.trim()).filter(Boolean).join(", ");
+    if (!address.street.trim() || !address.city.trim() || !address.state.trim() || !address.zip.trim()) {
+      setError("Enter the complete delivery address before continuing.");
+      setStep(1);
+      return;
+    }
+    setSubmitting(true);
+    setError("");
+    try {
+      const claimed = await claimFood(items, fullAddress);
+      setOrderId(claimed[0].id);
+      clearCart();
+      setStep(3);
+    } catch (err) {
+      setError(err.message || "The food could not be claimed. It may no longer be available.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputStyle = {
@@ -108,6 +112,7 @@ export default function CheckoutPage() {
       </div>
 
       {/* Stepper */}
+      {error && <div role="alert" style={{ margin: "16px", padding: "12px 16px", borderRadius: 12, color: "#ef4444", background: "rgba(239,68,68,.08)", border: "1px solid rgba(239,68,68,.2)", fontSize: 13 }}>{error}</div>}
       {step < 3 && (
         <div style={{ padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: 0 }}>
           {steps.map((label, idx) => (
@@ -176,16 +181,6 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Quick select saved addresses */}
-              <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 20, padding: 16 }}>
-                <p style={{ fontSize: 11, color: T.textFaint, fontFamily: "monospace", letterSpacing: "0.08em", marginBottom: 12 }}>SAVED LOCATIONS</p>
-                {["🏠 Home — 42 MG Road, Delhi", "🏢 Work — Sector 5, Noida"].map((loc, i) => (
-                  <button key={i} style={{ display: "block", width: "100%", textAlign: "left", padding: "10px 12px", background: T.bgAlt, border: `1px solid ${T.border}`, borderRadius: 12, fontSize: 13, color: T.textMuted, cursor: "pointer", fontFamily: "inherit", marginBottom: i === 0 ? 8 : 0 }}>
-                    {loc}
-                  </button>
-                ))}
-              </div>
-
               <motion.button whileTap={{ scale: 0.98 }} onClick={() => setStep(2)}
                 style={{ background: `linear-gradient(135deg, ${T.accent}, #16a34a)`, color: "#fff", border: "none", borderRadius: 18, padding: "16px", fontWeight: 800, fontSize: 15, cursor: "pointer", fontFamily: "inherit", boxShadow: `0 8px 32px ${T.accent}44` }}>
                 Continue to Payment →
@@ -202,34 +197,10 @@ export default function CheckoutPage() {
                   <h3 style={{ fontWeight: 700, fontSize: 15, color: T.text }}>Payment Method</h3>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {[
-                    { id: "free", label: "🌿 Free Donation", desc: "All food donations are free of charge", badge: "RECOMMENDED" },
-                    { id: "paypal", label: "💳 PayPal", desc: "Pay via PayPal (demo)", badge: null },
-                    { id: "card", label: "🏦 Credit/Debit Card", desc: "Secure card payment (demo)", badge: null },
-                  ].map((method) => (
-                    <motion.button
-                      key={method.id}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setPaymentMethod(method.id)}
-                      style={{
-                        width: "100%", textAlign: "left", padding: "14px 16px",
-                        borderRadius: 16,
-                        border: `2px solid ${paymentMethod === method.id ? T.accent : T.border}`,
-                        background: paymentMethod === method.id ? T.accentSoft : "transparent",
-                        cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s",
-                      }}
-                    >
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <p style={{ fontWeight: 700, fontSize: 13.5, color: T.text }}>{method.label}</p>
-                        {method.badge && (
-                          <span style={{ fontSize: 9, background: T.accentSoft, color: T.accent, borderRadius: 100, padding: "2px 8px", fontFamily: "monospace", fontWeight: 700, border: `1px solid ${T.borderMed}` }}>
-                            {method.badge}
-                          </span>
-                        )}
-                      </div>
-                      <p style={{ fontSize: 11.5, color: T.textMuted, marginTop: 3 }}>{method.desc}</p>
-                    </motion.button>
-                  ))}
+                  <div style={{ width: "100%", padding: "14px 16px", borderRadius: 16, border: `2px solid ${T.accent}`, background: T.accentSoft }}>
+                    <p style={{ fontWeight: 700, fontSize: 13.5, color: T.text }}>Free food rescue</p>
+                    <p style={{ fontSize: 11.5, color: T.textMuted, marginTop: 3 }}>ResQPlate never charges for donated food.</p>
+                  </div>
                 </div>
               </div>
 
@@ -251,10 +222,10 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <motion.button whileTap={{ scale: 0.98 }} onClick={handlePlaceOrder}
+              <motion.button whileTap={{ scale: 0.98 }} onClick={handlePlaceOrder} disabled={submitting}
                 style={{ background: `linear-gradient(135deg, ${T.accent}, #16a34a)`, color: "#fff", border: "none", borderRadius: 18, padding: "16px", fontWeight: 800, fontSize: 15, cursor: "pointer", fontFamily: "inherit", boxShadow: `0 8px 32px ${T.accent}44`, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                 <HiOutlineShieldCheck style={{ fontSize: 20 }} />
-                Place Order — Free
+                {submitting ? "Claiming food…" : "Confirm rescue — Free"}
               </motion.button>
             </div>
           )}
@@ -306,7 +277,7 @@ export default function CheckoutPage() {
                 margin: "0 auto 32px"
               }}>
                 <p style={{ fontSize: 12, color: T.amber, fontWeight: 700, fontFamily: "monospace" }}>
-                  This rescue saved 1.2kg of CO₂ emissions
+                  This rescue can save approximately {(totalItems * 0.5).toFixed(1)}kg of CO₂ emissions
                 </p>
               </div>
 

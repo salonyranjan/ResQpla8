@@ -1,4 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
+import Logo from "./Logo";
 import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, useCallback } from "react";
 import emailjs from "@emailjs/browser";
@@ -70,6 +72,7 @@ const GlobalStyles = ({ c }) => {
       body { margin: 0; background: ${c.bg}; transition: background 0.45s; }
       a { text-decoration: none; color: inherit; }
       button { cursor: pointer; font-family: 'Cabinet Grotesk', sans-serif; }
+      section:has(.rq-remove-live-impact) { display: none !important; }
 
       .rq-hero-em {
         font-style: italic;
@@ -87,7 +90,7 @@ const GlobalStyles = ({ c }) => {
         .rq-hero-grid { grid-template-columns: 1fr !important; text-align: center; }
         .rq-card-col { max-width: 380px; margin: 0 auto; }
         .rq-hero-sub { margin-left: auto !important; margin-right: auto !important; }
-        .rq-hero-btns, .rq-trust-row { justify-content: center !important; }
+        .rq-hero-btns { justify-content: center !important; }
         .rq-stats-grid { grid-template-columns: repeat(2,1fr) !important; }
         .rq-feat-grid { grid-template-columns: 1fr 1fr !important; }
         .rq-how-grid { grid-template-columns: 1fr 1fr !important; }
@@ -143,12 +146,12 @@ const ScrollProgress = ({ c }) => {
    LIVE TICKER
 ══════════════════════════════════════════════════ */
 const TICKS = [
-  "🍱 Mumbai — 24 meals rescued just now",
-  "🥗 Delhi — NGO matched in 3 min",
-  "🍛 Bangalore — 80 kg saved today",
-  "🫙 Pune — New volunteer joined",
-  "🍲 Chennai — 12 families fed",
-  "🌿 Hyderabad — 600g CO₂ offset",
+  "🍱 Good food deserves a second destination",
+  "🤝 Make surplus visible, useful, and easier to collect",
+  "🌿 Waste less. Share more. Strengthen communities",
+  "📍 Local food rescue begins with one honest listing",
+  "🍲 Every safe meal should have the chance to be shared",
+  "🫶 Technology should make generosity easier",
 ];
 const Ticker = ({ c }) => {
   const [idx, setIdx] = useState(0);
@@ -1259,27 +1262,6 @@ const Hero = ({ c }) => {
               </Link>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.9, duration: 0.9 }}
-              className="rq-trust-row"
-              style={{ display: "flex", flexWrap: "wrap", gap: 18 }}
-            >
-              {["Govt. of India Backed", "ISO 9001:2015 Certified", "2,400+ Lives Impacted"].map((t) => (
-                <div key={t} style={{
-                  display: "flex", alignItems: "center", gap: 7,
-                  fontSize: 12, color: "rgba(255,255,255,0.40)",
-                  fontFamily: "'DM Mono', monospace", letterSpacing: "0.04em",
-                }}>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <circle cx="7" cy="7" r="6" stroke="#52b788" strokeWidth="1.2" />
-                    <path d="M4 7l2 2 4-4" stroke="#52b788" strokeWidth="1.4" strokeLinecap="round" />
-                  </svg>
-                  {t}
-                </div>
-              ))}
-            </motion.div>
           </div>
 
           <motion.div
@@ -1318,10 +1300,10 @@ const Hero = ({ c }) => {
    STATS
 ══════════════════════════════════════════════════ */
 const STATS = [
-  { value: "1200", suffix: "+",   label: "Meals Rescued",    icon: "🍽️", color: "#52b788", to: "/dashboard"        },
-  { value: "50",   suffix: "+",   label: "NGO Partners",     icon: "🤝", color: "#e8a838", to: "/dashboard/search" },
-  { value: "500",  suffix: " kg", label: "CO₂ Reduced",      icon: "🌿", color: "#2d6a4f", to: "/about"            },
-  { value: "98",   suffix: "%",   label: "Satisfaction Rate", icon: "⭐", color: "#d4622a", to: "/about"            },
+  { value: "List", label: "Surplus food clearly", icon: "🍽️", color: "#52b788", to: "/dashboard/donate" },
+  { value: "Find", label: "Food available nearby", icon: "📍", color: "#e8a838", to: "/dashboard/search" },
+  { value: "Claim", label: "A pickup transparently", icon: "🤝", color: "#2d6a4f", to: "/dashboard/search" },
+  { value: "Track", label: "Real rescue activity", icon: "🌿", color: "#d4622a", to: "/dashboard" },
 ];
 
 const Stats = ({ c }) => (
@@ -1351,7 +1333,7 @@ const Stats = ({ c }) => (
                   }}
                 >{s.icon}</motion.div>
                 <div style={{ fontFamily: "'Fraunces', serif", fontSize: 44, fontWeight: 900, color: s.color, lineHeight: 1 }}>
-                  <Counter target={s.value} suffix={s.suffix} />
+                  {s.value}
                 </div>
                 <div style={{ fontSize: 13, color: c.text2, marginTop: 7 }}>{s.label}</div>
               </motion.div>
@@ -1388,30 +1370,29 @@ const Mission = ({ c }) => (
         </blockquote>
       </Reveal>
       <Reveal delay={0.22}>
-        <p style={{ fontSize: 16, color: c.text2, lineHeight: 1.78, maxWidth: 580, margin: "0 auto 44px" }}>
-          We believe food waste and hunger are two sides of the same broken system.
-          ResQPlate repairs it — with technology, community, and compassion at scale.
+        <p style={{ fontFamily: "'Fraunces', serif", fontSize: 21, fontStyle: "italic", color: c.text2, lineHeight: 1.7, maxWidth: 680, margin: "0 auto 44px" }}>
+          “Good food deserves a second destination.”
         </p>
       </Reveal>
       <Reveal delay={0.3}>
         <div style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap" }}>
           {[
-            { label: "Vision 2030", val: "Zero Food Waste India", to: "/about" },
-            { label: "Founded",     val: "2023 · New Delhi",      to: "/about" },
-            { label: "Network",     val: "22 Cities Active",       to: "/map"   },
-          ].map((m) => (
-            <Link key={m.label} to={m.to}>
-              <motion.div
-                whileHover={{ y: -4, boxShadow: `0 12px 32px ${c.shadow}` }}
-                style={{
-                  background: c.surface, border: `1px solid ${c.border}`,
-                  borderRadius: 18, padding: "22px 28px", textAlign: "center", cursor: "pointer",
-                }}
-              >
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: c.text3, letterSpacing: "0.12em", marginBottom: 7, textTransform: "uppercase" }}>{m.label}</div>
-                <div style={{ fontFamily: "'Fraunces', serif", fontSize: 18, fontWeight: 700, color: c.text }}>{m.val}</div>
-              </motion.div>
-            </Link>
+            "Waste less. Share more.",
+            "Make surplus visible.",
+            "Let every rescue be real.",
+          ].map((quote) => (
+            <motion.div
+              key={quote}
+              whileHover={{ y: -4, boxShadow: `0 12px 32px ${c.shadow}` }}
+              style={{
+                background: c.surface, border: `1px solid ${c.border}`,
+                borderRadius: 18, padding: "22px 28px", textAlign: "center",
+                fontFamily: "'Fraunces', serif", fontSize: 18,
+                fontStyle: "italic", fontWeight: 700, color: c.text,
+              }}
+            >
+              “{quote}”
+            </motion.div>
           ))}
         </div>
       </Reveal>
@@ -1423,12 +1404,12 @@ const Mission = ({ c }) => (
    FEATURES
 ══════════════════════════════════════════════════ */
 const FEATURES = [
-  { emoji: "⚡", title: "AI-Powered Matching",  desc: "Our algorithm matches surplus food to the nearest verified NGO in under 90 seconds, factoring in distance, capacity, and food type.", tag: "NEW", accent: "#52b788", to: "/dashboard/ai-matching" },
-  { emoji: "🗺️", title: "Live Map Tracking",   desc: "Follow every donation from post to plate with real-time GPS tracking and push notifications for all parties.", tag: "", accent: "#e8a838", to: "/map" },
-  { emoji: "🛡️", title: "Trust & Safety",      desc: "Every NGO is background-checked, rated, and insured. Donors get full transparency with photo proof of delivery.", tag: "", accent: "#2d6a4f", to: "/about" },
-  { emoji: "📊", title: "Impact Dashboard",    desc: "See your personal CO₂ savings, meals rescued, and families helped in a beautiful, shareable impact report.", tag: "NEW", accent: "#d4622a", to: "/dashboard" },
-  { emoji: "🔔", title: "Smart Alerts",        desc: "WhatsApp, SMS, and app notifications ensure zero missed pickups. Set your schedule and we'll handle coordination.", tag: "", accent: "#7c3aed", to: "/dashboard/smart-alerts" },
-  { emoji: "🏆", title: "Donor Rewards",       desc: "Earn ResQPoints for every donation. Redeem for tax certificates, brand badges, and exclusive partner discounts.", tag: "NEW", accent: "#0891b2", to: "/dashboard/profile" },
+  { emoji: "🍱", title: "Real Food Listings", desc: "Publish the food type, meal quantity, pickup location, collection window, and an optional photograph.", tag: "", accent: "#52b788", to: "/dashboard/donate" },
+  { emoji: "🔎", title: "Available Food", desc: "Browse pending Appwrite listings and search by food or pickup location without placeholder inventory.", tag: "", accent: "#e8a838", to: "/dashboard/search" },
+  { emoji: "🤝", title: "Clear Claiming", desc: "Claim available listings through checkout. Availability is checked again before the pickup record changes.", tag: "", accent: "#2d6a4f", to: "/dashboard/search" },
+  { emoji: "📊", title: "Honest Impact", desc: "Dashboard totals and impact calculations come from recorded donations and completed pickups.", tag: "", accent: "#d4622a", to: "/dashboard" },
+  { emoji: "🔔", title: "Activity Alerts", desc: "See alerts generated from real pending, active, completed, and cancelled pickup records.", tag: "", accent: "#7c3aed", to: "/dashboard/smart-alerts" },
+  { emoji: "🧭", title: "Pickup Progress", desc: "Open a pickup record and follow the status and scheduled collection time stored by the platform.", tag: "", accent: "#0891b2", to: "/dashboard/orders" },
 ];
 
 const Features = ({ c }) => (
@@ -1510,10 +1491,10 @@ const Features = ({ c }) => (
    HOW IT WORKS
 ══════════════════════════════════════════════════ */
 const HOW_STEPS = [
-  { num: "01", emoji: "📸", title: "Post in 60 Seconds", desc: "Snap a photo, add quantity and pickup window. No forms, no friction — just impact.", color: "#52b788", to: "/dashboard/post-60" },
-  { num: "02", emoji: "🤖", title: "AI Finds the Match",  desc: "Our engine notifies the best-fit NGO within seconds based on location, type, and urgency.", color: "#e8a838", to: "/dashboard/ai-matching" },
-  { num: "03", emoji: "🚴", title: "Volunteer Picks Up",  desc: "A vetted volunteer collects the food with live GPS updates for all parties.", color: "#d4622a", to: "/dashboard/volunteer-pickups" },
-  { num: "04", emoji: "📋", title: "Impact Delivered",    desc: "Receive a certificate with CO₂ saved, meals rescued, and families fed. Share on social.", color: "#2d6a4f", to: "/dashboard/impact-delivered" },
+  { num: "01", emoji: "📸", title: "List Surplus Food", desc: "Add accurate food details, quantity, pickup location, collection time, and a photo.", color: "#52b788", to: "/dashboard/donate" },
+  { num: "02", emoji: "🔎", title: "Make It Discoverable", desc: "The pending donation appears in the dashboard and available-food listing.", color: "#e8a838", to: "/dashboard/search" },
+  { num: "03", emoji: "🤝", title: "Claim the Pickup", desc: "A signed-in receiver chooses food and supplies the required destination information.", color: "#d4622a", to: "/dashboard/search" },
+  { num: "04", emoji: "📋", title: "Record the Outcome", desc: "Pickup status and completed rescue data become part of the project's real impact history.", color: "#2d6a4f", to: "/dashboard/impact-delivered" },
 ];
 
 const HowItWorks = ({ c }) => (
@@ -1593,7 +1574,7 @@ const ImpactMap = ({ c }) => (
             display: "inline-block", background: c.leafm, color: "#fff",
             fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: "0.15em",
             padding: "6px 16px", borderRadius: 100, marginBottom: 18,
-          }}>REAL-TIME IMPACT</span>
+          }}><span className="rq-remove-live-impact">REAL-TIME IMPACT</span></span>
           <h2 style={{
             fontFamily: "'Fraunces', serif", fontSize: "clamp(32px,4.2vw,56px)",
             fontWeight: 900, color: c.text, lineHeight: 1.1, marginBottom: 22, letterSpacing: "-0.02em",
@@ -1689,9 +1670,9 @@ const ImpactMap = ({ c }) => (
    TESTIMONIALS
 ══════════════════════════════════════════════════ */
 const TESTIMONIALS = [
-  { name: "Priya Sharma", role: "Restaurant Owner, Delhi",     text: "ResQPlate turned our daily food waste into daily impact. The app is stupidly simple and the results are extraordinary.", av: "PS", color: "#52b788" },
-  { name: "Rahul Gupta",  role: "NGO Coordinator, Mumbai",     text: "The AI matching cut our coordination time from hours to minutes. We're feeding 3× more families with the same team.", av: "RG", color: "#e8a838" },
-  { name: "Anita Verma",  role: "Community Leader, Bangalore", text: "I've never seen a tech product that cares this much about real people. The impact dashboard made our donors cry happy tears.", av: "AV", color: "#d4622a" },
+  { name: "Waste less", role: "Our environmental mission", text: "Keep safe, usable food in circulation instead of treating every surplus meal as waste.", av: "01", color: "#52b788" },
+  { name: "Share locally", role: "Our community mission", text: "Give donors and receivers one clear place to publish, discover, claim, and follow a food rescue.", av: "02", color: "#e8a838" },
+  { name: "Build trust", role: "Our product mission", text: "Show real records, honest statuses, and understandable actions without invented activity or inflated claims.", av: "03", color: "#d4622a" },
 ];
 
 const Testimonials = ({ c }) => (
@@ -1702,13 +1683,13 @@ const Testimonials = ({ c }) => (
           display: "inline-block", background: c.leafm, color: "#fff",
           fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: "0.15em",
           padding: "6px 16px", borderRadius: 100, marginBottom: 18,
-        }}>COMMUNITY VOICES</span>
+        }}>WHAT GUIDES US</span>
         <h2 style={{
           fontFamily: "'Fraunces', serif", fontSize: "clamp(34px,4.5vw,60px)",
           fontWeight: 900, color: c.text, lineHeight: 1.06, margin: 0, letterSpacing: "-0.02em",
         }}>
-          The people who make it{" "}
-          <em style={{ color: c.leafm, fontStyle: "italic" }}>real.</em>
+          A product built around{" "}
+          <em style={{ color: c.leafm, fontStyle: "italic" }}>real needs.</em>
         </h2>
       </Reveal>
       <div className="rq-test-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24 }}>
@@ -1721,7 +1702,7 @@ const Testimonials = ({ c }) => (
                 borderRadius: 26, padding: 32, transition: "box-shadow 0.35s",
               }}
             >
-              <div style={{ color: c.amber, fontSize: 14, marginBottom: 18, letterSpacing: 2 }}>★★★★★</div>
+              <div style={{ color: c.amber, fontSize: 12, marginBottom: 18, letterSpacing: 2 }}>RESQPLATE PRINCIPLE</div>
               <p style={{
                 fontFamily: "'Fraunces', serif", fontSize: 16.5, color: c.text,
                 lineHeight: 1.62, fontStyle: "italic", marginBottom: 24,
@@ -1843,37 +1824,6 @@ const Newsletter = ({ c }) => {
 };
 
 /* ══════════════════════════════════════════════════
-   PARTNERS
-══════════════════════════════════════════════════ */
-const Partners = ({ c }) => (
-  <section style={{ background: c.bg2, padding: "60px 32px", borderBottom: `1px solid ${c.border}` }}>
-    <div style={{ maxWidth: 920, margin: "0 auto", textAlign: "center" }}>
-      <Reveal>
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: "0.15em", color: c.text3, textTransform: "uppercase", marginBottom: 32 }}>
-          TRUSTED BY
-        </div>
-      </Reveal>
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 44, flexWrap: "wrap" }}>
-        {["Food Corp India", "Akshaya Patra", "Feeding India", "Zomato Feeding", "FSSAI"].map((name, i) => (
-          <Reveal key={i} delay={i * 0.08}>
-            <Link to="/about">
-              <motion.div
-                whileHover={{ opacity: 1, scale: 1.06 }}
-                style={{
-                  fontFamily: "'Fraunces', serif", fontSize: 15, fontWeight: 700,
-                  color: c.text2, opacity: 0.45, letterSpacing: "0.01em",
-                  cursor: "pointer", fontStyle: "italic",
-                }}
-              >{name}</motion.div>
-            </Link>
-          </Reveal>
-        ))}
-      </div>
-    </div>
-  </section>
-);
-
-/* ══════════════════════════════════════════════════
    CTA
 ══════════════════════════════════════════════════ */
 const CTA = ({ c }) => (
@@ -1899,10 +1849,7 @@ const CTA = ({ c }) => (
         }}>
           Ready to rescue<br />your first meal?
         </h2>
-        <p style={{ fontSize: 17, color: "rgba(255,255,255,0.55)", marginBottom: 52, fontWeight: 300, lineHeight: 1.78 }}>
-          Join 1,200+ donors and 50 NGOs already making India's food system more human.
-        </p>
-        <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", marginTop: 40 }}>
           <Link to="/register?role=donor">
             <motion.button
               whileHover={{ background: c.gold, transform: "translateY(-3px)", boxShadow: "0 24px 56px rgba(232,168,56,0.45)" }}
@@ -1964,37 +1911,23 @@ const FOOTER_COLS = [
     ],
   },
   {
-    title: "Company",
+    title: "Get involved",
     links: [
-      { label: "About",   to: "/about"   },
-      { label: "Contact", to: "/contact" },
-      { label: "Blog",    to: "/about"   },
-      { label: "Careers", to: "/contact" },
-    ],
-  },
-  {
-    title: "Account",
-    links: [
-      { label: "Sign Up",       to: "/register"         },
-      { label: "Log In",        to: "/login"            },
-      { label: "Dashboard",     to: "/dashboard"        },
-      { label: "Order History", to: "/dashboard/orders" },
+      { label: "Donate food", to: "/dashboard/donate" },
+      { label: "Create account", to: "/register" },
+      { label: "Sign in", to: "/login" },
+      { label: "Contact us", to: "/contact" },
     ],
   },
 ];
 
 const Footer = ({ c }) => (
   <footer style={{ background: "#0a1a0d", color: "rgba(255,255,255,0.4)", padding: "76px 32px 44px" }}>
-    <div className="rq-footer-grid" style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 44, marginBottom: 56 }}>
+    <div className="rq-footer-grid" style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 56, marginBottom: 56 }}>
       <div>
-        <Link to="/">
-          <div style={{ fontFamily: "'Fraunces', serif", fontSize: 25, fontWeight: 900, color: "#fff", marginBottom: 14, display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
-            <span style={{ fontSize: 20 }}>🍃</span>
-            ResQ<span style={{ color: c.amber }}>Plate</span>
-          </div>
-        </Link>
+        <div style={{ color: "#fff", marginBottom: 14 }}><Logo size={40} /></div>
         <p style={{ fontSize: 14, lineHeight: 1.78, maxWidth: 280, marginBottom: 22 }}>
-          Connecting surplus food with families in need. Building a hunger-free India, one rescue at a time.
+          A community platform helping surplus food reach people who can use it, safely and responsibly.
         </p>
         <div style={{ display: "flex", gap: 10 }}>
           {[{ icon: "🐦", href: "https://x.com/itsSalonyy" }, { icon: "📸", href: "https://salonyranjan.github.io/" }, { icon: "💼", href: "https://www.linkedin.com/in/salony-ranjan-b63200280/" }].map(({ icon, href }) => (
@@ -2030,11 +1963,10 @@ const Footer = ({ c }) => (
     </div>
 
     <div style={{ maxWidth: 1100, margin: "0 auto", borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 28, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-      <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12 }}>© 2026 ResQPlate · Built for Social Good</span>
+      <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12 }}>© 2026 ResQPlate · Food shared, not wasted.</span>
       <div style={{ display: "flex", gap: 20 }}>
-        <Link to="/contact"><span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, cursor: "pointer" }}>Privacy</span></Link>
-        <Link to="/contact"><span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, cursor: "pointer" }}>Terms</span></Link>
-        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: c.sage }}>🌿 Carbon-neutral operations</span>
+        <Link to="/about"><span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, cursor: "pointer" }}>About</span></Link>
+        <Link to="/contact"><span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, cursor: "pointer", color: c.sage }}>Contact</span></Link>
       </div>
     </div>
   </footer>
@@ -2044,7 +1976,7 @@ const Footer = ({ c }) => (
    ROOT EXPORT
 ══════════════════════════════════════════════════ */
 const Landing = () => {
-  const { dark, toggle } = useDarkMode();
+  const { dark } = useTheme();
   const c = C(dark);
 
   return (
@@ -2054,7 +1986,6 @@ const Landing = () => {
       <Grain />
       <ScrollProgress c={c} />
       <Ticker c={c} />
-      <NavBar c={c} dark={dark} toggleDark={toggle} />
       <Hero c={c} />
       <Stats c={c} />
       <Mission c={c} />
@@ -2063,7 +1994,6 @@ const Landing = () => {
       <ImpactMap c={c} />
       <Testimonials c={c} />
       <Newsletter c={c} />
-      <Partners c={c} />
       <CTA c={c} />
       <Footer c={c} />
     </>

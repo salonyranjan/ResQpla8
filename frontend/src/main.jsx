@@ -1,27 +1,24 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
-
-// Context & State Providers
-import { CartProvider } from "./context/CartContext";
-import { AuthProvider } from "./context/AuthContext";
-
-// Styles
 import "./index.css";
 import "./App.css";
-import "leaflet/dist/leaflet.css";
-
-// Components
 import App from "./App.jsx";
+import { BrowserRouter } from "react-router-dom";
+import { CartProvider } from "./context/CartContext";
+import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
+import "leaflet/dist/leaflet.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <CartProvider>
-          <App />
-        </CartProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <CartProvider>
+            <App />
+          </CartProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   </StrictMode>
 );

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useCart } from "../context/CartContext";
+import { useTheme } from "../context/ThemeContext";
 
 /* ═══════════════════════════════════════════════
    FOODCARD — Standalone, no router/context deps
@@ -459,18 +460,12 @@ const FoodCard = ({
   onDarkToggle,
 }) => {
   const [added, setAdded] = useState(false);
-  const [dark, setDark] = useState(true); // ← dark mode is now DEFAULT
+  const { dark: appDark } = useTheme();
   const cardRef = useRef(null);
   const { addItem } = useCart();
 
   // Allow external dark control or internal
-  const isDark = externalDark !== undefined ? externalDark : dark;
-  const handleDarkToggle = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (onDarkToggle) onDarkToggle(!isDark);
-    else setDark((d) => !d);
-  };
+  const isDark = externalDark !== undefined ? externalDark : appDark;
 
   useEffect(() => { injectStyles(); }, []);
 
@@ -480,10 +475,12 @@ const FoodCard = ({
     // Map Appwrite document fields to the context's Product type
     addItem({
       id: item.$id,
-      name: item.foodItem || "Surplus Meal",
+      name: item.name,
       price: 0, // Since ResQPlate is for donation
       restaurant: item.restaurant,
-      image: item.imageUrl
+      image: item.imageUrl,
+      status: item.status,
+      location: item.location,
     }, 1);
     setAdded(true);
     setTimeout(() => setAdded(false), 1400);
@@ -494,29 +491,19 @@ const FoodCard = ({
   };
 
   const {
-    name = "Dal Makhani Thali",
-    restaurant = "Spice Garden",
-    category = "Indian",
-    description = "Rich creamy dal makhani with basmati rice, sabzi, and fresh rotis.",
+    name = "Food donation",
+    restaurant = "Verified ResQPlate donor",
+    category = "Food",
+    description = "Details were not provided by the donor.",
     image = "",
-    expiresIn = "2h 30m",
-    distance = "0.8 km",
-    rating = 4.8,
-    quantity = 45,
+    expiresIn = "Pickup time not set",
+    distance = "Location not provided",
+    rating = null,
+    quantity = 0,
   } = item;
 
   return (
     <div className="fc-root" data-theme={isDark ? "dark" : "light"} style={{ display: "inline-block" }}>
-      {/* Dark toggle */}
-      <div className="fc-toggle-row">
-        <button className="fc-toggle-pill" onClick={handleDarkToggle} aria-label="Toggle dark mode">
-          <div className={`fc-track ${isDark ? "on" : ""}`}>
-            <div className="fc-thumb" />
-          </div>
-          {isDark ? "🌙 Dark" : "☀️ Light"}
-        </button>
-      </div>
-
       <div
         ref={cardRef}
         className="fc-card"
@@ -573,12 +560,12 @@ const FoodCard = ({
               </svg>
               {distance}
             </span>
-            <span className="fc-meta-chip fc-rating-chip">
+            {rating && <span className="fc-meta-chip fc-rating-chip">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
               </svg>
               {rating}
-            </span>
+            </span>}
           </div>
 
           {/* Quantity footer */}

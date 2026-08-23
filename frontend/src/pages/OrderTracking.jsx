@@ -10,10 +10,12 @@ import {
   HiOutlinePhone,
 } from "react-icons/hi";
 import { useOrderTracking } from "../hooks/useOrderTracking";
+import { useTheme } from "../context/ThemeContext";
 
 export default function OrderTracking() {
   const ctx = useOutletContext() || {};
-  const dark = ctx?.dark ?? true;
+  const { dark: appDark } = useTheme();
+  const dark = ctx?.dark ?? appDark;
   const T = dark
     ? {
         bg: "#080e0a", bgAlt: "#0d1710", bgCard: "#111c14", border: "rgba(34,197,94,0.09)",
@@ -32,16 +34,19 @@ export default function OrderTracking() {
 
   const { orderId } = useParams();
   const navigate = useNavigate();
-  const { order, currentStep, eta, progressPct, STATUS_STEPS } = useOrderTracking(orderId);
+  const { order, currentStep, eta, progressPct, STATUS_STEPS, loading, error } = useOrderTracking(orderId);
 
   // Map icons to steps (since hook doesn't include icon components)
   const STEP_ICONS = {
-    order_placed: HiOutlineShoppingBag,
+    pending: HiOutlineShoppingBag,
     confirmed: HiOutlineCheckCircle,
     preparing: HiOutlineFire,
     out_for_delivery: HiOutlineTruck,
-    delivered: HiOutlineCheckCircle,
+    completed: HiOutlineCheckCircle,
   };
+
+  if (loading) return <div style={{ minHeight: "60vh", display: "grid", placeItems: "center", background: T.bg, color: T.textMuted }}>Loading rescue status…</div>;
+  if (error || !order) return <div style={{ minHeight: "60vh", display: "grid", placeItems: "center", background: T.bg, color: "#ef4444", padding: 24, textAlign: "center" }}>{error || "Rescue not found."}</div>;
 
   return (
     <div style={{ background: T.bg, minHeight: "100vh", paddingBottom: 32 }}>
@@ -96,7 +101,7 @@ export default function OrderTracking() {
                 {currentStep === STATUS_STEPS.length - 1 ? "🎉" : currentStep >= 3 ? "🚴" : currentStep >= 2 ? "🍳" : "📋"}
               </div>
               <p style={{ fontSize: 22, fontWeight: 900, color: T.text, letterSpacing: "-0.03em" }}>
-                {currentStep === STATUS_STEPS.length - 1 ? "Delivered!" : `${eta} min away`}
+                {currentStep === STATUS_STEPS.length - 1 ? "Delivered!" : eta === null ? "Status in progress" : `${eta} min until pickup`}
               </p>
               <p style={{ fontSize: 13, color: T.textMuted, marginTop: 6 }}>
                 {STATUS_STEPS[currentStep].sub}

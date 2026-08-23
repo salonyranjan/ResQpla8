@@ -1,0 +1,27 @@
+name: Appwrite activity check
+
+on:
+  schedule:
+    - cron: "17 6 */3 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-appwrite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check the Appwrite project endpoint
+        env:
+          APPWRITE_ENDPOINT: ${{ secrets.APPWRITE_ENDPOINT }}
+          APPWRITE_PROJECT_ID: ${{ secrets.APPWRITE_PROJECT_ID }}
+        run: |
+          test -n "$APPWRITE_ENDPOINT" || { echo "Missing APPWRITE_ENDPOINT secret"; exit 1; }
+          test -n "$APPWRITE_PROJECT_ID" || { echo "Missing APPWRITE_PROJECT_ID secret"; exit 1; }
+          curl --fail --silent --show-error \
+            --retry 2 \
+            --max-time 20 \
+            -H "X-Appwrite-Project: $APPWRITE_PROJECT_ID" \
+            "${APPWRITE_ENDPOINT%/}/health/version"

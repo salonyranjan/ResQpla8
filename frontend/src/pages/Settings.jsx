@@ -1,11 +1,13 @@
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const Settings = () => {
-  const { T, dark } = useOutletContext();
+  const { T } = useOutletContext();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [emailUpdates, setEmailUpdates] = useState(false);
-  const [themePreference, setThemePreference] = useState(dark ? "dark" : "light");
 
   return (
     <div style={{ padding: "28px", background: T.bg, minHeight: "100vh" }}>
@@ -34,43 +36,6 @@ const Settings = () => {
         >
           Settings
         </h2>
-      </div>
-
-      <div style={{ background: T.bgCard, borderRadius: "16px", padding: "24px", marginBottom: "24px", border: `1px solid ${T.border}` }}>
-        <h3
-          style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: "18px",
-            color: T.text,
-            margin: "0 0 16px 0",
-          }}
-        >
-          Appearance
-        </h3>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{ fontSize: "16px" }}>🌓 Theme</div>
-          <select
-            value={themePreference}
-            onChange={(e) => setThemePreference(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "8px",
-              border: `1px solid ${T.border}`,
-              background: T.bgInput,
-              color: T.text,
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: "14px",
-              minWidth: "120px",
-            }}
-          >
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-            <option value="system">System</option>
-          </select>
-          <div style={{ fontSize: "12px", color: T.textFaint, marginLeft: "auto" }}>
-            Applies on next load
-          </div>
-        </div>
       </div>
 
       <div style={{ background: T.bgCard, borderRadius: "16px", padding: "24px", marginBottom: "24px", border: `1px solid ${T.border}` }}>
@@ -138,7 +103,7 @@ const Settings = () => {
         </h3>
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <button
-            onClick={() => alert("Profile update coming soon!")}
+            onClick={() => navigate("/dashboard/profile")}
             style={{
               width: "100%",
               padding: "12px 16px",
@@ -159,7 +124,10 @@ const Settings = () => {
             <span>👤</span> Update Profile
           </button>
           <button
-            onClick={() => alert("Logout functionality pending")}
+            onClick={async () => {
+              await logout();
+              navigate("/login", { replace: true });
+            }}
             style={{
               width: "100%",
               padding: "12px 16px",

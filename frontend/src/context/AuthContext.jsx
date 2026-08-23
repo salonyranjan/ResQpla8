@@ -58,9 +58,11 @@ export function AuthProvider({ children }) {
 
   const handleLogin = useCallback(async (email, password) => {
     const session = await login(email, password);
-    await refetch();
+    const authenticatedUser = await getCurrentUser();
+    if (!authenticatedUser) throw new Error("The session was created but the user could not be loaded.");
+    setUser(authenticatedUser);
     return session;
-  }, [refetch]);
+  }, []);
 
   const handleRegister = useCallback(async (email, password, name) => {
     const newUser = await register(email, password, name);
@@ -102,6 +104,7 @@ export function AuthProvider({ children }) {
  * Primary hook — full auth state and actions.
  * Throws if used outside <AuthProvider>.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");

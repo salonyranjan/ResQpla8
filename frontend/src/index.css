@@ -1,5 +1,83 @@
 @import "tailwindcss";
 
+:root {
+  --focus-ring: #52b788;
+  --page-bg: #f7f2e8;
+  --page-text: #111c15;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+:root[data-theme="dark"] {
+  --page-bg: #070f09;
+  --page-text: #e8f5ec;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  max-width: 100%;
+  overflow-x: clip;
+  background: var(--page-bg);
+  color: var(--page-text);
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  max-width: 100%;
+  overflow-x: clip;
+  min-height: 100vh;
+  background: var(--page-bg);
+  color: var(--page-text);
+  transition: background-color 240ms ease, color 240ms ease;
+}
+
+img, svg, video, canvas {
+  max-width: 100%;
+}
+
+input, select, textarea, button {
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  input, select, textarea {
+    font-size: 16px;
+  }
+}
+
+button, a, input, select, textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, a {
+  touch-action: manipulation;
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus-ring) 72%, transparent);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: rgba(82, 183, 136, 0.32);
+}
+
+.rq-main-logo { justify-self: start; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* ============================================
    ResQPlate – index.css
    Tailwind v4 CSS‑First Design System

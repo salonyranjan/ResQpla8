@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">ResQPlate</title>
+  <desc id="desc">A plate encircled by a rescue arrow with a growing leaf</desc>
+  <defs>
+    <linearGradient id="bg" x1="8" y1="5" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#173f29"/>
+      <stop offset="1" stop-color="#07170d"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="36" y1="13" x2="50" y2="31" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#95d5b2"/>
+      <stop offset="1" stop-color="#36a269"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="18" fill="url(#bg)"/>
+  <path d="M51.5 36A20.5 20.5 0 1 1 25 12.4" fill="none" stroke="#52b788" stroke-width="4" stroke-linecap="round"/>
+  <path d="m17.2 9.6 8.5 2.1-3 8.2" fill="none" stroke="#52b788" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M15 35.5h34c-1 10-8 16-17 16s-16-6-17-16Z" fill="#f7f2e8"/>
+  <path d="M19 39h26c-2.1 5.6-6.5 8.5-13 8.5S21.1 44.6 19 39Z" fill="#e8a838"/>
+  <path d="M34 31c.8-9.6 6.2-15.5 15.8-16.8-.7 9.5-6 15.3-15.8 16.8Z" fill="url(#leaf)"/>
+  <path d="M35 29c4-4.8 7.5-8 12-11" fill="none" stroke="#1d6b3e" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

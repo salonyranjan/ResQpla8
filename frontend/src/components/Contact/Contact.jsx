@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { motion, useInView, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import emailjs from "@emailjs/browser";
+import { useTheme } from "../../context/ThemeContext";
+import AppLogo from "../Logo";
 
 /* ═══════════════════════════════════════════════════════════
    FONTS
@@ -1121,12 +1123,7 @@ const Footer = ({ T }) => (
     display: "flex", alignItems: "center", justifyContent: "space-between",
     flexWrap: "wrap", gap: 14,
   }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
-      <Logo T={T} size={30} />
-      <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 19, fontWeight: 700, color: T.ink }}>
-        ResQ<em style={{ color: T.amber, fontStyle: "italic" }}>Plate</em>
-      </span>
-    </div>
+    <div style={{ color: T.ink }}><AppLogo size={34} /></div>
     <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11.5, color: T.inkHint }}>
       © 2026 ResQPlate · Built for Social Good
     </div>
@@ -1145,7 +1142,7 @@ const Footer = ({ T }) => (
    ROOT
 ═══════════════════════════════════════════════════════════ */
 export default function Contact() {
-  const [dark, setDark] = useState(true);
+  const { dark } = useTheme();
   const T = dark ? DARK : LIGHT;
 
   return (
@@ -1154,7 +1151,6 @@ export default function Contact() {
       <GlobalStyles dark={dark} />
       <Grain />
       <div style={{ background: T.bg, transition: "background 0.5s", minHeight: "100vh" }}>
-        <Navbar dark={dark} onToggle={() => setDark(d => !d)} T={T} />
         <Hero T={T} dark={dark} />
         <InfoCards T={T} />
         <FormSection T={T} />

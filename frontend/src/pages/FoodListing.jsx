@@ -3,11 +3,7 @@ import { useOutletContext, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlineSearch, HiOutlineAdjustments, HiOutlineX, HiOutlineClock, HiOutlineLocationMarker } from "react-icons/hi";
 import FoodCard from "../components/FoodCard";
-import { databases } from "../services/appwrite";
-import { Query } from "appwrite";
-
-const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
-const PICKUPS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PICKUPS_COLLECTION_ID;
+import { listAvailableFood, subscribeToPickupChanges } from "../services/foodService";
 
 const stagger = { 
   hidden: { opacity: 0 }, 
@@ -69,17 +65,8 @@ export default function FoodListing() {
 
     const fetchListings = async () => {
       try {
-        const res = await databases.listDocuments(
-          DATABASE_ID,
-          PICKUPS_COLLECTION_ID,
-          [
-            Query.equal("status", "available"),
-            Query.orderDesc("$createdAt"),
-            Query.limit(500),
-          ]
-        );
+        const docs = await listAvailableFood(500);
         if (!cancelled) {
-          const docs = res.documents;
           setListings(docs);
 
           // Derive unique categories dynamically
@@ -95,14 +82,20 @@ export default function FoodListing() {
       } catch (err) {
         console.error("Failed to fetch food listings:", err);
         if (!cancelled) {
-          setError("Failed to load listings. Please try again later.");
+          setError(err.message || "Failed to load listings. Please try again later.");
           setLoading(false);
         }
       }
     };
 
     fetchListings();
-    return () => { cancelled = true; };
+    const unsubscribe = subscribeToPickupChanges(fetchListings);
+    const expiryRefresh = window.setInterval(fetchListings, 60_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(expiryRefresh);
+      unsubscribe?.();
+    };
   }, []);
 
   // Filter and sort locally (JS fallback for search since Appwrite search may not be indexed)
@@ -114,7 +107,7 @@ export default function FoodListing() {
       const term = search.toLowerCase();
       result = result.filter(item =>
         (item.name && item.name.toLowerCase().includes(term)) ||
-        (item.restaurant && item.restaurant.toLowerCase().includes(term)) ||
+        (item.location && item.location.toLowerCase().includes(term)) ||
         (item.foodItem && item.foodItem.toLowerCase().includes(term)) ||
         (item.description && item.description.toLowerCase().includes(term))
       );
@@ -346,7 +339,7 @@ export default function FoodListing() {
             >
               <div style={{ fontSize: 56, marginBottom: 16 }}>🥡</div>
               <p style={{ fontSize: 17, fontWeight: 700, color: T.text, marginBottom: 6 }}>No food listings found</p>
-              <p style={{ fontSize: 13, color: T.textMuted }}>Try adjusting your search or filters</p>
+              <p style={{ fontSize: 13, color: T.textMuted }}>{listings.length ? "Try adjusting your search or filters." : "No pending donations are available right now."}</p>
               <motion.button
                 whileTap={{ scale: 0.96 }}
                 onClick={() => { setSearch(""); handleCategoryChange("All"); }}

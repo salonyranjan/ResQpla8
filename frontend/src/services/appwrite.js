@@ -1,4 +1,11 @@
-import { Client, Account, Databases } from "appwrite";
+import { Client, Account, Databases, Storage, ID } from "appwrite";
+
+const endpoint = import.meta.env.VITE_APPWRITE_ENDPOINT?.trim();
+const projectId = import.meta.env.VITE_APPWRITE_PROJECT_ID?.trim();
+
+if (!endpoint || !projectId) {
+  throw new Error("Appwrite is not configured. Add VITE_APPWRITE_ENDPOINT and VITE_APPWRITE_PROJECT_ID.");
+}
 
 /**
  * Appwrite client configuration.
@@ -10,15 +17,35 @@ import { Client, Account, Databases } from "appwrite";
  * This keeps the configuration flexible without hard‑coding values.
  */
 const client = new Client()
-  .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT) // required, no trailing slash
-  .setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID);
+  .setEndpoint(endpoint.replace(/\/$/, ""))
+  .setProject(projectId);
 
 // Re‑usable service instances
 export const account = new Account(client);
 export const databases = new Databases(client);
+export const storage = new Storage(client);
 
 // Export the client itself for any advanced use‑cases.
 export default client;
+
+function authError(error, fallback) {
+  const messages = {
+    user_invalid_credentials: "The email or password is incorrect.",
+    user_email_already_exists: "An account with this email already exists. Try signing in.",
+    user_session_already_exists: "You are already signed in.",
+    general_rate_limit_exceeded: "Too many attempts. Please wait a moment and try again.",
+    general_unknown_origin: "This website is not registered in Appwrite. Add its hostname under Project → Platforms.",
+    project_unknown: "The Appwrite project ID is invalid or the project is unavailable.",
+    project_paused: "The Appwrite project is paused. Resume it from the Appwrite Console, then try again.",
+  };
+  const friendly = new Error(messages[error?.type] || (error?.code >= 500
+    ? "The account service is temporarily unavailable. Please try again shortly."
+    : error?.message || fallback));
+  friendly.code = error?.code;
+  friendly.type = error?.type;
+  friendly.cause = error;
+  return friendly;
+}
 
 /* ────────────────────────────────────────────
    Authentication helpers
@@ -33,11 +60,11 @@ export default client;
  */
 export async function register(email, password, name) {
   try {
-    const user = await account.create("unique()", email, password, name);
+    const user = await account.create(ID.unique(), email.trim().toLowerCase(), password, name.trim());
     return user;
   } catch (err) {
     console.error("Registration failed:", err.message);
-    throw err; // let the caller handle UI feedback
+    throw authError(err, "Account creation failed. Please try again.");
   }
 }
 
@@ -50,11 +77,11 @@ export async function register(email, password, name) {
  */
 export async function login(email, password) {
   try {
-    const session = await account.createEmailPasswordSession(email, password);
+    const session = await account.createEmailPasswordSession(email.trim().toLowerCase(), password);
     return session;
   } catch (err) {
     console.error("Login failed:", err.message);
-    throw err;
+    throw authError(err, "Sign in failed. Please try again.");
   }
 }
 
@@ -72,7 +99,7 @@ export async function getCurrentUser() {
     // so the caller can decide how to handle it without clearing the session.
     if (err.code === 401) return null;
     console.error("Failed to fetch current user:", err.message);
-    throw err;
+    throw authError(err, "Unable to verify your session.");
   }
 }
 

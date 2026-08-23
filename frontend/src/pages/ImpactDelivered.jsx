@@ -3,42 +3,10 @@ import { useOutletContext, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { databases } from "../services/appwrite";
 import { Query } from "appwrite";
+import Logo from "../components/Logo";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const PICKUPS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PICKUPS_COLLECTION_ID;
-
-/* ─── Theme Toggle ────────────────────────────────────────────── */
-function ThemeToggle({ dark, onToggle }) {
-  return (
-    <button
-      onClick={onToggle}
-      aria-label="Toggle theme"
-      style={{
-        position: "fixed",
-        top: "1.25rem",
-        right: "1.25rem",
-        zIndex: 100,
-        width: "2.75rem",
-        height: "2.75rem",
-        borderRadius: "50%",
-        border: dark ? "1.5px solid rgba(74,222,128,0.25)" : "1.5px solid rgba(0,0,0,0.10)",
-        background: dark ? "rgba(17,28,20,0.85)" : "rgba(255,255,255,0.85)",
-        backdropFilter: "blur(12px)",
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontSize: "1.1rem",
-        boxShadow: dark
-          ? "0 2px 20px rgba(74,222,128,0.12)"
-          : "0 2px 20px rgba(0,0,0,0.08)",
-        transition: "all 0.3s cubic-bezier(0.34,1.56,0.64,1)",
-      }}
-    >
-      {dark ? "☀️" : "🌙"}
-    </button>
-  );
-}
 
 /* ─── Floating orbs background ───────────────────────────────── */
 function Orbs({ dark }) {
@@ -74,7 +42,7 @@ function Orbs({ dark }) {
 
 /* ─── Main Component ──────────────────────────────────────────── */
 export default function ImpactDelivered() {
-  const { T, dark, toggleDark } = useOutletContext() || {};
+  const { T, dark } = useOutletContext() || {};
   const theme = T || {
     bg: dark ? "#080e0a" : "#f0fdf4",
     bgCard: dark ? "rgba(13,22,15,0.85)" : "rgba(255,255,255,0.92)",
@@ -102,7 +70,7 @@ export default function ImpactDelivered() {
         const response = await databases.listDocuments(
           DATABASE_ID,
           PICKUPS_COLLECTION_ID,
-          [Query.equal("status", "delivered")]
+          [Query.equal("status", "completed")]
         );
         if (!cancelled) {
           setPickups(response.documents);
@@ -124,7 +92,7 @@ export default function ImpactDelivered() {
 
   const totalMeals = useMemo(() => {
     return pickups.reduce((sum, p) => {
-      const qty = parseInt(p.qty?.match(/\d+/)?.[0] || p.meals || 0, 10);
+      const qty = Number(p.mealsCount || 0);
       return sum + (isNaN(qty) ? 0 : qty);
     }, 0);
   }, [pickups]);
@@ -164,7 +132,6 @@ export default function ImpactDelivered() {
       transition: "background 0.5s ease",
     }}>
       <Orbs dark={dark} />
-      <ThemeToggle dark={dark} onToggle={toggleDark} />
 
       <div style={{
         position: "relative",
@@ -189,26 +156,7 @@ export default function ImpactDelivered() {
         <div style={{ padding: "2rem 2rem 2.25rem" }}>
           {/* Header */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
-              <div style={{
-                width: "2.5rem", height: "2.5rem",
-                borderRadius: "0.75rem",
-                background: "linear-gradient(135deg, #10b981, #14b8a6)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "1.1rem",
-                boxShadow: "0 4px 16px rgba(16,185,129,0.35)",
-              }}>🌿</div>
-              <h1 style={{
-                fontSize: "1.45rem",
-                fontWeight: 900,
-                fontFamily: "'Syne', sans-serif",
-                color: theme.text,
-                letterSpacing: "-0.03em",
-                lineHeight: 1,
-              }}>
-                ResQ<span style={{ color: "#f59e0b" }}>Plate</span>
-              </h1>
-            </div>
+            <Logo size={40} />
             <div style={{
               fontSize: "0.68rem",
               fontFamily: "'DM Mono', monospace",
@@ -417,7 +365,7 @@ export default function ImpactDelivered() {
                         fontWeight: 600,
                         flexShrink: 0,
                       }}>
-                        {pickup.qty || "1 meal"}
+                        {pickup.mealsCount || 0} meals
                       </div>
                     </motion.div>
                   ))}

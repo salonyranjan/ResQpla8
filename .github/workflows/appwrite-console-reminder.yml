@@ -1,0 +1,33 @@
+name: Appwrite console reminder
+
+on:
+  schedule:
+    # Appwrite Free pauses after 7 days without Console activity.
+    # Monday and Thursday gives a comfortable margin.
+    - cron: "0 9 * * 1,4"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create reminder if one is not already open
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          title="Action needed: open the Appwrite Console"
+          existing="$(gh issue list --state open --search "${title} in:title" --json number --jq 'length')"
+
+          if [ "$existing" -eq 0 ]; then
+            gh issue create \
+              --title "$title" \
+              --body $'Open your Appwrite project in the Console today so the Free project records development activity before the seven-day pause window.\n\n1. Open https://cloud.appwrite.io/console\n2. Open the ResQPlate project.\n3. Confirm that its status is Active.\n4. Close this issue after checking it; the workflow will create the next reminder automatically.\n\nDo not place Appwrite passwords or API keys in this workflow.'
+          else
+            echo "An Appwrite reminder is already open."
+          fi

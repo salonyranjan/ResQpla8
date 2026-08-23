@@ -3,6 +3,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useReducer,
 } from 'react';
@@ -97,18 +98,11 @@ function cartReducer(state, action) {
 function useCartReducer() {
   const [items, dispatch] = useReducer(cartReducer, undefined, readStorage);
 
-  const persistingDispatch = useCallback(
-    (action) => {
-      dispatch((prevItems) => {
-        const nextItems = cartReducer(prevItems, action);
-        writeStorage(nextItems);
-        return nextItems;
-      });
-    },
-    [],
-  );
+  useEffect(() => {
+    writeStorage(items);
+  }, [items]);
 
-  return [items, persistingDispatch];
+  return [items, dispatch];
 }
 
 // ─── Context ─────────────────────────────────────────────────────────────────

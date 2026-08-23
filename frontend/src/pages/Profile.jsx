@@ -1,6 +1,6 @@
-import { Link, useOutletContext } from "react-router-dom";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   HiOutlineUser,
   HiOutlineClipboardList,
@@ -13,7 +13,8 @@ import {
   HiOutlineStar,
   HiOutlineQuestionMarkCircle,
 } from "react-icons/hi";
-import { currentUser } from "../data/mockData";
+import { useAuth } from "../context/AuthContext";
+import { listAllPickups } from "../services/foodService";
 
 const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.07 } } };
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } } };
@@ -40,15 +41,17 @@ export default function ProfilePage() {
       };
 
   const [logoutModal, setLogoutModal] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [stats, setStats] = useState({ donations: 0, mealsShared: 0 });
 
-  const user = currentUser || {
-    name: "Arjun Kumar",
-    email: "arjun@example.com",
-    avatar: "https://api.dicebear.com/7.x/notionists/svg?seed=arjun",
-    donations: 42,
-    mealsShared: 186,
-    streak: 14,
-  };
+  useEffect(() => {
+    if (!user?.$id) return;
+    listAllPickups(500).then((pickups) => {
+      const own = pickups.filter((pickup) => pickup.donorId === user.$id);
+      setStats({ donations: own.length, mealsShared: own.reduce((sum, pickup) => sum + Number(pickup.mealsCount || 0), 0) });
+    }).catch(() => setStats({ donations: 0, mealsShared: 0 }));
+  }, [user?.$id]);
 
   const menuSections = [
     {
@@ -76,11 +79,10 @@ export default function ProfilePage() {
     },
   ];
 
-  const achievements = [
-    { emoji: "🏆", label: "Gold Donor", desc: "42 donations" },
-    { emoji: "🔥", label: "14-Day Streak", desc: "Consistent hero" },
-    { emoji: "🌿", label: "Eco Warrior", desc: "100kg CO₂ saved" },
-  ];
+  const achievements = stats.donations > 0 ? [
+    { emoji: "🌱", label: "Food rescuer", desc: `${stats.donations} real donation${stats.donations === 1 ? "" : "s"}` },
+    { emoji: "🌿", label: "Meals shared", desc: `${stats.mealsShared} meals posted` },
+  ] : [];
 
   return (
     <div style={{ background: T.bg, minHeight: "100vh", paddingBottom: 32 }}>
@@ -107,7 +109,7 @@ export default function ProfilePage() {
         <div style={{ display: "flex", alignItems: "center", gap: 16, position: "relative" }}>
           <div style={{ position: "relative" }}>
             <img
-              src={user.avatar || `https://api.dicebear.com/7.x/notionists/svg?seed=${user.name}`}
+              src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user?.name || "User")}`}
               alt="avatar"
               style={{
                 width: 72,
@@ -141,7 +143,7 @@ export default function ProfilePage() {
             <p style={{ fontSize: 12.5, color: T.textMuted, marginTop: 3 }}>{user.email}</p>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6 }}>
               <div style={{ background: T.accentSoft, border: `1px solid ${T.borderMed}`, borderRadius: 100, padding: "2px 10px" }}>
-                <span style={{ fontFamily: "monospace", fontSize: 10, color: T.accent, fontWeight: 700 }}>🏆 GOLD DONOR</span>
+                <span style={{ fontFamily: "monospace", fontSize: 10, color: T.accent, fontWeight: 700 }}>VERIFIED MEMBER</span>
               </div>
             </div>
           </div>
@@ -165,9 +167,9 @@ export default function ProfilePage() {
           }}
         >
           {[
-            { value: user.donations || 42, label: "Donations", icon: "🍽️", color: T.accent },
-            { value: user.mealsShared || 186, label: "Meals Shared", icon: "🤝", color: T.teal },
-            { value: (user.streak || 14) + "d", label: "Streak", icon: "🔥", color: T.amber },
+            { value: stats.donations, label: "Donations", icon: "🍽️", color: T.accent },
+            { value: stats.mealsShared, label: "Meals Shared", icon: "🤝", color: T.teal },
+            { value: (stats.mealsShared * 0.5).toFixed(1), label: "CO₂ saved (kg)", icon: "🌿", color: T.amber },
           ].map((s) => (
             <div key={s.label} style={{ textAlign: "center" }}>
               <div style={{ fontSize: 20, marginBottom: 4 }}>{s.icon}</div>
@@ -179,7 +181,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Achievements */}
-      <div style={{ padding: "20px 16px 0" }}>
+      {achievements.length > 0 && <div style={{ padding: "20px 16px 0" }}>
         <p style={{ fontSize: 11, fontFamily: "monospace", color: T.textFaint, letterSpacing: "0.08em", marginBottom: 12 }}>ACHIEVEMENTS</p>
         <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 2, scrollbarWidth: "none" }}>
           {achievements.map((a) => (
@@ -203,7 +205,7 @@ export default function ProfilePage() {
             </motion.div>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Menu sections */}
       {menuSections.map((section) => (
@@ -331,7 +333,7 @@ export default function ProfilePage() {
                 <p style={{ fontSize: 13, color: T.textMuted }}>Are you sure you want to logout?</p>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <button style={{ background: T.red, color: "#fff", border: "none", borderRadius: 16, padding: "14px", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "inherit" }}>
+                <button onClick={async () => { await logout(); navigate("/login", { replace: true }); }} style={{ background: T.red, color: "#fff", border: "none", borderRadius: 16, padding: "14px", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "inherit" }}>
                   Yes, Logout
                 </button>
                 <button onClick={() => setLogoutModal(false)}

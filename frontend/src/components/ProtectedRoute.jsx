@@ -1,14 +1,16 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
+
+const Motion = motion;
 
 /**
  * Simple loading spinner using Framer Motion.
  */
 const LoadingSpinner = () => (
   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-    <motion.div
+    <Motion.div
       animate={{ rotate: 360 }}
       transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
       style={{
@@ -30,13 +32,14 @@ const LoadingSpinner = () => (
  */
 export default function ProtectedRoute({ children }) {
   const { loading, user } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return <LoadingSpinner />;
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
   return <>{children}</>;

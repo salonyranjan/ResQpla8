@@ -1,9 +1,13 @@
-import { useOutletContext, Link } from "react-router-dom";
+import { useOutletContext, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
+import { createFoodDonation } from "../services/foodService";
 
 const DonateFood = () => {
-  const { T, dark } = useOutletContext();
+  const { T } = useOutletContext();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     foodType: "Veg",
     quantity: "",
@@ -15,6 +19,7 @@ const DonateFood = () => {
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -26,18 +31,18 @@ const DonateFood = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.quantity || !form.location || !form.description || !form.image) {
-      alert("Please fill all required fields and select an image.");
+      setError("Complete all required fields and select a food photo.");
       return;
     }
     setLoading(true);
-    // Simulate upload delay
-    setTimeout(() => {
-      setLoading(false);
+    setError("");
+    setSuccess(false);
+    try {
+      await createFoodDonation({ ...form, userId: user?.$id });
       setSuccess(true);
-      // Reset form after success
       setForm({
         foodType: "Veg",
         quantity: "",
@@ -47,7 +52,12 @@ const DonateFood = () => {
         image: null,
         imagePreview: null,
       });
-    }, 1500);
+      setTimeout(() => navigate("/dashboard/search"), 900);
+    } catch (err) {
+      setError(err.message || "The donation could not be posted. Check Appwrite permissions and try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -95,6 +105,12 @@ const DonateFood = () => {
             </p>
           </div>
         </motion.div>
+      )}
+
+      {error && (
+        <div role="alert" style={{ background: "rgba(239,68,68,.08)", border: "1px solid rgba(239,68,68,.25)", color: "#ef4444", borderRadius: 14, padding: "14px 18px", marginBottom: 20, fontSize: 13 }}>
+          {error}
+        </div>
       )}
 
       <form onSubmit={handleSubmit} style={{ maxWidth: 500, margin: "0 auto" }}>

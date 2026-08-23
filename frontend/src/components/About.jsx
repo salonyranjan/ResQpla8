@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "../context/ThemeContext";
 
 const MotionLink = motion(Link);
 
@@ -11,7 +12,6 @@ const ABOUT_NAV_LINKS = [
   { label: "About",        href: "#hero",         emoji: "✦" },
   { label: "Mission",      href: "#mission",       emoji: "🎯" },
   { label: "How It Works", href: "#how-it-works",  emoji: "⚙️" },
-  { label: "Impact",       href: "#impact",        emoji: "📊" },
   { label: "Values",       href: "#values",        emoji: "💚" },
 ];
 
@@ -1203,9 +1203,7 @@ const AboutNavBar = ({ dark, toggleDark, activeIdx, setActiveIdx }) => {
    MAIN ABOUT COMPONENT
 ═══════════════════════════════════════════════════ */
 export default function About() {
-  const [dark, setDark] = useState(true);
-  const [activeIdx, setActiveIdx] = useState(0);
-  const toggleDark = useCallback(() => setDark(d => !d), []);
+  const { dark } = useTheme();
   useReveal();
 
   useEffect(() => {
@@ -1219,21 +1217,14 @@ export default function About() {
 
   const HOW_STEPS = [
     { emoji: "🍽️", title: "Food Listed",    body: "Restaurants, events & households list surplus food with expiry time and quantity.", color: "step-green", to: "/dashboard/donate" },
-    { emoji: "📍", title: "Smart Matched",  body: "Our algorithm instantly notifies the nearest verified NGO or volunteer.", color: "step-teal", to: "/dashboard/ai-matching" },
-    { emoji: "🤝", title: "Claim & Pickup", body: "Verified receivers claim the listing and coordinate pickup within minutes.", color: "step-amber", to: "/dashboard/volunteer" },
-    { emoji: "❤️", title: "Meal Delivered", body: "Safe, warm food reaches families in need — tracked end-to-end.", color: "step-leaf", to: "/dashboard/track" },
-  ];
-
-  const IMPACT = [
-    { emoji: "🍽️", num: 12000, suffix: "+",  label: "Meals Rescued",  color: "#52b788", glow: "#52b788" },
-    { emoji: "🌿", num: 4200,  suffix: "kg", label: "CO₂ Offset",     color: "#1fb8a0", glow: "#1fb8a0" },
-    { emoji: "🤝", num: 340,   suffix: "+",  label: "NGO Partners",   color: "#f59e0b", glow: "#f59e0b" },
-    { emoji: "👥", num: 1800,  suffix: "+",  label: "Volunteers",     color: "#52b788", glow: "#52b788" },
+    { emoji: "📍", title: "Made Discoverable", body: "Pending donations appear in the shared food listing with their pickup details.", color: "step-teal", to: "/dashboard/search" },
+    { emoji: "🤝", title: "Claim & Pickup", body: "Signed-in receivers can claim an available listing and provide destination details.", color: "step-amber", to: "/dashboard/search" },
+    { emoji: "❤️", title: "Outcome Recorded", body: "The pickup status becomes part of the platform's real activity and impact history.", color: "step-leaf", to: "/dashboard/orders" },
   ];
 
   const VALUES = [
     { emoji: "🛡️", title: "Food Safety",   body: "Only safe, within-expiry food enters our network. Every listing is timestamped and tracked." },
-    { emoji: "🔐", title: "Secure Access",  body: "Role-based authentication protects donors, NGOs, and volunteers at every touchpoint." },
+    { emoji: "🔐", title: "Secure Access",  body: "Authentication protects personal dashboards and food-rescue actions." },
     { emoji: "⚖️", title: "Transparency",   body: "A clear, auditable claim-and-pickup workflow means zero ambiguity from listing to plate." },
     { emoji: "🌍", title: "Social Impact",  body: "We build sustainable food systems — not charity, but community-powered change." },
   ];
@@ -1247,13 +1238,6 @@ export default function About() {
 
   return (
     <>
-      <AboutNavBar
-        dark={dark}
-        toggleDark={toggleDark}
-        activeIdx={activeIdx}
-        setActiveIdx={setActiveIdx}
-      />
-
       {/* ══ HERO ══ */}
       <section className="ab-hero" id="hero">
         <div className="ab-hero-grain" />
@@ -1280,20 +1264,20 @@ export default function About() {
 
           <div className="ab-stats rv rv-d3">
             <div className="ab-stat">
-              <div className="ab-stat-n"><Counter to={12000} suffix="+" /></div>
-              <div className="ab-stat-l">Meals Rescued</div>
+              <div className="ab-stat-n">List</div>
+              <div className="ab-stat-l">Real Surplus</div>
             </div>
             <div className="ab-stat">
-              <div className="ab-stat-n"><Counter to={340} suffix="+" /></div>
-              <div className="ab-stat-l">NGO Partners</div>
+              <div className="ab-stat-n">Find</div>
+              <div className="ab-stat-l">Available Food</div>
             </div>
             <div className="ab-stat">
-              <div className="ab-stat-n"><Counter to={98} suffix="%" /></div>
-              <div className="ab-stat-l">Safe Delivery Rate</div>
+              <div className="ab-stat-n">Claim</div>
+              <div className="ab-stat-l">A Pickup</div>
             </div>
             <div className="ab-stat">
-              <div className="ab-stat-n"><Counter to={4200} suffix="kg" /></div>
-              <div className="ab-stat-l">CO₂ Offset</div>
+              <div className="ab-stat-n">Track</div>
+              <div className="ab-stat-l">Real Progress</div>
             </div>
           </div>
         </div>
@@ -1315,24 +1299,23 @@ export default function About() {
               Technology in service<br />of <em>humanity</em>
             </h2>
             <p className="ab-p rv rv-d2">
-              ResQPlate is a precision-built platform that turns food waste into community
-              nourishment. We connect restaurants, event organizers, and households with
-              verified NGOs and volunteers in real time — no food left behind.
+              ResQPlate helps restaurants, event organizers, and individuals make safe surplus
+              food visible to people and organizations that can collect and use it.
             </p>
             <p className="ab-p rv rv-d3">
-              Powered by geolocation, smart matching, and role-based authentication, every
-              surplus plate finds its rightful place at someone's table before the clock runs out.
+              The platform provides one straightforward flow for publishing a donation,
+              discovering available food, claiming a pickup, and recording its outcome.
             </p>
           </div>
 
           <div className="ab-why-card rv rv-d2">
             <h3 className="ab-why-title">Why ResQPlate?</h3>
             {[
-              "Precision matching reduces food waste to near-zero",
-              "Empowers frontline NGOs & grassroots volunteers",
-              "Guarantees safe, timely pickups every single time",
-              "Builds compassionate, self-sustaining communities",
-              "Transparent audit trail from listing to delivery",
+              "Real listings instead of placeholder inventory",
+              "Clear quantities, locations, and pickup windows",
+              "Availability checks before a donation is claimed",
+              "Completed pickups preserved as impact history",
+              "A focused experience for donors and receivers",
             ].map((text, i) => (
               <div className="ab-why-item" key={i}>
                 <div className="ab-why-check">✓</div>
@@ -1351,7 +1334,7 @@ export default function About() {
           <div className="ab-how-header">
             <p className="ab-tag rv">How It Works</p>
             <h2 className="ab-h2 rv rv-d1">
-              From surplus to <em>plate</em><br />in minutes
+              From surplus to <em>pickup</em><br />with a clear process
             </h2>
           </div>
 
@@ -1370,45 +1353,6 @@ export default function About() {
                 <h3 className="ab-step-title">{step.title}</h3>
                 <p className="ab-step-body">{step.body}</p>
               </MotionLink>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <div className="ab-sep" />
-
-      {/* ══ IMPACT ══ */}
-      <section className="ab-section ab-impact" id="impact">
-        <div className="ab-impact-watermark" aria-hidden>Impact</div>
-        <div className="ab-impact-inner">
-          <div>
-            <p className="ab-tag rv">Our Impact</p>
-            <h2 className="ab-h2 rv rv-d1">
-              Numbers that<br /><em>speak for themselves</em>
-            </h2>
-            <p className="ab-p rv rv-d2">
-              Every metric below is a life touched, a family fed, a community strengthened.
-              We don't just count meals — we count moments of dignity restored.
-            </p>
-            <p className="ab-p rv rv-d3">
-              Our technology runs 24/7, so that even at 11 PM, a hotel kitchen's leftovers
-              become a shelter's midnight supper.
-            </p>
-          </div>
-
-          <div className="ab-impact-grid rv rv-d2">
-            {IMPACT.map((card, i) => (
-              <div className="ab-impact-card" key={i}>
-                <div
-                  className="ab-impact-glow"
-                  style={{ background: `radial-gradient(circle, ${card.glow} 0%, transparent 70%)` }}
-                />
-                <span className="ab-impact-icon">{card.emoji}</span>
-                <div className="ab-impact-num" style={{ color: card.color }}>
-                  <Counter to={card.num} suffix={card.suffix} />
-                </div>
-                <div className="ab-impact-label">{card.label}</div>
-              </div>
             ))}
           </div>
         </div>
@@ -1449,15 +1393,14 @@ export default function About() {
         <div className="ab-quote-inner">
           <span className="ab-quote-mark rv">"</span>
           <blockquote className="ab-quote-text rv rv-d1">
-            We don't just rescue food — we rescue{" "}
-            <em>dignity, community,</em> and the belief that no one
-            should go hungry when there's abundance nearby.
+            ResQPlate is built on a simple belief: safe surplus food should be
+            <em> easier to share</em> and every rescue should be represented honestly.
           </blockquote>
           <div className="ab-quote-attr rv rv-d2">
-            <div className="ab-quote-avatar">🌿</div>
+            <div className="ab-quote-avatar">SR</div>
             <div>
-              <div className="ab-quote-name">Arjun Kumar</div>
-              <div className="ab-quote-role">Co-Founder & Operations Lead, ResQPlate</div>
+              <div className="ab-quote-name">Salony Ranjan</div>
+              <div className="ab-quote-role">Developer, ResQPlate</div>
             </div>
           </div>
         </div>
@@ -1487,15 +1430,6 @@ export default function About() {
             <Link to="/dashboard/search" className="ab-btn-ghost">
               Browse Listings
             </Link>
-          </div>
-
-          <div className="ab-partners rv rv-d4">
-            <div className="ab-partners-label">Trusted Partners</div>
-            <div className="ab-partners-row">
-              {["Akshaya Patra", "Feeding India", "Robin Hood Army", "No Food Waste"].map(p => (
-                <div className="ab-partner-pill" key={p}>{p}</div>
-              ))}
-            </div>
           </div>
 
           <p className="ab-cta-foot rv rv-d5">
