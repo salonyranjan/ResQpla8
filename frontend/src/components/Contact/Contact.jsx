@@ -153,7 +153,7 @@ const GlobalStyles = ({ dark }) => {
       }
       @media(max-width:600px){
         .rq-grid-4,.rq-grid-3,.rq-grid-2-eq{grid-template-columns:1fr!important}
-        .rq-contact-hero{min-height:auto!important;padding:86px 0 64px;align-items:flex-start!important}
+        .rq-contact-hero{min-height:auto!important;padding:72px 0 46px;align-items:flex-start!important}
         .rq-hero-inner{display:block!important;padding:0 20px!important}
         .rq-hero-copy{max-width:none!important;width:100%}
         .rq-hero-h1{font-size:clamp(40px,12vw,48px)!important;line-height:.98!important;letter-spacing:-.04em!important;margin-bottom:20px!important}
@@ -324,7 +324,7 @@ const Hero = ({ T, dark }) => {
 
   return (
     <section ref={ref} className="rq-contact-hero" style={{
-      position: "relative", minHeight: 620,
+      position: "relative", minHeight: 500,
       display: "flex", alignItems: "center",
       background: dark
         ? `radial-gradient(ellipse at 30% 60%, rgba(29,76,50,0.35) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(45,106,79,0.18) 0%, transparent 50%), ${T.bg}`
@@ -377,10 +377,10 @@ const Hero = ({ T, dark }) => {
       </div>
 
       <Motion.div style={{ y, opacity }} className="rq-section-pad">
-        <div className="rq-hero-inner" style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 40 }}>
+        <div className="rq-hero-inner" style={{ maxWidth: 900, margin: "0 auto", padding: "0 48px", display: "flex", alignItems: "center", justifyContent: "center" }}>
 
           {/* Left: text */}
-          <div className="rq-hero-copy" style={{ maxWidth: 580, flex: "0 1 580px" }}>
+          <div className="rq-hero-copy" style={{ maxWidth: 760, width: "100%", textAlign: "center" }}>
             {/* Eyebrow */}
             <Motion.div
               className="rq-hero-eyebrow"
@@ -430,130 +430,31 @@ const Hero = ({ T, dark }) => {
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              style={{ fontSize: 16, fontWeight: 300, color: T.inkMuted, lineHeight: 1.8, maxWidth: 420, marginBottom: 0 }}
+              style={{ fontSize: 16, fontWeight: 300, color: T.inkMuted, lineHeight: 1.75, maxWidth: 560, margin: "0 auto 24px" }}
             >
               Whether you&apos;re a restaurant with surplus, an NGO serving families,
               or a volunteer ready to ride — this is where the change begins.
             </Motion.p>
 
+            <Motion.a
+              href="#contact-form"
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.62, duration: 0.7 }}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 10,
+                padding: "11px 18px", borderRadius: 999,
+                background: `linear-gradient(135deg,${T.leaf},${T.leafBright})`,
+                color: "#fff", textDecoration: "none", fontSize: 13, fontWeight: 700,
+                boxShadow: `0 10px 28px ${T.leaf}38`,
+              }}
+            >
+              Send a message <span aria-hidden="true">↓</span>
+            </Motion.a>
+
           </div>
-
-          {/* Right: human conversation preview */}
-          <Motion.a className="rq-hero-float" href="#contact-form" initial={{ opacity: 0, x: 60, rotate: 2 }} animate={{ opacity: 1, x: 0, rotate: 0 }} whileHover={{ y: -5 }} transition={{ delay: .7, duration: .9, ease: [0.22, 1, 0.36, 1] }} style={{ width: 330, flexShrink: 0, position: "relative", textDecoration: "none" }}>
-            <div style={{ overflow: "hidden", borderRadius: 28, background: T.bgCard, border: `1px solid ${T.borderMed}`, boxShadow: dark ? "0 40px 90px rgba(0,0,0,.48)" : "0 34px 80px rgba(24,61,38,.15)" }}>
-              <div style={{ padding: "15px 17px", display: "flex", alignItems: "center", gap: 10, borderBottom: `1px solid ${T.border}`, background: T.bg2 }}>
-                <div style={{ width: 35, height: 35, borderRadius: 12, display: "grid", placeItems: "center", background: `linear-gradient(135deg,${T.leaf},${T.leafBright})`, color: "#fff", fontWeight: 800 }}>R</div>
-                <div style={{ flex: 1 }}><strong style={{ display: "block", color: T.ink, fontSize: 12 }}>ResQPlate team</strong><span style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2, color: T.inkMuted, font: "9px 'DM Mono', monospace" }}><Motion.i animate={{ opacity: [.4,1,.4] }} transition={{ duration: 1.7, repeat: Infinity }} style={{ width: 6, height: 6, borderRadius: "50%", background: T.sage }} />Here to help</span></div>
-                <span style={{ color: T.inkHint, fontSize: 18 }}>•••</span>
-              </div>
-
-              <div style={{ padding: 20, minHeight: 230, display: "flex", flexDirection: "column", gap: 13, background: dark ? "linear-gradient(160deg,#0d1b12,#101f16)" : "linear-gradient(160deg,#fffdf9,#f3f7f1)" }}>
-                <Motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.05 }} style={{ alignSelf: "flex-start", maxWidth: "84%", padding: "11px 13px", borderRadius: "5px 15px 15px 15px", background: T.bg2, border: `1px solid ${T.border}`, color: T.ink, fontSize: 11.5, lineHeight: 1.55 }}>Hi, I&apos;d like to help rescue surplus food.</Motion.div>
-
-                <Motion.div initial={{ opacity: 0, scale: .8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.45 }} style={{ alignSelf: "flex-end", display: "flex", gap: 4, padding: "10px 13px", borderRadius: "15px 5px 15px 15px", background: `${T.sage}18` }}>
-                  {[0,1,2].map(i => <Motion.i key={i} animate={{ y: [0,-4,0] }} transition={{ duration: .8, repeat: Infinity, delay: i*.14 }} style={{ width: 5, height: 5, borderRadius: "50%", background: T.sage }} />)}
-                </Motion.div>
-
-                <Motion.div initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 2.05 }} style={{ alignSelf: "flex-end", maxWidth: "88%", padding: "11px 13px", borderRadius: "15px 5px 15px 15px", background: `linear-gradient(135deg,${T.leaf},${T.leafBright})`, color: "#fff", fontSize: 11.5, lineHeight: 1.55, boxShadow: `0 8px 20px ${T.leaf}33` }}>Wonderful. Tell us how you&apos;d like to participate, and we&apos;ll connect you with the right person.</Motion.div>
-              </div>
-
-              <div style={{ padding: "13px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${T.border}`, color: T.inkMuted, fontSize: 10.5 }}><span>Start a conversation</span><strong style={{ color: T.sage, fontSize: 16 }}>→</strong></div>
-            </div>
-            <Motion.div animate={{ rotate: [0,-5,5,0], y: [0,5,0] }} transition={{ duration: 4, repeat: Infinity }} style={{ position: "absolute", right: -18, top: -18, width: 44, height: 44, display: "grid", placeItems: "center", borderRadius: 15, background: `linear-gradient(135deg,${T.amber},${T.terra})`, color: "#fff", boxShadow: "0 12px 28px rgba(176,100,15,.28)", fontSize: 18 }}>✦</Motion.div>
-          </Motion.a>
-
-          {/* Legacy visual retained off-screen for reference */}
-          <Motion.div
-            className="rq-hero-float"
-            initial={{ opacity: 0, x: 60, y: 20 }}
-            animate={{ opacity: 1, x: 0, y: 0 }}
-            transition={{ delay: 0.8, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            style={{ display: "none", flexShrink: 0, position: "relative", animation: "floatY 7s ease-in-out infinite" }}
-          >
-            {/* Main donation card */}
-            <div style={{
-              width: 280, background: T.bgCard,
-              borderRadius: 22, padding: 22,
-              border: `1px solid ${T.border}`,
-              boxShadow: dark ? `0 40px 90px rgba(0,0,0,0.55), 0 0 0 1px ${T.border}` : `0 30px 70px rgba(0,0,0,0.12)`,
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                <div style={{
-                  width: 38, height: 38, borderRadius: 10,
-                  background: T.mintSoft, border: `1px solid ${T.border}`,
-                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0,
-                }}>🍱</div>
-                <div>
-                  <div style={{ fontSize: 12.5, fontWeight: 600, color: T.ink }}>New Donation Posted</div>
-                  <div style={{ fontSize: 10.5, color: T.inkMuted, fontFamily: "'DM Mono', monospace", marginTop: 2 }}>2 min ago · Connaught Place</div>
-                </div>
-              </div>
-              <div style={{
-                background: T.bg2, borderRadius: 10, padding: "10px 13px", marginBottom: 13,
-                fontSize: 12.5, color: T.ink, lineHeight: 1.6,
-                border: `1px solid ${T.border}`,
-              }}>
-                45 meals — Dal Makhani, Rice &amp; Sabzi
-                <div style={{ fontSize: 11, color: T.inkMuted, marginTop: 3 }}>Expires in 3h · Pickup available</div>
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button style={{
-                  flex: 1, borderRadius: 9, padding: "8px 0",
-                  fontSize: 12, fontWeight: 600, color: "#fff",
-                  background: `linear-gradient(135deg, ${T.leaf}, ${T.leafBright})`,
-                  border: "none", cursor: "pointer",
-                  boxShadow: `0 4px 14px ${T.leaf}44`,
-                }}>Accept</button>
-                <button style={{
-                  flex: 1, borderRadius: 9, padding: "8px 0",
-                  fontSize: 12, color: T.inkMuted,
-                  background: T.bg2, border: `1px solid ${T.border}`, cursor: "pointer",
-                }}>Later</button>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 13, paddingTop: 13, borderTop: `1px solid ${T.border}` }}>
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: T.sage, display: "inline-block", animation: "blink 1.8s ease-in-out infinite" }} />
-                <span style={{ fontSize: 11, color: T.sage, fontFamily: "'DM Mono', monospace" }}>3 NGOs notified nearby</span>
-              </div>
-            </div>
-
-            {/* Floating CO2 badge */}
-            <Motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-              style={{
-                position: "absolute", bottom: -26, left: -44,
-                background: `linear-gradient(135deg, ${T.amber}, ${T.terra})`,
-                borderRadius: 14, padding: "11px 16px",
-                display: "flex", alignItems: "center", gap: 10,
-                boxShadow: dark ? "0 16px 40px rgba(0,0,0,0.38)" : "0 12px 30px rgba(0,0,0,0.15)",
-              }}
-            >
-              <span style={{ fontSize: 20 }}>🌱</span>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>500 kg CO₂ Saved</div>
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", fontFamily: "'DM Mono', monospace", marginTop: 2 }}>This month alone</div>
-              </div>
-            </Motion.div>
-
-            {/* AI match badge */}
-            <Motion.div
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-              style={{
-                position: "absolute", top: -22, right: -30,
-                background: T.bgCard, border: `1px solid ${T.borderMed}`,
-                borderRadius: 12, padding: "9px 14px",
-                display: "flex", alignItems: "center", gap: 8,
-                boxShadow: dark ? "0 10px 30px rgba(0,0,0,0.35)" : "0 8px 24px rgba(0,0,0,0.1)",
-              }}
-            >
-              <div style={{ width: 24, height: 24, borderRadius: 7, background: T.mintSoft, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12 }}>⚡</div>
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: T.ink }}>AI Matched</div>
-                <div style={{ fontSize: 9.5, color: T.inkMuted, fontFamily: "'DM Mono', monospace" }}>in 87 sec</div>
-              </div>
-            </Motion.div>
-          </Motion.div>
         </div>
       </Motion.div>
 
@@ -718,7 +619,7 @@ const FormSection = ({ T }) => {
   });
 
   return (
-    <section id="contact-form" className="rq-form-section" style={{ background: T.bg, padding: "58px 48px 70px", position: "relative", overflow: "hidden", scrollMarginTop: 72 }}>
+    <section id="contact-form" className="rq-form-section" style={{ background: T.bg, padding: "42px 48px 58px", position: "relative", overflow: "hidden", scrollMarginTop: 72 }}>
       {/* Decorative elements */}
       <div style={{ position: "absolute", top: -100, right: -100, width: 400, height: 400, borderRadius: "50%", background: `radial-gradient(circle, ${T.accentGlow} 0%, transparent 70%)`, pointerEvents: "none" }} />
       <div style={{ position: "absolute", bottom: -60, left: -60, width: 300, height: 300, borderRadius: "50%", background: `radial-gradient(circle, ${T.amberSoft} 0%, transparent 70%)`, pointerEvents: "none" }} />
