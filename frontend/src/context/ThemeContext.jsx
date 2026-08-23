@@ -4,9 +4,13 @@ const ThemeContext = createContext(null);
 const STORAGE_KEY = "resqplate-theme";
 
 function getInitialTheme() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved === "dark" || saved === "light") return saved;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  try {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    if (saved === "dark" || saved === "light") return saved;
+  } catch {
+    // Storage can be unavailable in private or hardened browser contexts.
+  }
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 export function ThemeProvider({ children }) {
@@ -16,7 +20,11 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
-    localStorage.setItem(STORAGE_KEY, theme);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, theme);
+    } catch {
+      // The visual theme still works when persistence is unavailable.
+    }
   }, [theme]);
 
   const toggleTheme = useCallback(() => {

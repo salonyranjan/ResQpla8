@@ -1,17 +1,18 @@
-import { useOutletContext } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 import { useSmartAlerts } from "../hooks/useSmartAlerts";
 
 const SmartAlerts = () => {
   const { T } = useOutletContext();
-  const { alerts, filteredAlerts, filter, setFilter, typeCounts } = useSmartAlerts();
+  const navigate = useNavigate();
+  const { filteredAlerts, filter, setFilter, typeCounts } = useSmartAlerts();
 
   return (
     <div style={{ padding: "28px", background: T.bg, minHeight: "100vh" }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <motion.div
+          <Motion.div
             animate={{ scale: [1, 1.15, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
             style={{
@@ -19,14 +20,14 @@ const SmartAlerts = () => {
               background: T.amberSoft, display: "flex",
               alignItems: "center", justifyContent: "center", fontSize: 20,
             }}
-          >🔔</motion.div>
+          >🔔</Motion.div>
           <div>
             <h2 style={{
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 24,
+              fontFamily: "'DM Mono', monospace", fontSize: 24,
               color: T.text, margin: 0, letterSpacing: "-0.02em",
             }}>Smart Alerts</h2>
             <div style={{
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+              fontFamily: "'DM Mono', monospace", fontSize: 11,
               color: T.textMuted, letterSpacing: "0.06em",
             }}>Real-time notifications for your rescue operations</div>
           </div>
@@ -38,13 +39,13 @@ const SmartAlerts = () => {
           background: T.accentSoft, border: `1px solid ${T.borderMed}`,
           borderRadius: 100, padding: "6px 14px",
         }}>
-          <motion.div
+          <Motion.div
             animate={{ opacity: [1, 0.3, 1] }}
             transition={{ duration: 1.4, repeat: Infinity }}
             style={{ width: 8, height: 8, borderRadius: "50%", background: T.accent }}
           />
           <span style={{
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+            fontFamily: "'DM Mono', monospace", fontSize: 10,
             color: T.accent, fontWeight: 700, letterSpacing: "0.08em",
           }}>LIVE</span>
         </div>
@@ -61,7 +62,7 @@ const SmartAlerts = () => {
           { label: "AI Matches", value: typeCounts.match, color: T.blue, icon: "🤖" },
           { label: "Active Pickups", value: typeCounts.pickup, color: T.teal, icon: "🚴" },
         ].map((s, i) => (
-          <motion.div
+          <Motion.div
             key={i}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -74,15 +75,15 @@ const SmartAlerts = () => {
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
               <span style={{ fontSize: 16 }}>{s.icon}</span>
               <span style={{
-                fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+                fontFamily: "'DM Mono', monospace", fontSize: 9,
                 color: T.textFaint, letterSpacing: "0.1em", textTransform: "uppercase",
               }}>{s.label}</span>
             </div>
             <div style={{
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 22,
+              fontFamily: "'DM Mono', monospace", fontSize: 22,
               fontWeight: 700, color: s.color, lineHeight: 1,
             }}>{s.value}</div>
-          </motion.div>
+          </Motion.div>
         ))}
       </div>
 
@@ -95,7 +96,7 @@ const SmartAlerts = () => {
           { id: "pickup", label: "🚴 Pickups" },
           { id: "delivery", label: "✅ Deliveries" },
         ].map(f => (
-          <motion.button
+          <Motion.button
             key={f.id}
             whileTap={{ scale: 0.95 }}
             onClick={() => setFilter(f.id)}
@@ -104,7 +105,7 @@ const SmartAlerts = () => {
               border: `1px solid ${filter === f.id ? T.accent : T.border}`,
               background: filter === f.id ? T.accentSoft : "transparent",
               color: filter === f.id ? T.accent : T.textMuted,
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+              fontFamily: "'DM Mono', monospace", fontSize: 10,
               cursor: "pointer", fontWeight: filter === f.id ? 700 : 400,
               letterSpacing: "0.04em", transition: "all 0.2s",
             }}
@@ -115,7 +116,7 @@ const SmartAlerts = () => {
               borderRadius: 100, padding: "1px 6px", marginLeft: 4,
               fontSize: 9, fontWeight: 700,
             }}>{typeCounts[f.id] || 0}</span>
-          )}</motion.button>
+          )}</Motion.button>
         ))}
       </div>
 
@@ -123,7 +124,7 @@ const SmartAlerts = () => {
       <AnimatePresence>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {filteredAlerts.map((alert, i) => (
-            <motion.div
+            <Motion.div
               key={alert.id}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -163,7 +164,7 @@ const SmartAlerts = () => {
                       <span style={{
                         background: T.amber, color: "#fff", borderRadius: 4,
                         padding: "2px 6px", fontSize: 8,
-                        fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
+                        fontFamily: "'DM Mono', monospace", fontWeight: 700,
                         letterSpacing: "0.06em",
                       }}>URGENT</span>
                     )}
@@ -174,42 +175,43 @@ const SmartAlerts = () => {
                   }}>{alert.message}</p>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
                     <span style={{
-                      fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+                      fontFamily: "'DM Mono', monospace", fontSize: 9,
                       color: T.textFaint,
                     }}>📍 {alert.location}</span>
                     <span style={{
-                      fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+                      fontFamily: "'DM Mono', monospace", fontSize: 9,
                       color: T.textFaint,
                     }}>🕐 {alert.time}</span>
                   </div>
                 </div>
 
-                <motion.button
+                <Motion.button
                   whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate(alert.type === "match" || alert.type === "urgent" ? "/dashboard/search" : `/tracking/${alert.id}`)}
                   style={{
                     padding: "8px 14px", borderRadius: 8, border: "none",
                     background: alert.color, color: "#fff",
-                    fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                    fontFamily: "'DM Mono', monospace", fontSize: 10,
                     fontWeight: 600, cursor: "pointer", flexShrink: 0,
                   }}
-                >{alert.action}</motion.button>
+                >{alert.action}</Motion.button>
               </div>
-            </motion.div>
+            </Motion.div>
           ))}
         </div>
       </AnimatePresence>
 
       {filteredAlerts.length === 0 && (
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           style={{ textAlign: "center", padding: "40px 20px", color: T.textFaint }}
         >
           <div style={{ fontSize: 40, marginBottom: 12 }}>🔕</div>
-          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13 }}>
             No alerts found for this filter
           </div>
-        </motion.div>
+        </Motion.div>
       )}
 
       {/* Responsive styles */}

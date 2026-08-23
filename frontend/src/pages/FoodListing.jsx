@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useOutletContext, useSearchParams } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 import { HiOutlineSearch, HiOutlineAdjustments, HiOutlineX, HiOutlineClock, HiOutlineLocationMarker } from "react-icons/hi";
 import FoodCard from "../components/FoodCard";
 import { listAvailableFood, subscribeToPickupChanges } from "../services/foodService";
@@ -34,8 +34,7 @@ export default function FoodListing() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState(searchParams.get("category") || "All");
-  const [showFilters, setShowFilters] = useState(false);
+  const activeCategory = searchParams.get("category") || "All";
   const [sortBy, setSortBy] = useState("recent");
 
   // Live data state
@@ -44,14 +43,7 @@ export default function FoodListing() {
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState(["All"]);
 
-  // Sync category to URL
-  useEffect(() => {
-    const cat = searchParams.get("category");
-    if (cat) setActiveCategory(cat);
-  }, [searchParams]);
-
   const handleCategoryChange = (cat) => {
-    setActiveCategory(cat);
     if (cat === "All") {
       setSearchParams({});
     } else {
@@ -89,7 +81,12 @@ export default function FoodListing() {
     };
 
     fetchListings();
-    const unsubscribe = subscribeToPickupChanges(fetchListings);
+    let unsubscribe;
+    try {
+      unsubscribe = subscribeToPickupChanges(fetchListings);
+    } catch (err) {
+      console.error("Live listing updates are unavailable:", err);
+    }
     const expiryRefresh = window.setInterval(fetchListings, 60_000);
     return () => {
       cancelled = true;
@@ -213,7 +210,7 @@ export default function FoodListing() {
         {/* Categories */}
         <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 2, scrollbarWidth: "none" }}>
           {categories.map((cat) => (
-            <motion.button
+            <Motion.button
               key={cat}
               whileTap={{ scale: 0.94 }}
               onClick={() => handleCategoryChange(cat)}
@@ -233,7 +230,7 @@ export default function FoodListing() {
               }}
             >
               {cat}
-            </motion.button>
+            </Motion.button>
           ))}
         </div>
       </div>
@@ -278,7 +275,7 @@ export default function FoodListing() {
       {/* Loading State */}
       {loading && (
         <div style={{ display: "flex", justifyContent: "center", padding: "3rem" }}>
-          <motion.div
+          <Motion.div
             animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
             style={{
@@ -312,7 +309,7 @@ export default function FoodListing() {
       {!loading && !error && (
         <div style={{ padding: "0 12px 16px" }}>
           {filtered.length > 0 ? (
-            <motion.div
+            <Motion.div
               variants={stagger}
               initial="hidden"
               animate="show"
@@ -320,19 +317,19 @@ export default function FoodListing() {
             >
               <AnimatePresence>
                 {filtered.map((item) => (
-                  <motion.div
+                  <Motion.div
                     key={item.$id || item.id}
                     variants={fadeUp}
                     layout
                     exit={{ opacity: 0, scale: 0.85 }}
                   >
                     <FoodCard item={item} T={T} dark={dark} />
-                  </motion.div>
+                  </Motion.div>
                 ))}
               </AnimatePresence>
-            </motion.div>
+            </Motion.div>
           ) : (
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               style={{ textAlign: "center", paddingTop: 80 }}
@@ -340,7 +337,7 @@ export default function FoodListing() {
               <div style={{ fontSize: 56, marginBottom: 16 }}>🥡</div>
               <p style={{ fontSize: 17, fontWeight: 700, color: T.text, marginBottom: 6 }}>No food listings found</p>
               <p style={{ fontSize: 13, color: T.textMuted }}>{listings.length ? "Try adjusting your search or filters." : "No pending donations are available right now."}</p>
-              <motion.button
+              <Motion.button
                 whileTap={{ scale: 0.96 }}
                 onClick={() => { setSearch(""); handleCategoryChange("All"); }}
                 style={{
@@ -357,8 +354,8 @@ export default function FoodListing() {
                 }}
               >
                 Clear Filters
-              </motion.button>
-            </motion.div>
+              </Motion.button>
+            </Motion.div>
           )}
         </div>
       )}

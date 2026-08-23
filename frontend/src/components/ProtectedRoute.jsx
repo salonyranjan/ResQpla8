@@ -1,13 +1,8 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
-const Motion = motion;
-
-/**
- * Simple loading spinner using Framer Motion.
- */
 const LoadingSpinner = () => (
   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
     <Motion.div

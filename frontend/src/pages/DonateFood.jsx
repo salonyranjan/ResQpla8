@@ -1,6 +1,6 @@
-import { useOutletContext, Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useLocation, useOutletContext, Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { motion as Motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { createFoodDonation } from "../services/foodService";
 
@@ -8,12 +8,14 @@ const DonateFood = () => {
   const { T } = useOutletContext();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const draft = location.state?.donationDraft;
   const [form, setForm] = useState({
-    foodType: "Veg",
-    quantity: "",
+    foodType: draft?.foodType || "Veg",
+    quantity: draft?.quantity || "",
     description: "",
-    location: "",
-    expiry: "2h",
+    location: draft?.location || "",
+    expiry: draft?.expiresIn || "2h",
     image: null,
     imagePreview: null,
   });
@@ -21,10 +23,27 @@ const DonateFood = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    return () => {
+      if (form.imagePreview) URL.revokeObjectURL(form.imagePreview);
+    };
+  }, [form.imagePreview]);
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (!file.type.startsWith("image/")) {
+        setError("Select a valid image file.");
+        e.target.value = "";
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError("The food photo must be 5 MB or smaller.");
+        e.target.value = "";
+        return;
+      }
       const preview = URL.createObjectURL(file);
+      setError("");
       setForm(prev => ({ ...prev, image: file, imagePreview: preview }));
     } else {
       setForm(prev => ({ ...prev, image: null, imagePreview: null }));
@@ -63,7 +82,7 @@ const DonateFood = () => {
   return (
     <div style={{ padding: "28px", background: T.bg, minHeight: "100vh" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-        <motion.div
+        <Motion.div
           animate={{ rotate: loading ? 360 : 0 }}
           transition={{ duration: 1.5, repeat: loading ? Infinity : 0, ease: "linear" }}
           style={{
@@ -71,21 +90,21 @@ const DonateFood = () => {
             background: T.accentSoft, display: "flex",
             alignItems: "center", justifyContent: "center", fontSize: 20,
           }}
-        >🍱</motion.div>
+        >🍱</Motion.div>
         <div>
           <h2 style={{
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 24,
+            fontFamily: "'DM Mono', monospace", fontSize: 24,
             color: T.text, margin: 0, letterSpacing: "-0.02em",
           }}>Donate Food</h2>
           <div style={{
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+            fontFamily: "'DM Mono', monospace", fontSize: 11,
             color: T.textMuted, letterSpacing: "0.06em",
           }}>Share surplus food with NGOs in need</div>
         </div>
       </div>
 
       {success && (
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
@@ -97,14 +116,14 @@ const DonateFood = () => {
         >
           <div style={{ fontSize: 24 }}>{T.accent === "#22c55e" ? "✅" : "🎉"}</div>
           <div>
-            <h3 style={{ margin: 0, fontSize: 16, color: T.accent, fontFamily: "'JetBrains Mono', monospace" }}>
+            <h3 style={{ margin: 0, fontSize: 16, color: T.accent, fontFamily: "'DM Mono', monospace" }}>
               Donation submitted successfully!
             </h3>
             <p style={{ margin: "4px 0 0", fontSize: 12, color: T.text }}>
               Your food listing is now live and visible to nearby NGOs.
             </p>
           </div>
-        </motion.div>
+        </Motion.div>
       )}
 
       {error && (
@@ -116,39 +135,40 @@ const DonateFood = () => {
       <form onSubmit={handleSubmit} style={{ maxWidth: 500, margin: "0 auto" }}>
         <div style={{ background: T.bgCard, borderRadius: 18, padding: "24px", marginBottom: 20, border: `1px solid ${T.border}` }}>
           <h3 style={{
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 16,
+            fontFamily: "'DM Mono', monospace", fontSize: 16,
             color: T.text, margin: "0 0 16px 0",
           }}>Food Details</h3>
 
           <div style={{ marginBottom: 16 }}>
             <label style={{
-              display: "block", fontFamily: "'JetBrains Mono', monospace",
+              display: "block", fontFamily: "'DM Mono', monospace",
               fontSize: 11, color: T.textMuted, letterSpacing: "0.08em",
               marginBottom: 6, textTransform: "uppercase",
             }}>Food Type</label>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {["Veg", "Non-Veg", "Vegan", "Mixed"].map((type) => (
-                <motion.button
+                <Motion.button
                   key={type}
+                  type="button"
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setForm(f => ({ ...f, foodType: type }))}
                   style={{
                     padding: "8px 12px", borderRadius: 8, border: `1px solid ${form.foodType === type ? T.accent : T.border}`,
                     background: form.foodType === type ? T.accentSoft : T.bgInput,
                     color: form.foodType === type ? T.accent : T.textMuted,
-                    fontFamily: "'JetBrains Mono', monospace", fontSize: 12,
+                    fontFamily: "'DM Mono', monospace", fontSize: 12,
                     cursor: "pointer", fontWeight: form.foodType === type ? 700 : 400,
                   }}
                 >
                   {type}
-                </motion.button>
+                </Motion.button>
               ))}
             </div>
           </div>
 
           <div style={{ marginBottom: 16 }}>
             <label style={{
-              display: "block", fontFamily: "'JetBrains Mono', monospace",
+              display: "block", fontFamily: "'DM Mono', monospace",
               fontSize: 11, color: T.textMuted, letterSpacing: "0.08em",
               marginBottom: 6, textTransform: "uppercase",
             }}>Quantity (meals)</label>
@@ -161,7 +181,7 @@ const DonateFood = () => {
               style={{
                 width: "100%", padding: "10px 14px", borderRadius: 10,
                 border: `1px solid ${T.border}`, background: T.bgInput,
-                color: T.text, fontFamily: "'JetBrains Mono', monospace",
+                color: T.text, fontFamily: "'DM Mono', monospace",
                 fontSize: 13, outline: "none", boxSizing: "border-box",
               }}
             />
@@ -169,7 +189,7 @@ const DonateFood = () => {
 
           <div style={{ marginBottom: 16 }}>
             <label style={{
-              display: "block", fontFamily: "'JetBrains Mono', monospace",
+              display: "block", fontFamily: "'DM Mono', monospace",
               fontSize: 11, color: T.textMuted, letterSpacing: "0.08em",
               marginBottom: 6, textTransform: "uppercase",
             }}>Description</label>
@@ -181,7 +201,7 @@ const DonateFood = () => {
               style={{
                 width: "100%", padding: "10px 14px", borderRadius: 10,
                 border: `1px solid ${T.border}`, background: T.bgInput,
-                color: T.text, fontFamily: "'JetBrains Mono', monospace",
+                color: T.text, fontFamily: "'DM Mono', monospace",
                 fontSize: 13, outline: "none", boxSizing: "border-box",
                 resize: "vertical",
               }}
@@ -190,7 +210,7 @@ const DonateFood = () => {
 
           <div style={{ marginBottom: 16 }}>
             <label style={{
-              display: "block", fontFamily: "'JetBrains Mono', monospace",
+              display: "block", fontFamily: "'DM Mono', monospace",
               fontSize: 11, color: T.textMuted, letterSpacing: "0.08em",
               marginBottom: 6, textTransform: "uppercase",
             }}>Pickup Location</label>
@@ -201,7 +221,7 @@ const DonateFood = () => {
               style={{
                 width: "100%", padding: "10px 14px", borderRadius: 10,
                 border: `1px solid ${T.border}`, background: T.bgInput,
-                color: T.text, fontFamily: "'JetBrains Mono', monospace",
+                color: T.text, fontFamily: "'DM Mono', monospace",
                 fontSize: 13, outline: "none", boxSizing: "border-box",
               }}
             />
@@ -209,33 +229,34 @@ const DonateFood = () => {
 
           <div style={{ marginBottom: 16 }}>
             <label style={{
-              display: "block", fontFamily: "'JetBrains Mono', monospace",
+              display: "block", fontFamily: "'DM Mono', monospace",
               fontSize: 11, color: T.textMuted, letterSpacing: "0.08em",
               marginBottom: 6, textTransform: "uppercase",
             }}>Expires In</label>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {["1h", "2h", "4h", "6h", "12h", "24h"].map((opt) => (
-                <motion.button
+                <Motion.button
                   key={opt}
+                  type="button"
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setForm(f => ({ ...f, expiry: opt }))}
                   style={{
                     padding: "8px 12px", borderRadius: 8, border: `1px solid ${form.expiry === opt ? T.accent : T.border}`,
                     background: form.expiry === opt ? T.accentSoft : T.bgInput,
                     color: form.expiry === opt ? T.accent : T.textMuted,
-                    fontFamily: "'JetBrains Mono', monospace", fontSize: 12,
+                    fontFamily: "'DM Mono', monospace", fontSize: 12,
                     cursor: "pointer", fontWeight: form.expiry === opt ? 700 : 400,
                   }}
                 >
                   {opt}
-                </motion.button>
+                </Motion.button>
               ))}
             </div>
           </div>
 
           <div style={{ marginBottom: 20 }}>
             <label style={{
-              display: "block", fontFamily: "'JetBrains Mono', monospace",
+              display: "block", fontFamily: "'DM Mono', monospace",
               fontSize: 11, color: T.textMuted, letterSpacing: "0.08em",
               marginBottom: 6, textTransform: "uppercase",
             }}>Photo of Food</label>
@@ -245,7 +266,7 @@ const DonateFood = () => {
                 style={{
                   display: "inline-block", padding: "14px 20px", borderRadius: 10,
                   background: T.accentSoft, color: T.accent,
-                  fontFamily: "'JetBrains Mono', monospace", fontSize: 12,
+                  fontFamily: "'DM Mono', monospace", fontSize: 12,
                   fontWeight: 600, cursor: "pointer",
                   transition: "all 0.2s",
                 }}
@@ -276,7 +297,7 @@ const DonateFood = () => {
             </div>
           </div>
 
-          <motion.button
+          <Motion.button
             type="submit"
             whileHover={{ scale: 1.02, boxShadow: `0 8px 28px ${T.accentGlow}` }}
             whileTap={{ scale: 0.97 }}
@@ -284,26 +305,26 @@ const DonateFood = () => {
             style={{
               width: "100%", padding: "14px 0", borderRadius: 12, border: "none",
               background: loading ? T.bgAlt : T.accent, color: loading ? T.textMuted : "#fff",
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 14, fontWeight: 700,
+              fontFamily: "'DM Mono', monospace", fontSize: 14, fontWeight: 700,
               cursor: loading ? "not-allowed" : "pointer",
               opacity: loading ? 0.5 : 1,
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
             }}
           >
             {loading ? (
-              <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>⚙️</motion.span>
+              <Motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>⚙️</Motion.span>
             ) : "📤"}&nbsp;{loading ? "Uploading..." : "Donate Food"}
-          </motion.button>
+          </Motion.button>
         </div>
 
         <div style={{ textAlign: "center", marginTop: 20 }}>
           <Link to="/dashboard" style={{ textDecoration: "none" }}>
-            <motion.span
+            <Motion.span
               whileHover={{ x: 3 }}
-              style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: T.accent, letterSpacing: "0.08em", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
+              style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: T.accent, letterSpacing: "0.08em", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
             >
               ← Back to Dashboard
-            </motion.span>
+            </Motion.span>
           </Link>
         </div>
       </form>

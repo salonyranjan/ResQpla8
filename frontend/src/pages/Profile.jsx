@@ -1,5 +1,5 @@
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import {
   HiOutlineUser,
@@ -152,7 +152,7 @@ export default function ProfilePage() {
 
       {/* Stats cards */}
       <div style={{ padding: "0 16px", marginTop: -44 }}>
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           style={{
@@ -177,7 +177,7 @@ export default function ProfilePage() {
               <p style={{ fontSize: 9.5, color: T.textFaint, fontFamily: "monospace", marginTop: 2 }}>{s.label}</p>
             </div>
           ))}
-        </motion.div>
+        </Motion.div>
       </div>
 
       {/* Achievements */}
@@ -185,7 +185,7 @@ export default function ProfilePage() {
         <p style={{ fontSize: 11, fontFamily: "monospace", color: T.textFaint, letterSpacing: "0.08em", marginBottom: 12 }}>ACHIEVEMENTS</p>
         <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 2, scrollbarWidth: "none" }}>
           {achievements.map((a) => (
-            <motion.div
+            <Motion.div
               key={a.label}
               whileHover={{ y: -2 }}
               style={{
@@ -202,7 +202,7 @@ export default function ProfilePage() {
               <div style={{ fontSize: 26, marginBottom: 6 }}>{a.emoji}</div>
               <p style={{ fontSize: 12, fontWeight: 700, color: T.text }}>{a.label}</p>
               <p style={{ fontSize: 10, color: T.textFaint, marginTop: 2 }}>{a.desc}</p>
-            </motion.div>
+            </Motion.div>
           ))}
         </div>
       </div>}
@@ -213,7 +213,7 @@ export default function ProfilePage() {
           <p style={{ fontSize: 10, fontFamily: "monospace", color: T.textFaint, letterSpacing: "0.1em", marginBottom: 10 }}>
             {section.title}
           </p>
-          <motion.div
+          <Motion.div
             variants={stagger}
             initial="hidden"
             animate="show"
@@ -226,7 +226,7 @@ export default function ProfilePage() {
           >
             {section.items.map((item, idx) => {
               const Inner = (
-                <motion.div
+                <Motion.div
                   key={item.label}
                   variants={fadeUp}
                   whileHover={{ x: 3 }}
@@ -255,7 +255,7 @@ export default function ProfilePage() {
                     <p style={{ fontSize: 11, color: T.textFaint, marginTop: 2 }}>{item.sub}</p>
                   </div>
                   <HiOutlineChevronRight style={{ fontSize: 16, color: T.textFaint }} />
-                </motion.div>
+                </Motion.div>
               );
 
               return item.to ? (
@@ -266,13 +266,13 @@ export default function ProfilePage() {
                 <div key={item.label}>{Inner}</div>
               );
             })}
-          </motion.div>
+          </Motion.div>
         </div>
       ))}
 
       {/* Logout */}
       <div style={{ padding: "16px 16px 0" }}>
-        <motion.button
+        <Motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setLogoutModal(true)}
           style={{
@@ -291,7 +291,7 @@ export default function ProfilePage() {
         >
           <HiOutlineLogout style={{ fontSize: 20, color: T.red }} />
           <span style={{ fontWeight: 700, fontSize: 14, color: T.red }}>Logout</span>
-        </motion.button>
+        </Motion.button>
       </div>
 
       {/* App version */}
@@ -302,7 +302,7 @@ export default function ProfilePage() {
       {/* Logout modal */}
       <AnimatePresence>
         {logoutModal && (
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -313,7 +313,7 @@ export default function ProfilePage() {
             }}
             onClick={() => setLogoutModal(false)}
           >
-            <motion.div
+            <Motion.div
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
@@ -341,8 +341,8 @@ export default function ProfilePage() {
                   Cancel
                 </button>
               </div>
-            </motion.div>
-          </motion.div>
+            </Motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
     </div>

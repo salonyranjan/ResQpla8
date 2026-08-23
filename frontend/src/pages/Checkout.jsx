@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../context/CartContext";
 import { useTheme } from "../context/ThemeContext";
 import { claimFood } from "../services/foodService";
@@ -99,13 +99,13 @@ export default function CheckoutPage() {
         borderBottom: `1px solid ${T.border}`, padding: "14px 16px",
         display: "flex", alignItems: "center", gap: 12, zIndex: 40,
       }}>
-        <motion.button
+        <Motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => step > 1 && step < 3 ? setStep(step - 1) : navigate(-1)}
           style={{ width: 38, height: 38, borderRadius: 12, background: T.bgCard, border: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
         >
           <HiOutlineArrowLeft style={{ fontSize: 18, color: T.textMuted }} />
-        </motion.button>
+        </Motion.button>
         <h1 style={{ fontSize: 17, fontWeight: 800, color: T.text }}>
           {step === 1 ? "Delivery Address" : step === 2 ? "Payment" : "Order Confirmed!"}
         </h1>
@@ -118,7 +118,7 @@ export default function CheckoutPage() {
           {steps.map((label, idx) => (
             <div key={label} style={{ display: "flex", alignItems: "center" }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                <motion.div
+                <Motion.div
                   animate={{ scale: step === idx + 1 ? 1.1 : 1 }}
                   style={{
                     width: 32, height: 32, borderRadius: "50%",
@@ -130,7 +130,7 @@ export default function CheckoutPage() {
                   }}
                 >
                   {step > idx + 1 ? <HiOutlineCheckCircle style={{ fontSize: 16 }} /> : idx + 1}
-                </motion.div>
+                </Motion.div>
                 <span style={{ fontSize: 9, color: step >= idx + 1 ? T.accent : T.textFaint, fontFamily: "monospace", fontWeight: step === idx + 1 ? 700 : 400 }}>
                   {label}
                 </span>
@@ -145,7 +145,7 @@ export default function CheckoutPage() {
 
       {/* Step content */}
       <AnimatePresence mode="wait">
-        <motion.div
+        <Motion.div
           key={step}
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
@@ -181,10 +181,10 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <motion.button whileTap={{ scale: 0.98 }} onClick={() => setStep(2)}
+              <Motion.button whileTap={{ scale: 0.98 }} onClick={() => setStep(2)}
                 style={{ background: `linear-gradient(135deg, ${T.accent}, #16a34a)`, color: "#fff", border: "none", borderRadius: 18, padding: "16px", fontWeight: 800, fontSize: 15, cursor: "pointer", fontFamily: "inherit", boxShadow: `0 8px 32px ${T.accent}44` }}>
                 Continue to Payment →
-              </motion.button>
+              </Motion.button>
             </div>
           )}
 
@@ -222,24 +222,24 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <motion.button whileTap={{ scale: 0.98 }} onClick={handlePlaceOrder} disabled={submitting}
+              <Motion.button whileTap={{ scale: 0.98 }} onClick={handlePlaceOrder} disabled={submitting}
                 style={{ background: `linear-gradient(135deg, ${T.accent}, #16a34a)`, color: "#fff", border: "none", borderRadius: 18, padding: "16px", fontWeight: 800, fontSize: 15, cursor: "pointer", fontFamily: "inherit", boxShadow: `0 8px 32px ${T.accent}44`, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                 <HiOutlineShieldCheck style={{ fontSize: 20 }} />
                 {submitting ? "Claiming food…" : "Confirm rescue — Free"}
-              </motion.button>
+              </Motion.button>
             </div>
           )}
 
           {/* Step 3: Confirmation */}
           {step === 3 && (
-            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 200 }} style={{ textAlign: "center", paddingTop: 24 }}>
-              <motion.div
+            <Motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 200 }} style={{ textAlign: "center", paddingTop: 24 }}>
+              <Motion.div
                 animate={{ rotate: [0, -10, 10, -5, 5, 0], scale: [1, 1.2, 1] }}
                 transition={{ duration: 0.6, delay: 0.2 }}
                 style={{ fontSize: 80, marginBottom: 20 }}
               >
                 🎉
-              </motion.div>
+              </Motion.div>
               <h2 style={{ fontSize: 26, fontWeight: 900, color: T.text, marginBottom: 10, letterSpacing: "-0.03em" }}>
                 Order Placed!
               </h2>
@@ -282,25 +282,25 @@ export default function CheckoutPage() {
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <motion.button
+                <Motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={() => navigate(`/tracking/${orderId}`)}
                   style={{ background: `linear-gradient(135deg, ${T.accent}, #16a34a)`, color: "#fff", border: "none", borderRadius: 18, padding: "16px", fontWeight: 800, fontSize: 14, cursor: "pointer", fontFamily: "inherit", boxShadow: `0 8px 32px ${T.accent}44` }}
                 >
                   Track My Order 🚀
-                </motion.button>
+                </Motion.button>
                 <Link to="/dashboard" style={{ textDecoration: "none" }}>
-                  <motion.button
+                  <Motion.button
                     whileTap={{ scale: 0.97 }}
                     style={{ width: "100%", background: T.bgCard, color: T.textMuted, border: `1px solid ${T.border}`, borderRadius: 18, padding: "16px", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "inherit" }}
                   >
                     Back to Home
-                  </motion.button>
+                  </Motion.button>
                 </Link>
               </div>
-            </motion.div>
+            </Motion.div>
           )}
-        </motion.div>
+        </Motion.div>
       </AnimatePresence>
     </div>
   );

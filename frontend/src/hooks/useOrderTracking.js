@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { getPickup } from "../services/foodService";
 
 export const STATUS_STEPS = [
@@ -20,9 +20,10 @@ export const useOrderTracking = (orderId) => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(Boolean(orderId));
   const [error, setError] = useState("");
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    if (!orderId) { setLoading(false); return; }
+    if (!orderId) return undefined;
     let cancelled = false;
     getPickup(orderId)
       .then((pickup) => {
@@ -36,8 +37,14 @@ export const useOrderTracking = (orderId) => {
     return () => { cancelled = true; };
   }, [orderId]);
 
+  useEffect(() => {
+    if (!order?.scheduledTime) return undefined;
+    const timer = window.setInterval(() => setNow(Date.now()), 30000);
+    return () => window.clearInterval(timer);
+  }, [order?.scheduledTime]);
+
   const currentStep = order?.status === "cancelled" ? 0 : (STATUS_INDEX[order?.status] ?? 0);
-  const eta = useMemo(() => order?.scheduledTime ? Math.max(0, Math.ceil((new Date(order.scheduledTime).getTime() - Date.now()) / 60000)) : null, [order?.scheduledTime]);
+  const eta = order?.scheduledTime ? Math.max(0, Math.ceil((new Date(order.scheduledTime).getTime() - now) / 60000)) : null;
   const progressPct = (currentStep / (STATUS_STEPS.length - 1)) * 100;
 
   return { order, currentStep, eta, progressPct, STATUS_STEPS, loading, error };

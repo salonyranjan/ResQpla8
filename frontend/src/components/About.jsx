@@ -1,13 +1,11 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import foodRescueStory from "../assets/about/food-rescue-story.png";
 
-const MotionLink = motion(Link);
+const MotionLink = Motion(Link);
 
-/* ═══════════════════════════════════════════════════
-   NAV LINKS
-═══════════════════════════════════════════════════ */
 const ABOUT_NAV_LINKS = [
   { label: "About",        href: "#hero",         emoji: "✦" },
   { label: "Mission",      href: "#mission",       emoji: "🎯" },
@@ -15,11 +13,8 @@ const ABOUT_NAV_LINKS = [
   { label: "Values",       href: "#values",        emoji: "💚" },
 ];
 
-/* ═══════════════════════════════════════════════════
-   GLOBAL CSS
-═══════════════════════════════════════════════════ */
 const GLOBAL_CSS = (dark) => `
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,700;1,9..144,900&family=Cabinet+Grotesk:wght@300;400;500;700;800&family=DM+Mono:wght@400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,700;1,9..144,900&family=Cabinet+Grotesk:wght@300;400;500;700;800&family=DM+Mono:wght@400;500&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
@@ -342,7 +337,7 @@ const GLOBAL_CSS = (dark) => `
   }
 
   .ab-h1 {
-    font-family: 'Fraunces', serif;
+    font-family: 'Playfair Display', serif;
     font-size: clamp(52px, 9vw, 104px);
     font-weight: 900; line-height: 0.95; color: #edf5e1;
     letter-spacing: -0.03em; margin-bottom: 6px;
@@ -357,7 +352,7 @@ const GLOBAL_CSS = (dark) => `
     animation: underline-reveal 1s 1.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
   }
   .ab-hero-sub {
-    font-family: 'Fraunces', serif; font-style: italic;
+    font-family: 'Playfair Display', serif; font-style: italic;
     font-size: clamp(17px, 2.5vw, 24px); font-weight: 400;
     color: rgba(200,230,170,0.7); max-width: 580px;
     margin: 28px auto 0; line-height: 1.65;
@@ -379,7 +374,7 @@ const GLOBAL_CSS = (dark) => `
     width: 1px; background: rgba(82,183,136,0.14);
   }
   .ab-stat-n {
-    font-family: 'Fraunces', serif; font-size: 44px; font-weight: 900;
+    font-family: 'Playfair Display', serif; font-size: 44px; font-weight: 900;
     color: #52b788; line-height: 1;
   }
   .ab-stat-l {
@@ -426,7 +421,7 @@ const GLOBAL_CSS = (dark) => `
   }
 
   .ab-h2 {
-    font-family: 'Fraunces', serif;
+    font-family: 'Playfair Display', serif;
     font-size: clamp(30px, 4.5vw, 56px); font-weight: 900;
     line-height: 1.05; color: ${dark ? "#e8f5ec" : "#111c15"};
     letter-spacing: -0.03em; margin-bottom: 24px;
@@ -457,7 +452,7 @@ const GLOBAL_CSS = (dark) => `
     opacity: 0.07; pointer-events: none;
   }
   .ab-why-title {
-    font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700;
+    font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;
     color: ${dark ? "#e8f5ec" : "#111c15"}; margin-bottom: 28px;
   }
   .ab-why-item {
@@ -505,7 +500,7 @@ const GLOBAL_CSS = (dark) => `
     border: 1px solid ${dark ? "rgba(82,183,136,0.20)" : "rgba(26,74,46,0.16)"};
   }
   .ab-step-title {
-    font-family: 'Fraunces', serif; font-size: 17px; font-weight: 700;
+    font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700;
     color: ${dark ? "#e8f5ec" : "#111c15"}; margin-bottom: 12px;
   }
   .ab-step-body { font-size: 13px; line-height: 1.75; color: ${dark ? "#6ee7b7" : "#4a5e52"}; }
@@ -524,7 +519,7 @@ const GLOBAL_CSS = (dark) => `
   /* ── Impact ── */
   .ab-impact { background: ${dark ? "#070f09" : "#f7f2e8"}; position: relative; overflow: hidden; }
   .ab-impact-watermark {
-    position: absolute; font-family: 'Fraunces', serif; font-size: 340px;
+    position: absolute; font-family: 'Playfair Display', serif; font-size: 340px;
     font-weight: 900; color: #52b788; opacity: 0.022;
     top: -60px; left: -20px; user-select: none; pointer-events: none; line-height: 1;
   }
@@ -552,7 +547,7 @@ const GLOBAL_CSS = (dark) => `
   .ab-impact-card:hover .ab-impact-glow { opacity: 0.36; }
   .ab-impact-icon { font-size: 28px; display: block; margin-bottom: 16px; }
   .ab-impact-num {
-    font-family: 'Fraunces', serif; font-size: 40px; font-weight: 900;
+    font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 900;
     line-height: 1; margin-bottom: 8px;
   }
   .ab-impact-label {
@@ -589,7 +584,7 @@ const GLOBAL_CSS = (dark) => `
   .ab-value-card:hover::after { transform: scale(1.6); opacity: 0.13; }
   .ab-value-emoji { font-size: 36px; display: block; margin-bottom: 20px; }
   .ab-value-title {
-    font-family: 'Fraunces', serif; font-size: 17px; font-weight: 700;
+    font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700;
     color: #52b788; margin-bottom: 12px;
   }
   .ab-value-body { font-size: 13.5px; line-height: 1.75; color: ${dark ? "#6ee7b7" : "#4a5e52"}; }
@@ -600,18 +595,18 @@ const GLOBAL_CSS = (dark) => `
     padding: 100px 24px; position: relative; overflow: hidden;
   }
   .ab-quote-bg {
-    position: absolute; font-family: 'Fraunces', serif; font-size: 520px;
+    position: absolute; font-family: 'Playfair Display', serif; font-size: 520px;
     font-weight: 900; color: #52b788; opacity: 0.022;
     top: -120px; left: -30px; line-height: 1;
     user-select: none; pointer-events: none;
   }
   .ab-quote-inner { max-width: 800px; margin: 0 auto; text-align: center; position: relative; z-index: 1; }
   .ab-quote-mark {
-    font-family: 'Fraunces', serif; font-size: 80px; font-weight: 900;
+    font-family: 'Playfair Display', serif; font-size: 80px; font-weight: 900;
     color: #52b788; line-height: 0.6; display: block; margin-bottom: 32px; opacity: 0.6;
   }
   .ab-quote-text {
-    font-family: 'Fraunces', serif;
+    font-family: 'Playfair Display', serif;
     font-size: clamp(22px, 3.5vw, 38px); font-weight: 700; font-style: italic;
     line-height: 1.45; color: ${dark ? "#e8f5ec" : "#111c15"};
     letter-spacing: -0.01em; margin-bottom: 40px;
@@ -649,7 +644,7 @@ const GLOBAL_CSS = (dark) => `
   }
   .ab-cta-inner { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; }
   .ab-cta-h2 {
-    font-family: 'Fraunces', serif;
+    font-family: 'Playfair Display', serif;
     font-size: clamp(36px, 6vw, 72px); font-weight: 900;
     line-height: 1.0; color: #edf5e1; letter-spacing: -0.03em; margin-bottom: 20px;
   }
@@ -704,11 +699,106 @@ const GLOBAL_CSS = (dark) => `
     font-family: 'Cabinet Grotesk', sans-serif;
   }
   .ab-cta-foot { margin-top: 60px; font-size: 11px; color: rgba(149,213,178,0.25); letter-spacing: 0.08em; font-family: 'DM Mono', monospace; }
+
+  /* Contact-page visual language */
+  .ab-hero {
+    min-height: 680px; padding: 110px 48px 92px; display: flex; align-items: center;
+    background: ${dark ? "linear-gradient(145deg,#08120c 0%,#10251a 68%,#182718 100%)" : "linear-gradient(145deg,#f8f3e8 0%,#edf4eb 64%,#e3eddf 100%)"};
+  }
+  .ab-hero-content { width: min(1100px,100%); max-width: 1100px; margin: 0 auto; text-align: left; }
+  .ab-hero-content::after {
+    content: ""; position: absolute; right: 2%; top: 50%; width: min(34vw,390px); aspect-ratio: 1;
+    transform: translateY(-50%); border-radius: 38% 62% 55% 45%;
+    background: radial-gradient(circle at 35% 30%,${dark ? "rgba(149,213,178,.28)" : "rgba(82,183,136,.28)"},transparent 48%),
+                linear-gradient(145deg,${dark ? "rgba(82,183,136,.16)" : "rgba(255,255,255,.7)"},${dark ? "rgba(245,158,11,.08)" : "rgba(225,235,216,.8)"});
+    border: 1px solid ${dark ? "rgba(149,213,178,.17)" : "rgba(45,106,79,.12)"};
+    box-shadow: ${dark ? "0 35px 90px rgba(0,0,0,.35)" : "0 35px 80px rgba(31,75,45,.13)"};
+  }
+  .ab-h1,.ab-h2,.ab-quote-text,.ab-cta-h2 { font-family: 'Playfair Display',serif; }
+  .ab-h1 { max-width: 650px; font-size: clamp(52px,7vw,86px); line-height: .96; letter-spacing: -.04em; }
+  .ab-h1-em { color: ${dark ? "#e5a94d" : "#b96836"}; }
+  .ab-hero-sub { max-width: 540px; margin-left: 0; font-size: 16px; line-height: 1.8; }
+  .ab-pill { border-radius: 999px; padding: 7px 13px; background: ${dark ? "rgba(82,183,136,.1)" : "rgba(45,106,79,.08)"}; border-color: ${dark ? "rgba(82,183,136,.2)" : "rgba(45,106,79,.14)"}; }
+  .ab-stats { width: min(620px,100%); margin-left: 0; padding: 18px 0 0; border-top: 1px solid ${dark ? "rgba(255,255,255,.1)" : "rgba(26,74,46,.12)"}; }
+  .ab-scroll-cue,.ab-hero-mesh { display: none; }
+  .ab-section { padding: 96px 48px; }
+  .ab-origin { background: ${dark ? "#0b1510" : "#f8f4eb"}; }
+  .ab-how { background: ${dark ? "#0e1a13" : "#edf3eb"}; }
+  .ab-values { background: ${dark ? "#0b1510" : "#f8f4eb"}; }
+  .ab-origin-inner,.ab-how-inner,.ab-values-inner { max-width: 1100px; }
+  .ab-origin-inner { gap: 72px; align-items: center; }
+  .ab-tag { color: ${dark ? "#82c99e" : "#3d8a67"}; font-size: 10px; letter-spacing: .16em; }
+  .ab-h2 { font-size: clamp(34px,5vw,56px); line-height: 1.06; letter-spacing: -.035em; }
+  .ab-h2 em { color: ${dark ? "#e5a94d" : "#b96836"}; }
+  .ab-p { font-size: 15px; line-height: 1.82; }
+  .ab-why-card { padding: 30px; border-radius: 24px; background: ${dark ? "#111f17" : "#fffdf8"}; border: 1px solid ${dark ? "rgba(82,183,136,.14)" : "rgba(42,78,53,.11)"}; box-shadow: ${dark ? "0 28px 70px rgba(0,0,0,.3)" : "0 28px 70px rgba(27,65,38,.1)"}; }
+  .ab-why-title { font-family:'Playfair Display',serif; font-size: 23px; }
+  .ab-why-item { padding: 12px 0; }
+  .ab-timeline { gap: 16px; }
+  .ab-step,.ab-value-card { border-radius: 20px; background: ${dark ? "#111f17" : "#fffdf8"}; border: 1px solid ${dark ? "rgba(82,183,136,.13)" : "rgba(42,78,53,.1)"}; box-shadow: 0 8px 30px ${dark ? "rgba(0,0,0,.16)" : "rgba(27,65,38,.055)"}; }
+  .ab-step { padding: 24px 20px; }
+  .ab-value-card { padding: 27px 24px; }
+  .ab-step-title,.ab-value-title { font-family:'Playfair Display',serif; }
+  .ab-quote { padding: 104px 48px; background: ${dark ? "#102419" : "#e6eee2"}; }
+  .ab-quote-text { font-size: clamp(28px,4vw,48px); }
+  .ab-quote-avatar { background: ${dark ? "#3d8a67" : "#2d6a4f"}; }
+  .ab-cta { padding: 105px 48px 80px; background: linear-gradient(145deg,#0b1d12,#183e29); }
+  .ab-cta-h2 { font-size: clamp(40px,6vw,68px); }
+  .ab-btn-primary,.ab-btn-ghost { border-radius: 12px; padding: 15px 28px; }
+  @media(max-width:860px){
+    .ab-hero{min-height:auto;padding:86px 22px 72px}.ab-hero-content::after{display:none}.ab-h1{font-size:clamp(46px,14vw,68px)}
+    .ab-section,.ab-quote,.ab-cta{padding:72px 22px}.ab-origin-inner{gap:40px}.ab-stats{grid-template-columns:repeat(2,1fr);gap:18px}.ab-stat{text-align:left}
+  }
+
+  /* Compact layout and guaranteed light-mode contrast */
+  .ab-hero { min-height: 560px; padding-top: 82px; padding-bottom: 64px; }
+  .ab-hero-content::after,.ab-hero-glow,.ab-hero-grain { display:none; }
+  .ab-h1 { color:${dark ? "#f2f7f3" : "#17251c"}; }
+  .ab-hero-sub { color:${dark ? "#a9c9b3" : "#52655a"}; font-family:'Cabinet Grotesk',sans-serif; font-style:normal; }
+  .ab-pill { color:${dark ? "#8bd2a6" : "#246044"}; }
+  .ab-pill-dot { background:${dark ? "#82c99e" : "#2d6a4f"}; }
+  .ab-stats { margin-top:34px; padding:16px 0; background:transparent; border-width:1px 0; border-radius:0; }
+  .ab-stat { padding:0 24px; }
+  .ab-stat-n { color:${dark ? "#93d3aa" : "#205f43"}; font-family:'Cabinet Grotesk',sans-serif; font-size:23px; }
+  .ab-stat-l { color:${dark ? "#8bad96" : "#607267"}; letter-spacing:.1em; }
+  .ab-sep { display:none; }
+  .ab-section { padding:68px 48px; }
+  .ab-how-header,.ab-values-header { margin-bottom:38px; }
+  .ab-h2 { color:${dark ? "#edf6f0" : "#17251c"}; }
+  .ab-p,.ab-step-body,.ab-value-body,.ab-why-item { color:${dark ? "#9fbcaa" : "#526359"}; }
+  .ab-step-title,.ab-value-title,.ab-why-title { color:${dark ? "#edf6f0" : "#1c3023"}; }
+  .ab-value-title { color:${dark ? "#8bd2a6" : "#246044"}; }
+  .ab-step-icon,.ab-value-emoji { font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif; opacity:1; filter:none; }
+  .ab-why-item:nth-of-type(n+5) { display:none; }
+  .ab-quote { display:none; }
+  .ab-cta { padding:72px 48px 58px; }
+  .ab-cta-sub { margin-bottom:30px; }
+  .ab-cta-foot { margin-top:34px; }
+  @media(max-width:860px){
+    .ab-hero{min-height:auto;padding:70px 20px 52px}.ab-section{padding:56px 20px}.ab-cta{padding:62px 20px 48px}
+    .ab-stats{display:grid;grid-template-columns:1fr 1fr}.ab-stat{padding:10px 6px}.ab-stat + .ab-stat::before{display:none}
+    .ab-how-header,.ab-values-header{margin-bottom:30px}.ab-value-card,.ab-step{padding:20px 18px}
+  }
+  .ab-hero-layout { width:min(1120px,100%); margin:0 auto; display:grid; grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr); align-items:center; gap:58px; position:relative; z-index:2; }
+  .ab-hero-content { width:100%; margin:0; }
+  .ab-story-art { position:relative; margin:0; }
+  .ab-story-art::before { content:""; position:absolute; inset:10% -5% -7% 8%; border-radius:50%; background:${dark ? "rgba(82,183,136,.18)" : "rgba(45,106,79,.12)"}; filter:blur(30px); }
+  .ab-story-image { position:relative; display:block; width:100%; aspect-ratio:1; object-fit:cover; border-radius:30px 30px 80px 30px; border:1px solid ${dark ? "rgba(149,213,178,.2)" : "rgba(38,91,57,.14)"}; box-shadow:${dark ? "0 32px 80px rgba(0,0,0,.4)" : "0 32px 70px rgba(41,77,51,.18)"}; }
+  .ab-story-caption { position:absolute; left:-20px; bottom:24px; display:flex; align-items:center; gap:9px; padding:11px 15px; border-radius:14px; background:${dark ? "rgba(12,28,18,.92)" : "rgba(255,253,248,.94)"}; border:1px solid ${dark ? "rgba(149,213,178,.18)" : "rgba(38,91,57,.13)"}; color:${dark ? "#dcebe1" : "#213b2a"}; box-shadow:0 14px 34px rgba(0,0,0,.16); backdrop-filter:blur(12px); font-size:11px; font-weight:700; }
+  .ab-story-caption i { width:8px; height:8px; border-radius:50%; background:#52b788; box-shadow:0 0 0 5px rgba(82,183,136,.14); }
+  .ab-hero { min-height:500px; padding-block:58px; }
+  .ab-stats,.ab-values { display:none; }
+  .ab-origin-inner > div:first-child .ab-p:last-child { display:none; }
+  .ab-section { padding-block:56px; }
+  .ab-how-header { margin-bottom:30px; }
+  .ab-timeline { grid-template-columns:repeat(3,1fr); max-width:900px; margin-inline:auto; }
+  .ab-timeline::before { left:16%; right:16%; }
+  .ab-cta { padding-block:58px 46px; }
+  .ab-cta-sub { max-width:560px; }
+  @media(max-width:900px){.ab-hero-layout{grid-template-columns:1fr;gap:38px}.ab-story-art{width:min(480px,92%);margin:0 auto}.ab-hero{padding-top:62px}.ab-story-caption{left:-10px}}
+  @media(max-width:760px){.ab-timeline{grid-template-columns:1fr}.ab-hero{padding-block:48px}.ab-section{padding-block:46px}}
 `;
 
-/* ═══════════════════════════════════════════════════
-   ANIMATED COUNTER
-═══════════════════════════════════════════════════ */
 function Counter({ to, suffix = "", prefix = "" }) {
   const [val, setVal] = useState(0);
   const ref = useRef(null);
@@ -732,9 +822,6 @@ function Counter({ to, suffix = "", prefix = "" }) {
   return <span ref={ref}>{prefix}{val.toLocaleString()}{suffix}</span>;
 }
 
-/* ═══════════════════════════════════════════════════
-   SCROLL REVEAL HOOK
-═══════════════════════════════════════════════════ */
 function useReveal() {
   useEffect(() => {
     const els = document.querySelectorAll(".rv");
@@ -747,9 +834,6 @@ function useReveal() {
   }, []);
 }
 
-/* ═══════════════════════════════════════════════════
-   MAGNETIC NAV LINK (desktop only)
-═══════════════════════════════════════════════════ */
 const MagneticNavLink = ({ children, href, isActive, onClick, dark }) => {
   const ref = useRef(null);
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -764,7 +848,7 @@ const MagneticNavLink = ({ children, href, isActive, onClick, dark }) => {
   const handleMouseLeave = () => { setPos({ x: 0, y: 0 }); setHovered(false); };
 
   const inner = (
-    <motion.button
+    <Motion.button
       ref={ref}
       onClick={onClick}
       onMouseMove={handleMouseMove}
@@ -788,7 +872,7 @@ const MagneticNavLink = ({ children, href, isActive, onClick, dark }) => {
     >
       <AnimatePresence>
         {(isActive || hovered) && (
-          <motion.div
+          <Motion.div
             key="glow"
             initial={{ opacity: 0, scale: 0.6 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -810,7 +894,7 @@ const MagneticNavLink = ({ children, href, isActive, onClick, dark }) => {
         )}
       </AnimatePresence>
 
-      <motion.span
+      <Motion.span
         animate={isActive
           ? { scale: [1, 1.6, 1], opacity: [0.9, 0.4, 0.9] }
           : { scale: 1, opacity: hovered ? 0.6 : 0 }}
@@ -826,7 +910,7 @@ const MagneticNavLink = ({ children, href, isActive, onClick, dark }) => {
       <span style={{ position: "relative", zIndex: 1 }}>{children}</span>
 
       {isActive && (
-        <motion.div
+        <Motion.div
           layoutId="ab-nav-shimmer-line"
           style={{
             position: "absolute", bottom: 4, left: 18, right: 18, height: 1.5, borderRadius: 2,
@@ -839,20 +923,17 @@ const MagneticNavLink = ({ children, href, isActive, onClick, dark }) => {
           transition={{ type: "spring", stiffness: 400, damping: 32 }}
         />
       )}
-    </motion.button>
+    </Motion.button>
   );
 
   if (href.startsWith("#")) return <a href={href} style={{ textDecoration: "none" }}>{inner}</a>;
   return <Link to={href} style={{ textDecoration: "none" }}>{inner}</Link>;
 };
 
-/* ═══════════════════════════════════════════════════
-   NAV FIREFLY
-═══════════════════════════════════════════════════ */
 const NavFirefly = ({ dark, index }) => {
   const x = 15 + index * 18 + (index * 7 % 8);
   return (
-    <motion.div
+    <Motion.div
       style={{
         position: "absolute", left: `${x}%`, top: "50%",
         width: 3, height: 3, borderRadius: "50%",
@@ -866,11 +947,8 @@ const NavFirefly = ({ dark, index }) => {
   );
 };
 
-/* ═══════════════════════════════════════════════════
-   ORBITAL DARK MODE TOGGLE
-═══════════════════════════════════════════════════ */
 const DarkToggle = ({ dark, toggleDark }) => (
-  <motion.button
+  <Motion.button
     onClick={toggleDark}
     whileHover={{ scale: 1.08 }}
     whileTap={{ scale: 0.92, rotate: 15 }}
@@ -881,7 +959,7 @@ const DarkToggle = ({ dark, toggleDark }) => (
       cursor: "pointer", flexShrink: 0, overflow: "visible",
     }}
   >
-    <motion.div
+    <Motion.div
       animate={{ rotate: dark ? 0 : 180 }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       style={{
@@ -889,7 +967,7 @@ const DarkToggle = ({ dark, toggleDark }) => (
         border: `1.5px solid ${dark ? "rgba(82,183,136,0.35)" : "rgba(26,74,46,0.25)"}`,
       }}
     >
-      <motion.div
+      <Motion.div
         animate={{ rotate: [0, 360] }}
         transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
         style={{ position: "absolute", inset: 0, borderRadius: "50%" }}
@@ -900,8 +978,8 @@ const DarkToggle = ({ dark, toggleDark }) => (
           background: dark ? "#f59e0b" : "#2d6a4f",
           boxShadow: dark ? "0 0 8px #f59e0b, 0 0 16px rgba(245,158,11,0.5)" : "0 0 6px #2d6a4f",
         }} />
-      </motion.div>
-    </motion.div>
+      </Motion.div>
+    </Motion.div>
     <div style={{
       width: 32, height: 32, borderRadius: "50%",
       background: dark
@@ -914,7 +992,7 @@ const DarkToggle = ({ dark, toggleDark }) => (
         : "inset 0 1px 0 rgba(255,255,255,0.8), 0 2px 6px rgba(26,74,46,0.12)",
     }}>
       <AnimatePresence mode="wait" initial={false}>
-        <motion.span
+        <Motion.span
           key={dark ? "sun" : "moon"}
           initial={{ rotate: -120, opacity: 0, scale: 0.3 }}
           animate={{ rotate: 0, opacity: 1, scale: 1 }}
@@ -935,15 +1013,12 @@ const DarkToggle = ({ dark, toggleDark }) => (
                 fill="#2d6a4f" opacity="0.25" stroke="#2d6a4f" strokeWidth="1.6" strokeLinecap="round"/>
             </svg>
           )}
-        </motion.span>
+        </Motion.span>
       </AnimatePresence>
     </div>
-  </motion.button>
+  </Motion.button>
 );
 
-/* ═══════════════════════════════════════════════════
-   MOBILE DRAWER
-═══════════════════════════════════════════════════ */
 const MobileDrawer = ({ dark, toggleDark, activeIdx, setActiveIdx, open, onClose }) => {
   useEffect(() => {
     if (open) {
@@ -959,7 +1034,7 @@ const MobileDrawer = ({ dark, toggleDark, activeIdx, setActiveIdx, open, onClose
       {open && (
         <>
           {/* Overlay */}
-          <motion.div
+          <Motion.div
             className="ab-drawer-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -969,7 +1044,7 @@ const MobileDrawer = ({ dark, toggleDark, activeIdx, setActiveIdx, open, onClose
           />
 
           {/* Drawer panel */}
-          <motion.div
+          <Motion.div
             className="ab-drawer"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -986,7 +1061,7 @@ const MobileDrawer = ({ dark, toggleDark, activeIdx, setActiveIdx, open, onClose
             {/* Nav links */}
             <nav className="ab-drawer-nav" aria-label="Mobile navigation">
               {ABOUT_NAV_LINKS.map((link, i) => (
-                <motion.a
+                <Motion.a
                   key={link.label}
                   href={link.href}
                   className={`ab-drawer-link${activeIdx === i ? " active" : ""}`}
@@ -999,7 +1074,7 @@ const MobileDrawer = ({ dark, toggleDark, activeIdx, setActiveIdx, open, onClose
                   <span className="ab-drawer-link-emoji">{link.emoji}</span>
                   <span style={{ flex: 1 }}>{link.label}</span>
                   <span className="ab-drawer-link-arrow">→</span>
-                </motion.a>
+                </Motion.a>
               ))}
 
               <div className="ab-drawer-divider" />
@@ -1014,7 +1089,7 @@ const MobileDrawer = ({ dark, toggleDark, activeIdx, setActiveIdx, open, onClose
             </nav>
 
             {/* Footer CTAs */}
-            <motion.div
+            <Motion.div
               className="ab-drawer-foot"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1026,19 +1101,14 @@ const MobileDrawer = ({ dark, toggleDark, activeIdx, setActiveIdx, open, onClose
               <Link to="/dashboard/search" className="ab-drawer-cta-ghost" onClick={onClose}>
                 Browse Listings
               </Link>
-            </motion.div>
-          </motion.div>
+            </Motion.div>
+          </Motion.div>
         </>
       )}
     </AnimatePresence>
   );
 };
 
-/* ═══════════════════════════════════════════════════
-   ABOUT PAGE SECONDARY NAVBAR
-   — No logo/brand name (main navbar handles that)
-   — Burger only appears on mobile (≤860px)
-═══════════════════════════════════════════════════ */
 const AboutNavBar = ({ dark, toggleDark, activeIdx, setActiveIdx }) => {
   const [scrolled, setScrolled] = useState(false);
   const [scrollPct, setScrollPct] = useState(0);
@@ -1068,7 +1138,7 @@ const AboutNavBar = ({ dark, toggleDark, activeIdx, setActiveIdx }) => {
 
   return (
     <>
-      <motion.nav
+      <Motion.nav
         initial={{ y: -90, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 220, damping: 24, delay: 0.08 }}
@@ -1117,7 +1187,7 @@ const AboutNavBar = ({ dark, toggleDark, activeIdx, setActiveIdx }) => {
         ))}
 
         {/* Progress filament */}
-        <motion.div style={{
+        <Motion.div style={{
           position: "absolute", bottom: 0, left: 0, height: 1.5, borderRadius: 1,
           background: dark
             ? "linear-gradient(90deg, transparent, #2d6a4f, #52b788, #95d5b2, #52b788, #2d6a4f, transparent)"
@@ -1184,7 +1254,7 @@ const AboutNavBar = ({ dark, toggleDark, activeIdx, setActiveIdx }) => {
             </button>
           </div>
         </div>
-      </motion.nav>
+      </Motion.nav>
 
       {/* Mobile Drawer */}
       <MobileDrawer
@@ -1199,9 +1269,6 @@ const AboutNavBar = ({ dark, toggleDark, activeIdx, setActiveIdx }) => {
   );
 };
 
-/* ═══════════════════════════════════════════════════
-   MAIN ABOUT COMPONENT
-═══════════════════════════════════════════════════ */
 export default function About() {
   const { dark } = useTheme();
   useReveal();
@@ -1218,7 +1285,7 @@ export default function About() {
   const HOW_STEPS = [
     { emoji: "🍽️", title: "Food Listed",    body: "Restaurants, events & households list surplus food with expiry time and quantity.", color: "step-green", to: "/dashboard/donate" },
     { emoji: "📍", title: "Made Discoverable", body: "Pending donations appear in the shared food listing with their pickup details.", color: "step-teal", to: "/dashboard/search" },
-    { emoji: "🤝", title: "Claim & Pickup", body: "Signed-in receivers can claim an available listing and provide destination details.", color: "step-amber", to: "/dashboard/search" },
+    { emoji: "🤝", title: "Claim, Pick Up & Track", body: "A receiver claims the food, arranges collection, and records the completed rescue.", color: "step-amber", to: "/dashboard/search" },
     { emoji: "❤️", title: "Outcome Recorded", body: "The pickup status becomes part of the platform's real activity and impact history.", color: "step-leaf", to: "/dashboard/orders" },
   ];
 
@@ -1246,7 +1313,8 @@ export default function About() {
         <div className="ab-hero-glow ab-glow-b" />
         <div className="ab-hero-glow ab-glow-c" />
 
-        <div className="ab-hero-content">
+        <div className="ab-hero-layout">
+          <div className="ab-hero-content">
           <div className="ab-pill rv">
             <div className="ab-pill-dot" />
             Our Story
@@ -1280,6 +1348,12 @@ export default function About() {
               <div className="ab-stat-l">Real Progress</div>
             </div>
           </div>
+          </div>
+
+          <Motion.figure className="ab-story-art rv rv-d2" animate={{ y: [0, -8, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}>
+            <img className="ab-story-image" src={foodRescueStory} alt="A family facing food insecurity as community volunteers arrive with fresh food" />
+            <figcaption className="ab-story-caption"><i aria-hidden="true" />A meal can change the next chapter</figcaption>
+          </Motion.figure>
         </div>
 
         <div className="ab-scroll-cue">
@@ -1299,8 +1373,8 @@ export default function About() {
               Technology in service<br />of <em>humanity</em>
             </h2>
             <p className="ab-p rv rv-d2">
-              ResQPlate helps restaurants, event organizers, and individuals make safe surplus
-              food visible to people and organizations that can collect and use it.
+              ResQPlate connects safe surplus food with verified people and organizations that
+              can collect it—through one clear, trackable workflow.
             </p>
             <p className="ab-p rv rv-d3">
               The platform provides one straightforward flow for publishing a donation,
@@ -1339,7 +1413,7 @@ export default function About() {
           </div>
 
           <div className="ab-timeline">
-            {HOW_STEPS.map((step, i) => (
+            {HOW_STEPS.slice(0, 3).map((step, i) => (
               <MotionLink
                 key={i}
                 to={step.to}
@@ -1406,37 +1480,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* ══ CTA ══ */}
-      <section className="ab-cta">
-        <div className="ab-cta-glow" />
-        <div className="ab-cta-grid" />
-
-        <div className="ab-cta-inner">
-          <p className="ab-tag rv" style={{ display: "flex", justifyContent: "center" }}>
-            Join the Movement
-          </p>
-          <h2 className="ab-cta-h2 rv rv-d1">
-            Together, we can<br /><em>end food waste.</em>
-          </h2>
-          <p className="ab-cta-sub rv rv-d2">
-            Every surplus plate is someone's next meal. Every second counts.
-            Be the bridge between abundance and need.
-          </p>
-
-          <div className="ab-cta-btns rv rv-d3">
-            <Link to="/register" className="ab-btn-primary">
-              Get Started Free <span className="arr">→</span>
-            </Link>
-            <Link to="/dashboard/search" className="ab-btn-ghost">
-              Browse Listings
-            </Link>
-          </div>
-
-          <p className="ab-cta-foot rv rv-d5">
-            © 2026 ResQPlate — Built for Social Impact · All food is free
-          </p>
-        </div>
-      </section>
     </>
   );
 }

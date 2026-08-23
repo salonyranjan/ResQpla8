@@ -117,7 +117,7 @@ export default function MapView({ selectedPickup, onPickupSelect }) {
   return (
     <main className={`rq-professional-map ${dark ? "dark" : "light"}`}>
       <style>{`
-        .rq-professional-map { --panel:#fff; --text:#17251c; --muted:#66776c; --line:rgba(19,74,39,.13); --soft:#f4f8f5; position:relative; height:calc(100dvh - 72px); margin-top:72px; overflow:hidden; background:#e8efe9; color:var(--text); font-family:Inter,system-ui,sans-serif; }
+        .rq-professional-map { --panel:#fff; --text:#17251c; --muted:#66776c; --line:rgba(19,74,39,.13); --soft:#f4f8f5; position:relative; height:calc(100dvh - 72px); margin-top:72px; overflow:hidden; background:#e8efe9; color:var(--text); font-family:'Cabinet Grotesk',system-ui,sans-serif; }
         .rq-professional-map.dark { --panel:#0c1710; --text:#edf7f0; --muted:#8ba092; --line:rgba(82,183,136,.14); --soft:#111f16; background:#09130d; }
         .rq-map-panel { position:absolute; z-index:600; top:16px; bottom:16px; left:16px; width:340px; display:flex; flex-direction:column; overflow:hidden; border:1px solid var(--line); border-radius:18px; background:color-mix(in srgb,var(--panel) 96%,transparent); box-shadow:0 18px 55px rgba(6,35,17,.16); backdrop-filter:blur(16px); }
         .rq-map-panel-head { padding:20px; border-bottom:1px solid var(--line); }

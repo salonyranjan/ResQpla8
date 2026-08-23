@@ -1,13 +1,18 @@
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 const Settings = () => {
   const { T } = useOutletContext();
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [emailUpdates, setEmailUpdates] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => localStorage.getItem("resqplate-push-notifications") !== "false");
+  const [emailUpdates, setEmailUpdates] = useState(() => localStorage.getItem("resqplate-email-updates") === "true");
+
+  useEffect(() => {
+    localStorage.setItem("resqplate-push-notifications", String(notificationsEnabled));
+    localStorage.setItem("resqplate-email-updates", String(emailUpdates));
+  }, [notificationsEnabled, emailUpdates]);
 
   return (
     <div style={{ padding: "28px", background: T.bg, minHeight: "100vh" }}>
@@ -27,7 +32,7 @@ const Settings = () => {
         </div>
         <h2
           style={{
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "'DM Mono', monospace",
             fontSize: "24px",
             color: T.text,
             margin: 0,
@@ -41,7 +46,7 @@ const Settings = () => {
       <div style={{ background: T.bgCard, borderRadius: "16px", padding: "24px", marginBottom: "24px", border: `1px solid ${T.border}` }}>
         <h3
           style={{
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "'DM Mono', monospace",
             fontSize: "18px",
             color: T.text,
             margin: "0 0 16px 0",
@@ -49,7 +54,7 @@ const Settings = () => {
         >
           Notifications
         </h3>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+        <label style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
           <input
             type="checkbox"
             checked={notificationsEnabled}
@@ -58,7 +63,7 @@ const Settings = () => {
           />
           <span
             style={{
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "'DM Mono', monospace",
               fontSize: "14px",
               color: T.text,
               cursor: "pointer",
@@ -66,8 +71,8 @@ const Settings = () => {
           >
             Enable push notifications
           </span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+        </label>
+        <label style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
           <input
             type="checkbox"
             checked={emailUpdates}
@@ -76,7 +81,7 @@ const Settings = () => {
           />
           <span
             style={{
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "'DM Mono', monospace",
               fontSize: "14px",
               color: T.text,
               cursor: "pointer",
@@ -84,7 +89,7 @@ const Settings = () => {
           >
             Email updates for rescued meals
           </span>
-        </div>
+        </label>
         <div style={{ fontSize: "12px", color: T.textFaint }}>
           We'll notify you about new food listings and rescue impacts
         </div>
@@ -93,7 +98,7 @@ const Settings = () => {
       <div style={{ background: T.bgCard, borderRadius: "16px", padding: "24px", border: `1px solid ${T.border}` }}>
         <h3
           style={{
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "'DM Mono', monospace",
             fontSize: "18px",
             color: T.text,
             margin: "0 0 16px 0",
@@ -111,7 +116,7 @@ const Settings = () => {
               color: "#fff",
               border: "none",
               borderRadius: "10px",
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "'DM Mono', monospace",
               fontSize: "14px",
               fontWeight: "600",
               cursor: "pointer",
@@ -135,7 +140,7 @@ const Settings = () => {
               color: T.red,
               border: `1px solid ${T.red}`,
               borderRadius: "10px",
-              fontFamily: "'JetBrains Mono', monospace",
+              fontFamily: "'DM Mono', monospace",
               fontSize: "14px",
               fontWeight: "600",
               cursor: "pointer",

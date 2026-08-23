@@ -1,5 +1,5 @@
 import { useOutletContext } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 const Leaderboard = () => {
   const { T, dark } = useOutletContext() || {};
@@ -27,7 +27,7 @@ const Leaderboard = () => {
     <div style={{ padding: "28px", background: theme.bg, minHeight: "100vh" }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
-        <motion.div
+        <Motion.div
           animate={{ rotate: [0, 10, -10, 0] }}
           transition={{ duration: 3, repeat: Infinity }}
           style={{
@@ -35,21 +35,21 @@ const Leaderboard = () => {
             background: theme.accentSoft, display: "flex",
             alignItems: "center", justifyContent: "center", fontSize: 20,
           }}
-        >🏆</motion.div>
+        >🏆</Motion.div>
         <div>
           <h2 style={{
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 24,
+            fontFamily: "'DM Mono', monospace", fontSize: 24,
             color: theme.text, margin: 0, letterSpacing: "-0.02em",
           }}>Leaderboard</h2>
           <div style={{
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+            fontFamily: "'DM Mono', monospace", fontSize: 11,
             color: theme.textMuted, letterSpacing: "0.06em",
           }}>Top volunteers this month</div>
         </div>
       </div>
 
       {/* Trophy Card - FIXED Line 62 */}
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         style={{
@@ -66,14 +66,14 @@ const Leaderboard = () => {
           marginBottom: 4,
         }}>Top Volunteer</div>
         <div style={{
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "'DM Mono', monospace",
           fontSize: 14, color: theme.accent, fontWeight: 700,
         }}>{leaders[0].name}</div>
         <div style={{
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "'DM Mono', monospace",
           fontSize: 12, color: theme.textMuted, marginTop: 4,
         }}>{leaders[0].rescues} rescues this month</div>
-      </motion.div>
+      </Motion.div>
 
       {/* Leaderboard List */}
       <div style={{ 
@@ -83,7 +83,7 @@ const Leaderboard = () => {
         overflow: "hidden" 
       }}>
         {leaders.map((leader, i) => (
-          <motion.div
+          <Motion.div
             key={leader.rank}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -99,7 +99,7 @@ const Leaderboard = () => {
               width: 32, height: 32, borderRadius: 8,
               background: i === 0 ? leader.color : theme.accentSoft,
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 12,
+              fontFamily: "'DM Mono', monospace", fontSize: 12,
               color: i === 0 ? "#fff" : theme.textMuted, fontWeight: 700,
             }}>
               {leader.rank}
@@ -120,14 +120,14 @@ const Leaderboard = () => {
                 color: theme.text,
               }}>{leader.name}</div>
               <div style={{
-                fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                fontFamily: "'DM Mono', monospace", fontSize: 10,
                 color: theme.textMuted,
               }}>{leader.rescues} rescues</div>
             </div>
             {leader.badge && (
               <div style={{ fontSize: 20 }}>{leader.badge}</div>
             )}
-          </motion.div>
+          </Motion.div>
         ))}
       </div>
     </div>

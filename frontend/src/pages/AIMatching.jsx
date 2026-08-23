@@ -1,9 +1,10 @@
-import { useOutletContext } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { useState } from "react";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 
 const AIMatching = () => {
-  const { T, dark } = useOutletContext();
+  const { T } = useOutletContext();
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -33,7 +34,7 @@ const AIMatching = () => {
     <div style={{ padding: "28px", background: T.bg, minHeight: "100vh" }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
-        <motion.div
+        <Motion.div
           animate={{ rotate: loading ? 360 : 0 }}
           transition={{ duration: 1.5, repeat: loading ? Infinity : 0, ease: "linear" }}
           style={{
@@ -41,14 +42,14 @@ const AIMatching = () => {
             background: T.accentSoft, display: "flex",
             alignItems: "center", justifyContent: "center", fontSize: 20,
           }}
-        >🤖</motion.div>
+        >🤖</Motion.div>
         <div>
           <h2 style={{
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 24,
+            fontFamily: "'DM Mono', monospace", fontSize: 24,
             color: T.text, margin: 0, letterSpacing: "-0.02em",
           }}>AI-Powered Matching</h2>
           <div style={{
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+            fontFamily: "'DM Mono', monospace", fontSize: 11,
             color: T.textMuted, letterSpacing: "0.06em",
           }}>Real-time donor → NGO intelligence engine</div>
         </div>
@@ -61,7 +62,7 @@ const AIMatching = () => {
           border: `1px solid ${T.border}`,
         }}>
           <h3 style={{
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 16,
+            fontFamily: "'DM Mono', monospace", fontSize: 16,
             color: T.text, margin: "0 0 20px 0",
           }}>Donation Details</h3>
 
@@ -73,25 +74,26 @@ const AIMatching = () => {
           ].map((field) => (
             <div key={field.key} style={{ marginBottom: 16 }}>
               <label style={{
-                display: "block", fontFamily: "'JetBrains Mono', monospace",
+                display: "block", fontFamily: "'DM Mono', monospace",
                 fontSize: 11, color: T.textMuted, letterSpacing: "0.08em",
                 marginBottom: 6, textTransform: "uppercase",
               }}>{field.label}</label>
               {field.options ? (
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {field.options.map((opt) => (
-                    <motion.button
+                    <Motion.button
                       key={opt}
+                      type="button"
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setForm(f => ({ ...f, [field.key]: opt }))}
                       style={{
                         padding: "8px 16px", borderRadius: 10, border: `1px solid ${form[field.key] === opt ? T.accent : T.border}`,
                         background: form[field.key] === opt ? T.accentSoft : T.bgInput,
                         color: form[field.key] === opt ? T.accent : T.textMuted,
-                        fontFamily: "'JetBrains Mono', monospace", fontSize: 12,
+                        fontFamily: "'DM Mono', monospace", fontSize: 12,
                         cursor: "pointer", fontWeight: form[field.key] === opt ? 700 : 400,
                       }}
-                    >{opt}</motion.button>
+                    >{opt}</Motion.button>
                   ))}
                 </div>
               ) : (
@@ -102,7 +104,7 @@ const AIMatching = () => {
                   style={{
                     width: "100%", padding: "10px 14px", borderRadius: 10,
                     border: `1px solid ${T.border}`, background: T.bgInput,
-                    color: T.text, fontFamily: "'JetBrains Mono', monospace",
+                    color: T.text, fontFamily: "'DM Mono', monospace",
                     fontSize: 13, outline: "none", boxSizing: "border-box",
                   }}
                 />
@@ -110,7 +112,7 @@ const AIMatching = () => {
             </div>
           ))}
 
-          <motion.button
+          <Motion.button
             whileHover={{ scale: 1.02, boxShadow: `0 8px 28px ${T.accentGlow}` }}
             whileTap={{ scale: 0.97 }}
             onClick={runMatch}
@@ -118,16 +120,16 @@ const AIMatching = () => {
             style={{
               width: "100%", padding: "14px 0", borderRadius: 12, border: "none",
               background: loading ? T.bgAlt : T.accent, color: loading ? T.textMuted : "#fff",
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 14, fontWeight: 700,
+              fontFamily: "'DM Mono', monospace", fontSize: 14, fontWeight: 700,
               cursor: loading || !form.quantity || !form.location ? "not-allowed" : "pointer",
               opacity: loading || !form.quantity || !form.location ? 0.5 : 1,
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
             }}
           >
             {loading ? (
-              <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>⚙️</motion.span>
+              <Motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>⚙️</Motion.span>
             ) : "⚡"}&nbsp;{loading ? "AI Processing..." : "Run AI Match"}
-          </motion.button>
+          </Motion.button>
         </div>
 
         {/* Matching Pipeline + Results */}
@@ -138,7 +140,7 @@ const AIMatching = () => {
             border: `1px solid ${T.border}`,
           }}>
             <h3 style={{
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 16,
+              fontFamily: "'DM Mono', monospace", fontSize: 16,
               color: T.text, margin: "0 0 20px 0",
             }}>Matching Pipeline</h3>
             <div style={{ display: "flex", alignItems: "center", gap: 0, overflow: "hidden" }}>
@@ -149,7 +151,7 @@ const AIMatching = () => {
                 { icon: "✅", label: "Match", done: step >= 3 },
               ].map((s, i) => (
                 <div key={s.label} style={{ flex: 1, textAlign: "center" }}>
-                  <motion.div
+                  <Motion.div
                     animate={{
                       background: s.done ? `${T.accent}22` : T.bgInput,
                       borderColor: s.done ? T.accent : T.border,
@@ -161,13 +163,13 @@ const AIMatching = () => {
                       margin: "0 auto 8px", display: "flex", alignItems: "center",
                       justifyContent: "center", fontSize: 20,
                     }}
-                  >{s.icon}</motion.div>
+                  >{s.icon}</Motion.div>
                   <div style={{
-                    fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                    fontFamily: "'DM Mono', monospace", fontSize: 10,
                     color: s.done ? T.accent : T.textFaint, letterSpacing: "0.06em",
                   }}>{s.label}</div>
                   {i < 3 && (
-                    <motion.div
+                    <Motion.div
                       animate={{ background: step > i + 1 ? T.accent : T.border }}
                       style={{
                         height: 2, width: "100%", position: "relative",
@@ -183,7 +185,7 @@ const AIMatching = () => {
           {/* Results */}
           <AnimatePresence>
             {matches.length > 0 && (
-              <motion.div
+              <Motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
@@ -193,11 +195,11 @@ const AIMatching = () => {
                 }}
               >
                 <h3 style={{
-                  fontFamily: "'JetBrains Mono', monospace", fontSize: 16,
+                  fontFamily: "'DM Mono', monospace", fontSize: 16,
                   color: T.text, margin: "0 0 16px 0",
                 }}>Top Matches ({matches.length})</h3>
                 {matches.map((m, i) => (
-                  <motion.div
+                  <Motion.div
                     key={m.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -220,11 +222,11 @@ const AIMatching = () => {
                     }}>🏠</div>
                     <div style={{ flex: 1 }}>
                       <div style={{
-                        fontFamily: "'JetBrains Mono', monospace", fontSize: 13,
+                        fontFamily: "'DM Mono', monospace", fontSize: 13,
                         fontWeight: 600, color: T.text,
                       }}>{m.name}</div>
                       <div style={{
-                        fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                        fontFamily: "'DM Mono', monospace", fontSize: 10,
                         color: T.textMuted, marginTop: 2,
                       }}>{m.location} · {m.capacity} · ⭐ {m.rating} · {m.eta}</div>
                     </div>
@@ -232,22 +234,23 @@ const AIMatching = () => {
                       <div style={{
                         background: T.accent, color: "#fff",
                         borderRadius: 6, padding: "3px 8px",
-                        fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+                        fontFamily: "'DM Mono', monospace", fontSize: 9,
                         fontWeight: 700, letterSpacing: "0.06em",
                       }}>BEST</div>
                     )}
-                    <motion.button
+                    <Motion.button
                       whileTap={{ scale: 0.95 }}
+                      onClick={() => navigate("/dashboard/donate", { state: { donationDraft: form, suggestedPartner: m.name } })}
                       style={{
                         padding: "8px 14px", borderRadius: 8, border: "none",
                         background: m.color, color: "#fff",
-                        fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+                        fontFamily: "'DM Mono', monospace", fontSize: 11,
                         fontWeight: 600, cursor: "pointer",
                       }}
-                    >Select</motion.button>
-                  </motion.div>
+                    >Select</Motion.button>
+                  </Motion.div>
                 ))}
-              </motion.div>
+              </Motion.div>
             )}
           </AnimatePresence>
         </div>

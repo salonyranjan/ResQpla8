@@ -2,11 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useCart } from "../context/CartContext";
 import { useTheme } from "../context/ThemeContext";
 
-/* ═══════════════════════════════════════════════
-   FOODCARD — Standalone, no router/context deps
-   Drop-in replacement that works anywhere
-═══════════════════════════════════════════════ */
-
 const FONT_URL =
   "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap";
 
@@ -159,7 +154,7 @@ const injectStyles = () => {
       z-index: 4;
       background: var(--fc-bg);
       color: var(--fc-accent);
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'DM Mono', monospace;
       font-size: 9px;
       font-weight: 500;
       letter-spacing: 0.12em;
@@ -236,7 +231,7 @@ const injectStyles = () => {
       padding: 6px 16px;
       background: linear-gradient(90deg, var(--fc-amber), rgba(0,0,0,0));
       color: #fff;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'DM Mono', monospace;
       font-size: 9.5px;
       font-weight: 500;
       letter-spacing: 0.06em;
@@ -267,7 +262,7 @@ const injectStyles = () => {
       font-size: 11px;
       font-weight: 600;
       color: var(--fc-accent);
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'DM Mono', monospace;
       letter-spacing: 0.06em;
       text-transform: uppercase;
       margin: 0 0 8px;
@@ -333,7 +328,7 @@ const injectStyles = () => {
     }
 
     .fc-qty-label {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'DM Mono', monospace;
       font-size: 11px;
       font-weight: 400;
       color: var(--fc-text-muted);
@@ -440,7 +435,7 @@ const injectStyles = () => {
     }
 
     .fc-img-placeholder-text {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'DM Mono', monospace;
       font-size: 9px;
       color: var(--fc-text-muted);
       letter-spacing: 0.12em;
@@ -450,21 +445,16 @@ const injectStyles = () => {
   document.head.appendChild(style);
 };
 
-/* ══════════════════════════════════════════
-   FOOD CARD COMPONENT
-══════════════════════════════════════════ */
 const FoodCard = ({
   item = {},
   onClick,
   externalDark,
-  onDarkToggle,
 }) => {
   const [added, setAdded] = useState(false);
   const { dark: appDark } = useTheme();
   const cardRef = useRef(null);
   const { addItem } = useCart();
 
-  // Allow external dark control or internal
   const isDark = externalDark !== undefined ? externalDark : appDark;
 
   useEffect(() => { injectStyles(); }, []);
@@ -472,11 +462,10 @@ const FoodCard = ({
   const handleAdd = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    // Map Appwrite document fields to the context's Product type
     addItem({
       id: item.$id,
       name: item.name,
-      price: 0, // Since ResQPlate is for donation
+      price: 0,
       restaurant: item.restaurant,
       image: item.imageUrl,
       status: item.status,

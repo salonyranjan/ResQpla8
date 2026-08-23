@@ -1,9 +1,13 @@
+@import url("https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,700&display=swap");
 @import "tailwindcss";
 
 :root {
   --focus-ring: #52b788;
   --page-bg: #f7f2e8;
   --page-text: #111c15;
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "Cabinet Grotesk", "Segoe UI", sans-serif;
+  --font-meta: "DM Mono", "SFMono-Regular", Consolas, monospace;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
@@ -33,6 +37,7 @@ body {
   min-height: 100vh;
   background: var(--page-bg);
   color: var(--page-text);
+  font-family: var(--font-body);
   transition: background-color 240ms ease, color 240ms ease;
 }
 
@@ -116,9 +121,7 @@ button, a {
   --color-info: #3b82f6;
 
   /* Typography */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji";
+  --font-sans: var(--font-body);
 
   /* Spacing for safe areas (mobile) */
   --spacing-safe-top: env(safe-area-inset-top, 0px);
@@ -211,6 +214,7 @@ button, a {
 
   /* Headings */
   h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
     line-height: 1.2;
     font-weight: 700;
     text-wrap: balance;

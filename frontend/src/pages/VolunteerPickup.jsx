@@ -1,10 +1,11 @@
-import { useOutletContext } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 import { useVolunteerPickups } from "../hooks/useVolunteerPickups";
 import { useState, useMemo } from "react";
 
 const VolunteerPickup = () => {
   const { T } = useOutletContext();
+  const navigate = useNavigate();
   const { pickups, loading, error } = useVolunteerPickups();
   const [filter, setFilter] = useState("all");
 
@@ -43,7 +44,7 @@ const VolunteerPickup = () => {
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <motion.div
+          <Motion.div
             animate={{ y: [0, -8, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
             style={{
@@ -51,14 +52,14 @@ const VolunteerPickup = () => {
               background: T.amberSoft, display: "flex",
               alignItems: "center", justifyContent: "center", fontSize: 20,
             }}
-          >🚴</motion.div>
+          >🚴</Motion.div>
           <div>
             <h2 style={{
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 24,
+              fontFamily: "'DM Mono', monospace", fontSize: 24,
               color: T.text, margin: 0, letterSpacing: "-0.02em",
             }}>Volunteer Pickups</h2>
             <div style={{
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+              fontFamily: "'DM Mono', monospace", fontSize: 11,
               color: T.textMuted, letterSpacing: "0.06em",
             }}>Live tracking of food rescue operations</div>
           </div>
@@ -70,13 +71,13 @@ const VolunteerPickup = () => {
           background: T.accentSoft, border: `1px solid ${T.borderMed}`,
           borderRadius: 100, padding: "6px 14px",
         }}>
-          <motion.div
+          <Motion.div
             animate={{ opacity: [1, 0.3, 1] }}
             transition={{ duration: 1.4, repeat: Infinity }}
             style={{ width: 8, height: 8, borderRadius: "50%", background: T.accent }}
           />
           <span style={{
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+            fontFamily: "'DM Mono', monospace", fontSize: 10,
             color: T.accent, fontWeight: 700, letterSpacing: "0.08em",
           }}>LIVE</span>
         </div>
@@ -93,7 +94,7 @@ const VolunteerPickup = () => {
           { label: "Arrived", value: statusCounts.arrived, icon: "📍", color: T.amber },
           { label: "Avg Delivery", value: "4.2 min", icon: "⏱", color: T.teal },
         ].map((s, i) => (
-          <motion.div
+          <Motion.div
             key={i}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -107,14 +108,14 @@ const VolunteerPickup = () => {
               <span style={{ fontSize: 18 }}>{s.icon}</span>
             </div>
             <div style={{
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 22,
+              fontFamily: "'DM Mono', monospace", fontSize: 22,
               fontWeight: 700, color: s.color, lineHeight: 1, marginBottom: 4,
             }}>{s.value}</div>
             <div style={{
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+              fontFamily: "'DM Mono', monospace", fontSize: 9,
               color: T.textMuted, letterSpacing: "0.1em", textTransform: "uppercase",
             }}>{s.label}</div>
-          </motion.div>
+          </Motion.div>
         ))}
       </div>
 
@@ -126,7 +127,7 @@ const VolunteerPickup = () => {
           { id: "arrived", label: "📍 Arrived" },
           { id: "picking-up", label: "📦 Picking Up" },
         ].map(f => (
-          <motion.button
+          <Motion.button
             key={f.id}
             whileTap={{ scale: 0.95 }}
             onClick={() => setFilter(f.id)}
@@ -135,7 +136,7 @@ const VolunteerPickup = () => {
               border: `1px solid ${filter === f.id ? T.accent : T.border}`,
               background: filter === f.id ? T.accentSoft : "transparent",
               color: filter === f.id ? T.accent : T.textMuted,
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+              fontFamily: "'DM Mono', monospace", fontSize: 10,
               cursor: "pointer", fontWeight: filter === f.id ? 700 : 400,
               letterSpacing: "0.04em", transition: "all 0.2s",
             }}
@@ -148,7 +149,7 @@ const VolunteerPickup = () => {
                 fontSize: 9, fontWeight: 700,
               }}>{statusCounts[f.id] || 0}</span>
             )}
-          </motion.button>
+          </Motion.button>
         ))}
       </div>
 
@@ -158,7 +159,7 @@ const VolunteerPickup = () => {
           {filteredPickups.map((pickup, i) => {
             const badge = getStatusBadge(pickup.status);
             return (
-              <motion.div
+              <Motion.div
                 key={pickup.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -188,7 +189,7 @@ const VolunteerPickup = () => {
                       background: `${pickup.color}18`, border: `1px solid ${pickup.color}33`,
                       display: "flex", alignItems: "center", justifyContent: "center",
                       fontSize: 14, fontWeight: 700, color: pickup.color,
-                      fontFamily: "'JetBrains Mono', monospace",
+                      fontFamily: "'DM Mono', monospace",
                     }}>{pickup.avatar}</div>
                     <div>
                       <div style={{
@@ -196,7 +197,7 @@ const VolunteerPickup = () => {
                         color: T.text,
                       }}>{pickup.volunteer}</div>
                       <div style={{
-                        fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                        fontFamily: "'DM Mono', monospace", fontSize: 10,
                         color: T.textMuted, marginTop: 2,
                       }}>★ {pickup.rating} · {pickup.rescues} rescues</div>
                     </div>
@@ -207,7 +208,7 @@ const VolunteerPickup = () => {
                     borderRadius: 8, padding: "4px 10px", flexShrink: 0,
                   }}>
                     <span style={{
-                      fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+                      fontFamily: "'DM Mono', monospace", fontSize: 9,
                       color: badge.color, fontWeight: 700, letterSpacing: "0.06em",
                     }}>{badge.label.toUpperCase()}</span>
                   </div>
@@ -223,7 +224,7 @@ const VolunteerPickup = () => {
                     color: T.text, marginBottom: 4,
                   }}>{pickup.foodItem}</div>
                   <div style={{
-                    fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                    fontFamily: "'DM Mono', monospace", fontSize: 10,
                     color: T.textMuted,
                   }}>From: {pickup.donor}</div>
                 </div>
@@ -232,7 +233,7 @@ const VolunteerPickup = () => {
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
                   <div style={{ flex: 1, minWidth: 140 }}>
                     <div style={{
-                      fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+                      fontFamily: "'DM Mono', monospace", fontSize: 9,
                       color: T.textFaint, letterSpacing: "0.1em", marginBottom: 4,
                       textTransform: "uppercase",
                     }}>Pickup</div>
@@ -244,15 +245,15 @@ const VolunteerPickup = () => {
                     </div>
                   </div>
 
-                  <motion.div
+                  <Motion.div
                     animate={{ x: [0, 8, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
                     style={{ color: T.accent, fontSize: 18, flexShrink: 0 }}
-                  >→</motion.div>
+                  >→</Motion.div>
 
                   <div style={{ flex: 1, minWidth: 140 }}>
                     <div style={{
-                      fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+                      fontFamily: "'DM Mono', monospace", fontSize: 9,
                       color: T.textFaint, letterSpacing: "0.1em", marginBottom: 4,
                       textTransform: "uppercase",
                     }}>Deliver To</div>
@@ -269,11 +270,11 @@ const VolunteerPickup = () => {
                     borderRadius: 8, padding: "6px 10px", flexShrink: 0, textAlign: "center",
                   }}>
                     <div style={{
-                      fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+                      fontFamily: "'DM Mono', monospace", fontSize: 9,
                       color: pickup.color, fontWeight: 700,
                     }}>{pickup.eta}</div>
                     <div style={{
-                      fontFamily: "'JetBrains Mono', monospace", fontSize: 8,
+                      fontFamily: "'DM Mono', monospace", fontSize: 8,
                       color: T.textFaint,
                     }}>ETA</div>
                   </div>
@@ -283,11 +284,11 @@ const VolunteerPickup = () => {
                 <div style={{ marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                     <span style={{
-                      fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+                      fontFamily: "'DM Mono', monospace", fontSize: 9,
                       color: T.textFaint, letterSpacing: "0.08em",
                     }}>PROGRESS</span>
                     <span style={{
-                      fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+                      fontFamily: "'DM Mono', monospace", fontSize: 9,
                       color: pickup.color, fontWeight: 700,
                     }}>{Math.round(pickup.progress)}%</span>
                   </div>
@@ -295,7 +296,7 @@ const VolunteerPickup = () => {
                     height: 6, background: T.bgAlt, borderRadius: 100,
                     overflow: "hidden",
                   }}>
-                    <motion.div
+                    <Motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${pickup.progress}%` }}
                       transition={{ duration: 0.8, delay: 0.3 }}
@@ -309,51 +310,44 @@ const VolunteerPickup = () => {
 
                 {/* Action Buttons */}
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <motion.button
+                  <Motion.button
                     whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate(`/tracking/${pickup.id}`)}
                     style={{
                       padding: "8px 14px", borderRadius: 8, border: "none",
                       background: pickup.color, color: "#fff",
-                      fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                      fontFamily: "'DM Mono', monospace", fontSize: 10,
                       fontWeight: 600, cursor: "pointer", flexShrink: 0,
                     }}
-                  >📍 Track Live</motion.button>
-                  <motion.button
+                  >📍 Track Live</Motion.button>
+                  <Motion.button
                     whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate(`/tracking/${pickup.id}`)}
                     style={{
                       padding: "8px 14px", borderRadius: 8,
                       border: `1px solid ${T.border}`, background: T.bgAlt,
-                      color: T.text, fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
-                      fontWeight: 500, cursor: "pointer", flexShrink: 0,
-                    }}
-                  >📞 Contact Volunteer</motion.button>
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    style={{
-                      padding: "8px 14px", borderRadius: 8,
-                      border: `1px solid ${T.border}`, background: T.bgAlt,
-                      color: T.textMuted, fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                      color: T.textMuted, fontFamily: "'DM Mono', monospace", fontSize: 10,
                       fontWeight: 500, cursor: "pointer", flexShrink: 0, marginLeft: "auto",
                     }}
-                  >View Details →</motion.button>
+                  >View Details →</Motion.button>
                 </div>
-              </motion.div>
+              </Motion.div>
             );
           })}
         </div>
       </AnimatePresence>
 
       {filteredPickups.length === 0 && (
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           style={{ textAlign: "center", padding: "40px 20px", color: T.textFaint }}
         >
           <div style={{ fontSize: 40, marginBottom: 12 }}>🚴</div>
-          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13 }}>
             No pickups found for this filter
           </div>
-        </motion.div>
+        </Motion.div>
       )}
 
       {/* Responsive styles */}

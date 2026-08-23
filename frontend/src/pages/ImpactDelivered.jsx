@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useOutletContext, Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import { databases } from "../services/appwrite";
 import { Query } from "appwrite";
 import Logo from "../components/Logo";
@@ -8,7 +8,6 @@ import Logo from "../components/Logo";
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const PICKUPS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PICKUPS_COLLECTION_ID;
 
-/* ─── Floating orbs background ───────────────────────────────── */
 function Orbs({ dark }) {
   return (
     <div style={{ position: "fixed", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 0 }}>
@@ -40,7 +39,6 @@ function Orbs({ dark }) {
   );
 }
 
-/* ─── Main Component ──────────────────────────────────────────── */
 export default function ImpactDelivered() {
   const { T, dark } = useOutletContext() || {};
   const theme = T || {
@@ -228,7 +226,7 @@ export default function ImpactDelivered() {
               alignItems: "center",
               padding: "3rem",
             }}>
-              <motion.div
+              <Motion.div
                 animate={{ rotate: 360 }}
                 transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
                 style={{
@@ -254,7 +252,7 @@ export default function ImpactDelivered() {
                 { label: "Meals Rescued", value: totalMeals.toLocaleString(), suffix: "", icon: "🍽️", color: "#f59e0b" },
                 { label: "CO₂ Saved", value: totalCO2, suffix: " kg", icon: "🌿", color: "#14b8a6" },
               ].map((stat, i) => (
-                <motion.div
+                <Motion.div
                   key={i}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -284,7 +282,7 @@ export default function ImpactDelivered() {
                     letterSpacing: "0.08em",
                     marginTop: "0.25rem",
                   }}>{stat.label.toUpperCase()}</div>
-                </motion.div>
+                </Motion.div>
               ))}
             </div>
           )}
@@ -314,7 +312,7 @@ export default function ImpactDelivered() {
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                   {pickups.map((pickup, idx) => (
-                    <motion.div
+                    <Motion.div
                       key={pickup.$id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
@@ -367,7 +365,7 @@ export default function ImpactDelivered() {
                       }}>
                         {pickup.mealsCount || 0} meals
                       </div>
-                    </motion.div>
+                    </Motion.div>
                   ))}
                 </div>
               )}

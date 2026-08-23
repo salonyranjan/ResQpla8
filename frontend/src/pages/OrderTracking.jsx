@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate, useOutletContext } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 import {
   HiOutlineArrowLeft,
   HiOutlineCheckCircle,
@@ -7,7 +7,6 @@ import {
   HiOutlineTruck,
   HiOutlineShoppingBag,
   HiOutlineFire,
-  HiOutlinePhone,
 } from "react-icons/hi";
 import { useOrderTracking } from "../hooks/useOrderTracking";
 import { useTheme } from "../context/ThemeContext";
@@ -56,23 +55,23 @@ export default function OrderTracking() {
         borderBottom: `1px solid ${T.border}`, padding: "14px 16px",
         display: "flex", alignItems: "center", gap: 12, zIndex: 40,
       }}>
-        <motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate(-1)}
+        <Motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate(-1)}
           style={{ width: 38, height: 38, borderRadius: 12, background: T.bgCard, border: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
           <HiOutlineArrowLeft style={{ fontSize: 18, color: T.textMuted }} />
-        </motion.button>
+        </Motion.button>
         <div style={{ flex: 1 }}>
           <h1 style={{ fontSize: 16, fontWeight: 800, color: T.text }}>Tracking Order</h1>
           <p style={{ fontSize: 11, color: T.accent, fontFamily: "monospace", fontWeight: 700 }}>{orderId}</p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, background: T.accentSoft, border: `1px solid ${T.borderMed}`, borderRadius: 100, padding: "5px 12px" }}>
-          <motion.div animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1.2, repeat: Infinity }}
+          <Motion.div animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1.2, repeat: Infinity }}
             style={{ width: 5, height: 5, borderRadius: "50%", background: T.accent }} />
           <span style={{ fontFamily: "monospace", fontSize: 9, color: T.accent, letterSpacing: "0.1em" }}>LIVE</span>
         </div>
       </div>
 
       {/* ETA Hero */}
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         style={{
@@ -91,7 +90,7 @@ export default function OrderTracking() {
         <div style={{ position: "absolute", inset: 0, background: dark ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.3)" }} />
         <div style={{ position: "relative" }}>
           <AnimatePresence mode="wait">
-            <motion.div
+            <Motion.div
               key={currentStep}
               initial={{ y: 12, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -106,10 +105,10 @@ export default function OrderTracking() {
               <p style={{ fontSize: 13, color: T.textMuted, marginTop: 6 }}>
                 {STATUS_STEPS[currentStep].sub}
               </p>
-            </motion.div>
+            </Motion.div>
           </AnimatePresence>
         </div>
-      </motion.div>
+      </Motion.div>
 
       {/* Progress bar */}
       <div style={{ margin: "16px 16px 0", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 20, padding: 18 }}>
@@ -118,7 +117,7 @@ export default function OrderTracking() {
           <p style={{ fontSize: 12, fontFamily: "monospace", color: T.accent, fontWeight: 700 }}>{Math.round(progressPct)}%</p>
         </div>
         <div style={{ height: 8, background: T.bgAlt, borderRadius: 100, overflow: "hidden" }}>
-          <motion.div
+          <Motion.div
             animate={{ width: `${progressPct}%` }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             style={{ height: "100%", background: `linear-gradient(90deg, ${T.accent}, ${T.teal})`, borderRadius: 100 }}
@@ -135,7 +134,7 @@ export default function OrderTracking() {
             position: "absolute", left: 19, top: 20, bottom: 20, width: 2,
             background: T.border, borderRadius: 1,
           }} />
-          <motion.div
+          <Motion.div
             animate={{ height: `${progressPct}%` }}
             transition={{ duration: 0.8 }}
             style={{
@@ -150,14 +149,14 @@ export default function OrderTracking() {
             const isCompleted = idx < currentStep;
             const isCurrent = idx === currentStep;
             return (
-              <motion.div
+              <Motion.div
                 key={step.id}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.1 }}
                 style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: idx < STATUS_STEPS.length - 1 ? 20 : 0 }}
               >
-                <motion.div
+                <Motion.div
                   animate={isCurrent ? { scale: [1, 1.2, 1] } : {}}
                   transition={{ duration: 1.5, repeat: isCurrent ? Infinity : 0 }}
                   style={{
@@ -169,7 +168,7 @@ export default function OrderTracking() {
                   }}
                 >
                   <Icon style={{ fontSize: 18, color: isCompleted ? "#fff" : isCurrent ? T.accent : T.textFaint }} />
-                </motion.div>
+                </Motion.div>
 
                 <div style={{ paddingTop: 8 }}>
                   <p style={{ fontWeight: isCompleted || isCurrent ? 700 : 400, fontSize: 14, color: isCompleted ? T.accent : isCurrent ? T.text : T.textFaint }}>
@@ -177,48 +176,16 @@ export default function OrderTracking() {
                   </p>
                   <p style={{ fontSize: 11.5, color: T.textFaint, marginTop: 2 }}>{step.sub}</p>
                   {isCurrent && (
-                    <motion.div animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
+                    <Motion.div animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
                       style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 6, background: T.accentSoft, borderRadius: 100, padding: "2px 10px", border: `1px solid ${T.borderMed}` }}>
                       <div style={{ width: 4, height: 4, borderRadius: "50%", background: T.accent }} />
                       <span style={{ fontSize: 9, color: T.accent, fontFamily: "monospace", fontWeight: 700 }}>IN PROGRESS</span>
-                    </motion.div>
+                    </Motion.div>
                   )}
                 </div>
-              </motion.div>
+              </Motion.div>
             );
           })}
-        </div>
-      </div>
-
-      {/* Delivery partner */}
-      <div style={{ margin: "16px 16px 0", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 20, padding: 16 }}>
-        <p style={{ fontSize: 11, fontFamily: "monospace", color: T.textFaint, letterSpacing: "0.08em", marginBottom: 14 }}>DELIVERY PARTNER</p>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{
-            width: 48, height: 48, borderRadius: 16,
-            background: `linear-gradient(135deg, ${T.accent}, ${T.teal})`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 22, flexShrink: 0,
-          }}>
-            🚴
-          </div>
-          <div style={{ flex: 1 }}>
-            <p style={{ fontWeight: 700, fontSize: 14, color: T.text }}>Ramesh Kumar</p>
-            <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 2 }}>
-              <span style={{ fontSize: 11, color: T.amber }}>★★★★★</span>
-              <span style={{ fontSize: 11, color: T.textFaint, fontFamily: "monospace" }}>4.9 · 248 deliveries</span>
-            </div>
-          </div>
-          <motion.button
-            whileTap={{ scale: 0.92 }}
-            style={{
-              width: 42, height: 42, borderRadius: 13,
-              background: T.accentSoft, border: `1px solid ${T.borderMed}`,
-              display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
-            }}
-          >
-            <HiOutlinePhone style={{ fontSize: 18, color: T.accent }} />
-          </motion.button>
         </div>
       </div>
 

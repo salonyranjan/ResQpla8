@@ -1,12 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { useLocation, Outlet } from "react-router-dom";
-import { AnimatePresence, motion, useMotionValue, useSpring } from "framer-motion";
-import { pageReveal, staggerContainer } from "../animations/variants";
+import { AnimatePresence, motion as Motion, useMotionValue, useSpring } from "framer-motion";
 
-/* ────────────────────────────────────────────
-   Route → personality map
-   Each route gets its own transition "feel"
-──────────────────────────────────────────── */
 const ROUTE_PROFILES = {
   "/dashboard":        { color: "#52b788", label: "Home",      variant: "slide"   },
   "/dashboard/search": { color: "#f4a261", label: "Search",    variant: "zoom"    },
@@ -24,9 +19,6 @@ function getProfile(pathname) {
   return key ? ROUTE_PROFILES[key] : DEFAULT_PROFILE;
 }
 
-/* ────────────────────────────────────────────
-   Transition variants
-──────────────────────────────────────────── */
 const VARIANTS = {
   slide: {
     initial:   { opacity: 0, y: 28, filter: "blur(6px)" },
@@ -60,9 +52,6 @@ const VARIANTS = {
   },
 };
 
-/* ────────────────────────────────────────────
-   Slim progress bar (top of screen)
-──────────────────────────────────────────── */
 function ProgressBar({ color }) {
   const width = useMotionValue(0);
   const smooth = useSpring(width, { stiffness: 120, damping: 22 });
@@ -72,10 +61,10 @@ function ProgressBar({ color }) {
     const t1 = setTimeout(() => width.set(72), 80);
     const t2 = setTimeout(() => width.set(90), 300);
     return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [color]);
+  }, [color, width]);
 
   return (
-    <motion.div
+    <Motion.div
       style={{
         position: "fixed",
         top: 0,
@@ -93,12 +82,9 @@ function ProgressBar({ color }) {
   );
 }
 
-/* ────────────────────────────────────────────
-   Floating route label (lower-left, ephemeral)
-──────────────────────────────────────────── */
 function RouteLabel({ label, color }) {
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0, x: -16, y: 4 }}
       animate={{ opacity: 1, x: 0,   y: 0  }}
       exit={{    opacity: 0, x: 0,   y: 8  }}
@@ -121,7 +107,7 @@ function RouteLabel({ label, color }) {
         userSelect: "none",
       }}
     >
-      <motion.span
+      <Motion.span
         style={{
           display: "inline-block",
           width: 6,
@@ -134,23 +120,13 @@ function RouteLabel({ label, color }) {
         transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
       />
       {label}
-    </motion.div>
+    </Motion.div>
   );
 }
 
-/* ────────────────────────────────────────────
-   Ink-splash overlay (single burst per nav)
-──────────────────────────────────────────── */
-function InkSplash({ color, trigger }) {
-  const [key, setKey] = useState(0);
-
-  useEffect(() => {
-    if (trigger) setKey((k) => k + 1);
-  }, [trigger]);
-
+function InkSplash({ color }) {
   return (
-    <motion.div
-      key={key}
+    <Motion.div
       initial={{ scale: 0, opacity: 0.55 }}
       animate={{ scale: 18, opacity: 0 }}
       transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
@@ -172,32 +148,11 @@ function InkSplash({ color, trigger }) {
   );
 }
 
-/* ────────────────────────────────────────────
-   Main component
-──────────────────────────────────────────── */
 export default function PageTransition() {
   const location  = useLocation();
   const profile   = getProfile(location.pathname);
   const { variant, color, label } = profile;
   const v         = VARIANTS[variant];
-
-  const [navigating, setNavigating] = useState(false);
-  const [showLabel,  setShowLabel]  = useState(false);
-  const [splashKey,  setSplashKey]  = useState(0);
-  const prevPath = useRef(location.pathname);
-
-  useEffect(() => {
-    if (location.pathname === prevPath.current) return;
-    prevPath.current = location.pathname;
-
-    setNavigating(true);
-    setShowLabel(true);
-    setSplashKey((k) => k + 1);
-
-    const t1 = setTimeout(() => setNavigating(false), 600);
-    const t2 = setTimeout(() => setShowLabel(false),  1800);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [location.pathname]);
 
   return (
     <>
@@ -205,16 +160,16 @@ export default function PageTransition() {
       <ProgressBar color={color} />
 
       {/* ── Ink splash burst ── */}
-      <InkSplash color={color} trigger={splashKey} />
+      <InkSplash key={`splash-${location.pathname}`} color={color} />
 
       {/* ── Route label ── */}
       <AnimatePresence>
-        {showLabel && <RouteLabel key="route-label" label={label} color={color} />}
+        <RouteLabel key={location.pathname} label={label} color={color} />
       </AnimatePresence>
 
       {/* ── Page content with seamless transitions ── */}
       <AnimatePresence mode="wait" initial={false}>
-        <motion.div
+        <Motion.div
           key={location.pathname}  /* <-- critical: changes on every route */
           initial={v.initial}
           animate={v.animate}
@@ -226,11 +181,9 @@ export default function PageTransition() {
             transformPerspective: 1200,
             willChange: "transform, opacity",
           }}
-          onAnimationStart={() => setNavigating(true)}
-          onAnimationComplete={() => setNavigating(false)}
         >
           <Outlet />
-        </motion.div>
+        </Motion.div>
       </AnimatePresence>
     </>
   );

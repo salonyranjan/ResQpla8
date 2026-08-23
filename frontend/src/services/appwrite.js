@@ -47,10 +47,6 @@ function authError(error, fallback) {
   return friendly;
 }
 
-/* ────────────────────────────────────────────
-   Authentication helpers
-   ──────────────────────────────────────────── */
-
 /**
  * Register a new user.
  * @param {string} email

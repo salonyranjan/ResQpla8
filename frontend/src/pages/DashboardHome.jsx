@@ -31,7 +31,12 @@ export default function DashboardHome() {
 
   useEffect(() => {
     loadDashboard();
-    const unsubscribe = subscribeToPickupChanges(loadDashboard);
+    let unsubscribe;
+    try {
+      unsubscribe = subscribeToPickupChanges(loadDashboard);
+    } catch (subscriptionError) {
+      console.error("Dashboard live updates are unavailable:", subscriptionError);
+    }
     const expiryRefresh = window.setInterval(loadDashboard, 60_000);
     return () => {
       unsubscribe?.();

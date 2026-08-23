@@ -1,13 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import Logo from "./Logo";
-import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { useRef, useState, useEffect, useCallback } from "react";
+import { motion as Motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { useRef, useState, useEffect, useMemo } from "react";
 import emailjs from "@emailjs/browser";
 
-/* ══════════════════════════════════════════════════
-   FONT LOADER
-══════════════════════════════════════════════════ */
 const FontLoader = () => {
   useEffect(() => {
     const link = document.createElement("link");
@@ -19,18 +16,6 @@ const FontLoader = () => {
   return null;
 };
 
-/* ══════════════════════════════════════════════════
-   DARK MODE HOOK
-══════════════════════════════════════════════════ */
-const useDarkMode = () => {
-  const [dark, setDark] = useState(true);
-  const toggle = useCallback(() => setDark((d) => !d), []);
-  return { dark, toggle };
-};
-
-/* ══════════════════════════════════════════════════
-   PALETTE
-══════════════════════════════════════════════════ */
 const C = (dark) => ({
   leaf:       dark ? "#2d6a4f" : "#1a4a2e",
   leafm:      dark ? "#3d8a65" : "#2d6a4f",
@@ -57,9 +42,6 @@ const C = (dark) => ({
     : "linear-gradient(150deg,#1a3d26 0%,#2d6a4f 55%,#1e5c3a 100%)",
 });
 
-/* ══════════════════════════════════════════════════
-   GLOBAL STYLES
-══════════════════════════════════════════════════ */
 const GlobalStyles = ({ c }) => {
   useEffect(() => {
     const el = document.getElementById("rq-global");
@@ -118,9 +100,6 @@ const GlobalStyles = ({ c }) => {
   return null;
 };
 
-/* ══════════════════════════════════════════════════
-   GRAIN OVERLAY
-══════════════════════════════════════════════════ */
 const Grain = () => (
   <div style={{
     position: "fixed", inset: 0, pointerEvents: "none", zIndex: 9999, opacity: 0.022,
@@ -128,13 +107,10 @@ const Grain = () => (
   }} />
 );
 
-/* ══════════════════════════════════════════════════
-   SCROLL PROGRESS
-══════════════════════════════════════════════════ */
 const ScrollProgress = ({ c }) => {
   const { scrollYProgress } = useScroll();
   return (
-    <motion.div style={{
+    <Motion.div style={{
       position: "fixed", top: 0, left: 0, right: 0, height: 2,
       background: `linear-gradient(90deg, ${c.amber}, ${c.sage}, ${c.mint})`,
       transformOrigin: "0%", scaleX: scrollYProgress, zIndex: 10001,
@@ -142,9 +118,6 @@ const ScrollProgress = ({ c }) => {
   );
 };
 
-/* ══════════════════════════════════════════════════
-   LIVE TICKER
-══════════════════════════════════════════════════ */
 const TICKS = [
   "🍱 Good food deserves a second destination",
   "🤝 Make surplus visible, useful, and easier to collect",
@@ -166,33 +139,30 @@ const Ticker = ({ c }) => {
       fontWeight: 500, letterSpacing: "0.04em", overflow: "hidden",
     }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
-        <motion.span
+        <Motion.span
           animate={{ opacity: [1, 0.3, 1], scale: [1, 1.5, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
           style={{ width: 6, height: 6, borderRadius: "50%", background: c.leaf, display: "inline-block", flexShrink: 0 }}
         />
         <AnimatePresence mode="wait">
-          <motion.span
+          <Motion.span
             key={idx}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
-          >{TICKS[idx]}</motion.span>
+          >{TICKS[idx]}</Motion.span>
         </AnimatePresence>
       </div>
     </div>
   );
 };
 
-/* ══════════════════════════════════════════════════
-   REVEAL WRAPPER
-══════════════════════════════════════════════════ */
 const Reveal = ({ children, delay = 0, y = 36, x = 0, style = {} }) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
   return (
-    <motion.div
+    <Motion.div
       ref={ref}
       initial={{ opacity: 0, y, x }}
       animate={inView ? { opacity: 1, y: 0, x: 0 } : {}}
@@ -200,13 +170,10 @@ const Reveal = ({ children, delay = 0, y = 36, x = 0, style = {} }) => {
       style={style}
     >
       {children}
-    </motion.div>
+    </Motion.div>
   );
 };
 
-/* ══════════════════════════════════════════════════
-   ANIMATED COUNTER
-══════════════════════════════════════════════════ */
 const Counter = ({ target, suffix = "" }) => {
   const [val, setVal] = useState(0);
   const ref = useRef(null);
@@ -226,9 +193,6 @@ const Counter = ({ target, suffix = "" }) => {
   return <span ref={ref}>{val.toLocaleString()}{suffix}</span>;
 };
 
-/* ══════════════════════════════════════════════════
-   LEAF DECORATION
-══════════════════════════════════════════════════ */
 const LeafDeco = ({ c, style }) => (
   <svg viewBox="0 0 120 180" fill="none" style={{ position: "absolute", pointerEvents: "none", ...style }}>
     <path d="M60 175 C15 140 -5 90 8 42 C21 -6 65 2 95 36 C125 70 118 130 60 175Z"
@@ -237,25 +201,22 @@ const LeafDeco = ({ c, style }) => (
   </svg>
 );
 
-/* ══════════════════════════════════════════════════
-   FLOATING PARTICLES
-══════════════════════════════════════════════════ */
 const Particles = ({ c }) => {
-  const particles = useRef(
+  const particles = useMemo(() =>
     Array.from({ length: 20 }, (_, i) => ({
       id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 4 + 2,
-      dur: Math.random() * 7 + 5,
-      delay: Math.random() * 3,
-      up: Math.random() > 0.5,
-    }))
-  ).current;
+      x: (i * 37 + 11) % 100,
+      y: (i * 61 + 7) % 100,
+      size: 2 + (i % 5) * 0.8,
+      dur: 5 + (i % 7),
+      delay: (i % 6) * 0.5,
+      up: i % 2 === 0,
+    })), []
+  );
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
       {particles.map((p) => (
-        <motion.div
+        <Motion.div
           key={p.id}
           style={{
             position: "absolute", left: `${p.x}%`, top: `${p.y}%`,
@@ -270,19 +231,14 @@ const Particles = ({ c }) => {
   );
 };
 
-/* ══════════════════════════════════════════════════
-   NAVBAR — WORLD-CLASS MOBILE + DESKTOP
-══════════════════════════════════════════════════ */
 const NAV_LINKS = [
   { label: "Home",         href: "#hero",     icon: "⬡", emoji: "🏠" },
   { label: "Features",     href: "#features", icon: "◈", emoji: "✨" },
   { label: "How It Works", href: "#how",      icon: "◎", emoji: "⚙️" },
-  { label: "Impact",       href: "#impact",   icon: "◉", emoji: "🌍" },
-  { label: "Stories",      href: "#stories",  icon: "◇", emoji: "💬" },
 ];
 
 /* Magnetic link — desktop only */
-const MagneticLink = ({ children, href, isActive, onClick, c, dark }) => {
+const MagneticLink = ({ children, href, isActive, onClick, dark }) => {
   const ref = useRef(null);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [hovered, setHovered] = useState(false);
@@ -297,7 +253,7 @@ const MagneticLink = ({ children, href, isActive, onClick, c, dark }) => {
 
   return (
     <a href={href} style={{ textDecoration: "none", position: "relative" }}>
-      <motion.button
+      <Motion.button
         ref={ref}
         onClick={onClick}
         onMouseMove={handleMouseMove}
@@ -321,7 +277,7 @@ const MagneticLink = ({ children, href, isActive, onClick, c, dark }) => {
       >
         <AnimatePresence>
           {(isActive || hovered) && (
-            <motion.div
+            <Motion.div
               key="glow"
               initial={{ opacity: 0, scale: 0.6 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -343,7 +299,7 @@ const MagneticLink = ({ children, href, isActive, onClick, c, dark }) => {
           )}
         </AnimatePresence>
 
-        <motion.span
+        <Motion.span
           animate={isActive
             ? { scale: [1, 1.6, 1], opacity: [0.9, 0.4, 0.9] }
             : { scale: 1, opacity: hovered ? 0.6 : 0 }}
@@ -357,7 +313,7 @@ const MagneticLink = ({ children, href, isActive, onClick, c, dark }) => {
         />
         <span style={{ position: "relative", zIndex: 1 }}>{children}</span>
         {isActive && (
-          <motion.div
+          <Motion.div
             layoutId="nav-shimmer-line"
             style={{
               position: "absolute", bottom: 4, left: 18, right: 18, height: 1.5, borderRadius: 2,
@@ -370,16 +326,16 @@ const MagneticLink = ({ children, href, isActive, onClick, c, dark }) => {
             transition={{ type: "spring", stiffness: 400, damping: 32 }}
           />
         )}
-      </motion.button>
+      </Motion.button>
     </a>
   );
 };
 
 /* Firefly particle */
-const NavFirefly = ({ c, dark, index }) => {
-  const x = 15 + index * 18 + Math.random() * 8;
+const NavFirefly = ({ dark, index }) => {
+  const x = 15 + index * 18 + (index * 7) % 8;
   return (
-    <motion.div
+    <Motion.div
       style={{
         position: "absolute", left: `${x}%`, top: "50%",
         width: 3, height: 3, borderRadius: "50%",
@@ -398,19 +354,19 @@ const HamburgerIcon = ({ open, dark }) => {
   const color = dark ? "#95d5b2" : "#2d6a4f";
   return (
     <svg width="22" height="16" viewBox="0 0 22 16" fill="none">
-      <motion.rect
+      <Motion.rect
         x="0" y="0" width="22" height="2" rx="1" fill={color}
         animate={open ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }}
         style={{ originX: "11px", originY: "1px" }}
         transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
       />
-      <motion.rect
+      <Motion.rect
         x="0" y="7" width="22" height="2" rx="1" fill={color}
         animate={open ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }}
         style={{ originX: "11px", originY: "8px" }}
         transition={{ duration: 0.22, ease: "easeInOut" }}
       />
-      <motion.rect
+      <Motion.rect
         x="0" y="14" width="22" height="2" rx="1" fill={color}
         animate={open ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }}
         style={{ originX: "11px", originY: "15px" }}
@@ -421,7 +377,7 @@ const HamburgerIcon = ({ open, dark }) => {
 };
 
 /* ── Mobile Drawer ── */
-const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, c, dark, toggleDark }) => {
+const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, dark, toggleDark }) => {
   useEffect(() => {
     if (open) document.body.classList.add("rq-drawer-open");
     else document.body.classList.remove("rq-drawer-open");
@@ -433,7 +389,7 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, c, dark, toggleD
       {open && (
         <>
           {/* Backdrop */}
-          <motion.div
+          <Motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -449,7 +405,7 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, c, dark, toggleD
           />
 
           {/* Drawer panel */}
-          <motion.div
+          <Motion.div
             key="drawer"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -488,19 +444,19 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, c, dark, toggleD
               {/* Logo */}
               <Link to="/" onClick={onClose}>
                 <div style={{
-                  fontFamily: "'Fraunces', serif", fontSize: 22, fontWeight: 900,
+                  fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 900,
                   color: dark ? "#e8f5ec" : "#111c15",
                   display: "flex", alignItems: "center", gap: 8,
                 }}>
-                  <motion.span
+                  <Motion.span
                     animate={{ rotate: [0, 10, -5, 0] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  >🍃</motion.span>
+                  >🍃</Motion.span>
                   ResQ<span style={{ color: dark ? "#f59e0b" : "#e8a838" }}>Plate</span>
                 </div>
               </Link>
               {/* Close button */}
-              <motion.button
+              <Motion.button
                 whileTap={{ scale: 0.88 }}
                 onClick={onClose}
                 style={{
@@ -510,20 +466,20 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, c, dark, toggleD
                   display: "flex", alignItems: "center", justifyContent: "center",
                   color: dark ? "#95d5b2" : "#2d6a4f", fontSize: 16, cursor: "pointer",
                 }}
-              >✕</motion.button>
+              >✕</Motion.button>
             </div>
 
             {/* Nav links */}
             <nav style={{ flex: 1, padding: "12px 16px", overflowY: "auto" }}>
               {NAV_LINKS.map((l, i) => (
-                <motion.div
+                <Motion.div
                   key={l.label}
                   initial={{ opacity: 0, x: 40 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.06 + i * 0.07, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <a href={l.href} onClick={() => { setActiveIdx(i); onClose(); }}>
-                    <motion.div
+                    <Motion.div
                       whileTap={{ scale: 0.97, x: 4 }}
                       style={{
                         display: "flex", alignItems: "center", gap: 14,
@@ -566,7 +522,7 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, c, dark, toggleD
                       </div>
 
                       {/* Active chevron */}
-                      <motion.div
+                      <Motion.div
                         animate={activeIdx === i ? { x: [0, 3, 0], opacity: 1 } : { opacity: 0.25 }}
                         transition={activeIdx === i ? { duration: 1.8, repeat: Infinity } : {}}
                         style={{
@@ -575,10 +531,10 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, c, dark, toggleD
                             : (dark ? "rgba(82,183,136,0.25)" : "rgba(45,106,79,0.25)"),
                           fontSize: 12,
                         }}
-                      >›</motion.div>
-                    </motion.div>
+                      >›</Motion.div>
+                    </Motion.div>
                   </a>
-                </motion.div>
+                </Motion.div>
               ))}
 
               {/* Divider */}
@@ -588,7 +544,7 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, c, dark, toggleD
               }} />
 
               {/* Quick actions */}
-              <motion.div
+              <Motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.44, duration: 0.45 }}
@@ -602,7 +558,7 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, c, dark, toggleD
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "0 4px" }}>
                   <Link to="/register?role=donor" onClick={onClose}>
-                    <motion.div
+                    <Motion.div
                       whileTap={{ scale: 0.97 }}
                       style={{
                         background: dark ? "#f59e0b" : "#e8a838",
@@ -617,11 +573,11 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, c, dark, toggleD
                       <span style={{ fontSize: 18 }}>🍱</span>
                       Donate Food
                       <span style={{ marginLeft: "auto" }}>→</span>
-                    </motion.div>
+                    </Motion.div>
                   </Link>
 
                   <Link to="/register?role=ngo" onClick={onClose}>
-                    <motion.div
+                    <Motion.div
                       whileTap={{ scale: 0.97 }}
                       style={{
                         background: dark ? "rgba(82,183,136,0.12)" : "rgba(45,106,79,0.08)",
@@ -637,14 +593,14 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, c, dark, toggleD
                       <span style={{ fontSize: 18 }}>🤝</span>
                       Request Food
                       <span style={{ marginLeft: "auto" }}>→</span>
-                    </motion.div>
+                    </Motion.div>
                   </Link>
                 </div>
-              </motion.div>
+              </Motion.div>
             </nav>
 
             {/* Footer */}
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
@@ -662,7 +618,7 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, c, dark, toggleD
                 }}>
                   {dark ? "Dark Mode" : "Light Mode"}
                 </span>
-                <motion.button
+                <Motion.button
                   onClick={toggleDark}
                   whileTap={{ scale: 0.9 }}
                   style={{
@@ -673,7 +629,7 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, c, dark, toggleD
                     transition: "all 0.3s",
                   }}
                 >
-                  <motion.div
+                  <Motion.div
                     animate={{ x: dark ? 20 : 2 }}
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                     style={{
@@ -690,13 +646,13 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, c, dark, toggleD
                     }}
                   >
                     {dark ? "☀" : "☾"}
-                  </motion.div>
-                </motion.button>
+                  </Motion.div>
+                </Motion.button>
               </div>
 
               {/* Live indicator */}
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <motion.div
+                <Motion.div
                   animate={{ scale: [1, 1.5, 1], opacity: [1, 0.3, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                   style={{
@@ -710,8 +666,8 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, c, dark, toggleD
                   color: dark ? "#52b788" : "#2d6a4f", fontWeight: 500,
                 }}>47 live</span>
               </div>
-            </motion.div>
-          </motion.div>
+            </Motion.div>
+          </Motion.div>
         </>
       )}
     </AnimatePresence>
@@ -784,7 +740,7 @@ const NavBar = ({ c, dark, toggleDark }) => {
 
   return (
     <>
-      <motion.nav
+      <Motion.nav
         initial={{ y: -90, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 220, damping: 24, delay: 0.08 }}
@@ -834,7 +790,7 @@ const NavBar = ({ c, dark, toggleDark }) => {
         ))}
 
         {/* Progress filament */}
-        <motion.div style={{
+        <Motion.div style={{
           position: "absolute", bottom: 0, left: 0,
           height: 1.5, borderRadius: 1,
           background: dark
@@ -859,20 +815,20 @@ const NavBar = ({ c, dark, toggleDark }) => {
             {/* Mobile logo */}
             <div className="rq-nav-ham" style={{ display: "none", alignItems: "center" }}>
               <Link to="/">
-                <motion.div
+                <Motion.div
                   whileTap={{ scale: 0.96 }}
                   style={{
-                    fontFamily: "'Fraunces', serif", fontSize: 20, fontWeight: 900,
+                    fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 900,
                     color: dark ? "#e8f5ec" : "#111c15",
                     display: "flex", alignItems: "center", gap: 8,
                   }}
                 >
-                  <motion.span
+                  <Motion.span
                     animate={{ rotate: [0, 8, -4, 0] }}
                     transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                  >🍃</motion.span>
+                  >🍃</Motion.span>
                   ResQ<span style={{ color: dark ? "#f59e0b" : "#e8a838" }}>Plate</span>
-                </motion.div>
+                </Motion.div>
               </Link>
             </div>
           </div>
@@ -907,7 +863,7 @@ const NavBar = ({ c, dark, toggleDark }) => {
             </div>
 
             <div className="rq-nav-desktop-toggle" style={{ alignItems: "center" }}>
-              <motion.button
+              <Motion.button
                 onClick={toggleDark}
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.92, rotate: 15 }}
@@ -918,7 +874,7 @@ const NavBar = ({ c, dark, toggleDark }) => {
                   cursor: "pointer", flexShrink: 0, overflow: "visible",
                 }}
               >
-                <motion.div
+                <Motion.div
                   animate={{ rotate: dark ? 0 : 180 }}
                   transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                   style={{
@@ -926,7 +882,7 @@ const NavBar = ({ c, dark, toggleDark }) => {
                     border: `1.5px solid ${dark ? "rgba(82,183,136,0.35)" : "rgba(26,74,46,0.25)"}`,
                   }}
                 >
-                  <motion.div
+                  <Motion.div
                     animate={{ rotate: [0, 360] }}
                     transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
                     style={{ position: "absolute", inset: 0, borderRadius: "50%" }}
@@ -937,8 +893,8 @@ const NavBar = ({ c, dark, toggleDark }) => {
                       background: dark ? "#f59e0b" : "#2d6a4f",
                       boxShadow: dark ? "0 0 8px #f59e0b, 0 0 16px rgba(245,158,11,0.5)" : "0 0 6px #2d6a4f",
                     }} />
-                  </motion.div>
-                </motion.div>
+                  </Motion.div>
+                </Motion.div>
                 <div style={{
                   width: 32, height: 32, borderRadius: "50%",
                   background: dark
@@ -951,7 +907,7 @@ const NavBar = ({ c, dark, toggleDark }) => {
                     : "inset 0 1px 0 rgba(255,255,255,0.8), 0 2px 6px rgba(26,74,46,0.12)",
                 }}>
                   <AnimatePresence mode="wait" initial={false}>
-                    <motion.span
+                    <Motion.span
                       key={dark ? "sun" : "moon"}
                       initial={{ rotate: -120, opacity: 0, scale: 0.3 }}
                       animate={{ rotate: 0, opacity: 1, scale: 1 }}
@@ -972,14 +928,14 @@ const NavBar = ({ c, dark, toggleDark }) => {
                             fill="#2d6a4f" opacity="0.2" stroke="#2d6a4f" strokeWidth="1.6" strokeLinecap="round"/>
                         </svg>
                       )}
-                    </motion.span>
+                    </Motion.span>
                   </AnimatePresence>
                 </div>
-              </motion.button>
+              </Motion.button>
             </div>
 
             {/* Mobile: hamburger button */}
-            <motion.button
+            <Motion.button
               className="rq-nav-ham"
               onClick={() => setDrawerOpen(true)}
               whileTap={{ scale: 0.88 }}
@@ -993,10 +949,10 @@ const NavBar = ({ c, dark, toggleDark }) => {
               }}
             >
               <HamburgerIcon open={false} dark={dark} />
-            </motion.button>
+            </Motion.button>
           </div>
         </div>
-      </motion.nav>
+      </Motion.nav>
 
       {/* Mobile Drawer */}
       <MobileDrawer
@@ -1012,14 +968,11 @@ const NavBar = ({ c, dark, toggleDark }) => {
   );
 };
 
-/* ══════════════════════════════════════════════════
-   FOOD CARD (hero visual)
-══════════════════════════════════════════════════ */
 const LegacyFoodCard = () => {
   const navigate = useNavigate();
   return (
     <div className="rq-card-col" style={{ position: "relative", padding: "26px 8px 38px 24px" }}>
-      <motion.div
+      <Motion.div
         animate={{ y: [0, -8, 0], rotate: [0, 1, 0] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
         onClick={() => navigate("/dashboard")}
@@ -1035,7 +988,7 @@ const LegacyFoodCard = () => {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative" }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 7, color: "#95d5b2", font: "600 10px 'DM Mono', monospace", letterSpacing: ".12em", textTransform: "uppercase" }}>
-              <motion.span animate={{ opacity: [.35, 1, .35] }} transition={{ duration: 1.8, repeat: Infinity }} style={{ width: 7, height: 7, borderRadius: "50%", background: "#74c69d", boxShadow: "0 0 0 5px rgba(116,198,157,.12)" }} /> Live rescue
+              <Motion.span animate={{ opacity: [.35, 1, .35] }} transition={{ duration: 1.8, repeat: Infinity }} style={{ width: 7, height: 7, borderRadius: "50%", background: "#74c69d", boxShadow: "0 0 0 5px rgba(116,198,157,.12)" }} /> Live rescue
             </div>
             <div style={{ marginTop: 7, font: "700 20px 'Cabinet Grotesk', sans-serif", letterSpacing: "-.02em" }}>Tonight&apos;s journey</div>
           </div>
@@ -1044,12 +997,12 @@ const LegacyFoodCard = () => {
 
         <div style={{ marginTop: 26, padding: "20px 16px", borderRadius: 20, background: "rgba(4,25,15,.34)", border: "1px solid rgba(255,255,255,.08)", position: "relative" }}>
           <div style={{ position: "absolute", left: 31, right: 31, top: 36, height: 2, background: "rgba(149,213,178,.22)" }}>
-            <motion.div animate={{ width: ["8%", "92%"] }} transition={{ duration: 3.2, repeat: Infinity, repeatDelay: 1.1, ease: "easeInOut" }} style={{ height: "100%", background: "linear-gradient(90deg,#74c69d,#ffd166)", boxShadow: "0 0 12px #74c69d" }} />
+            <Motion.div animate={{ width: ["8%", "92%"] }} transition={{ duration: 3.2, repeat: Infinity, repeatDelay: 1.1, ease: "easeInOut" }} style={{ height: "100%", background: "linear-gradient(90deg,#74c69d,#ffd166)", boxShadow: "0 0 12px #74c69d" }} />
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", position: "relative" }}>
             {[{ icon: "✦", label: "Surplus", sub: "Collected" }, { icon: "⌁", label: "On the way", sub: "12 min" }, { icon: "♡", label: "Community", sub: "Next stop" }].map((step, index) => (
               <div key={step.label} style={{ width: "31%", textAlign: index === 0 ? "left" : index === 2 ? "right" : "center" }}>
-                <motion.div animate={index === 1 ? { scale: [1, 1.12, 1] } : {}} transition={{ duration: 2, repeat: Infinity }} style={{ width: 34, height: 34, margin: index === 0 ? "0" : index === 2 ? "0 0 0 auto" : "0 auto", borderRadius: 12, display: "grid", placeItems: "center", background: index === 2 ? "#ffd166" : "#74c69d", color: "#123622", boxShadow: "0 7px 20px rgba(0,0,0,.24)", fontWeight: 800 }}>{step.icon}</motion.div>
+                <Motion.div animate={index === 1 ? { scale: [1, 1.12, 1] } : {}} transition={{ duration: 2, repeat: Infinity }} style={{ width: 34, height: 34, margin: index === 0 ? "0" : index === 2 ? "0 0 0 auto" : "0 auto", borderRadius: 12, display: "grid", placeItems: "center", background: index === 2 ? "#ffd166" : "#74c69d", color: "#123622", boxShadow: "0 7px 20px rgba(0,0,0,.24)", fontWeight: 800 }}>{step.icon}</Motion.div>
                 <div style={{ marginTop: 10, fontSize: 11, fontWeight: 700 }}>{step.label}</div>
                 <div style={{ marginTop: 2, color: "rgba(225,245,232,.56)", font: "9px 'DM Mono', monospace" }}>{step.sub}</div>
               </div>
@@ -1061,10 +1014,10 @@ const LegacyFoodCard = () => {
           <div style={{ padding: "13px 14px", borderRadius: 16, background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.08)" }}><div style={{ font: "800 22px 'Cabinet Grotesk', sans-serif" }}>45</div><div style={{ color: "rgba(225,245,232,.58)", font: "9px 'DM Mono', monospace", textTransform: "uppercase", letterSpacing: ".08em" }}>meals moving</div></div>
           <div style={{ padding: "13px 14px", borderRadius: 16, background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.08)" }}><div style={{ font: "800 22px 'Cabinet Grotesk', sans-serif" }}>18<span style={{ fontSize: 12, color: "#95d5b2" }}> kg</span></div><div style={{ color: "rgba(225,245,232,.58)", font: "9px 'DM Mono', monospace", textTransform: "uppercase", letterSpacing: ".08em" }}>waste avoided</div></div>
         </div>
-      </motion.div>
+      </Motion.div>
 
-      <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }} style={{ position: "absolute", zIndex: 4, left: 0, bottom: 6, padding: "11px 15px", borderRadius: 16, background: "#fff8e8", color: "#6f4700", border: "1px solid rgba(255,209,102,.5)", boxShadow: "0 16px 38px rgba(54,30,0,.2)", font: "700 11px 'Cabinet Grotesk', sans-serif" }}>☀ 127 plates served today</motion.div>
-      <motion.div animate={{ y: [0, -7, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: .6 }} style={{ position: "absolute", zIndex: 4, right: -6, top: 4, padding: "10px 13px", borderRadius: 15, background: "rgba(255,255,255,.96)", color: "#184d33", border: "1px solid rgba(82,183,136,.25)", boxShadow: "0 14px 34px rgba(0,0,0,.18)", font: "700 10.5px 'Cabinet Grotesk', sans-serif" }}>● Rescue network active</motion.div>
+      <Motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }} style={{ position: "absolute", zIndex: 4, left: 0, bottom: 6, padding: "11px 15px", borderRadius: 16, background: "#fff8e8", color: "#6f4700", border: "1px solid rgba(255,209,102,.5)", boxShadow: "0 16px 38px rgba(54,30,0,.2)", font: "700 11px 'Cabinet Grotesk', sans-serif" }}>☀ 127 plates served today</Motion.div>
+      <Motion.div animate={{ y: [0, -7, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: .6 }} style={{ position: "absolute", zIndex: 4, right: -6, top: 4, padding: "10px 13px", borderRadius: 15, background: "rgba(255,255,255,.96)", color: "#184d33", border: "1px solid rgba(82,183,136,.25)", boxShadow: "0 14px 34px rgba(0,0,0,.18)", font: "700 10.5px 'Cabinet Grotesk', sans-serif" }}>● Rescue network active</Motion.div>
     </div>
   );
 };
@@ -1102,7 +1055,7 @@ const FoodCard = () => {
 
   return (
     <div className="rq-card-col" style={{ position: "relative", padding: "18px 8px 30px 22px" }}>
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0, scale: .94, rotate: 2 }}
         animate={{ opacity: 1, scale: 1, rotate: 0 }}
         transition={{ duration: .65, ease: [0.22, 1, 0.36, 1] }}
@@ -1121,7 +1074,7 @@ const FoodCard = () => {
           {GAME_ITEMS.map((item) => {
             const selected = rescued.includes(item.id);
             return (
-              <motion.button
+              <Motion.button
                 key={item.id}
                 type="button"
                 whileHover={{ y: -3, scale: 1.02 }}
@@ -1132,26 +1085,23 @@ const FoodCard = () => {
               >
                 <span style={{ display: "block", fontSize: 26, filter: selected ? "none" : item.hazard ? "grayscale(.7)" : "none" }}>{selected ? "✓" : item.icon}</span>
                 <span style={{ display: "block", marginTop: 5, fontSize: 9.5, fontWeight: 700 }}>{selected ? "Rescued" : item.label}</span>
-              </motion.button>
+              </Motion.button>
             );
           })}
         </div>
 
         <div aria-live="polite" style={{ display: "flex", alignItems: "center", gap: 8, minHeight: 42, marginTop: 12, padding: "10px 12px", borderRadius: 13, background: completed ? "#2d6a4f" : "#f3f0e8", color: completed ? "#fff" : "#637068", font: "600 10px 'DM Mono', monospace" }}>
-          <motion.span animate={completed ? { rotate: [0, -12, 12, 0], scale: [1, 1.25, 1] } : {}} transition={{ duration: .55 }} style={{ fontSize: 16 }}>{completed ? "🎉" : "💡"}</motion.span>
+          <Motion.span animate={completed ? { rotate: [0, -12, 12, 0], scale: [1, 1.25, 1] } : {}} transition={{ duration: .55 }} style={{ fontSize: 16 }}>{completed ? "🎉" : "💡"}</Motion.span>
           <span style={{ flex: 1 }}>{message}</span>
           {completed && <button type="button" onClick={resetGame} style={{ border: 0, borderRadius: 9, padding: "6px 9px", background: "rgba(255,255,255,.15)", color: "#fff", cursor: "pointer", font: "700 9px 'DM Mono', monospace" }}>Play again</button>}
         </div>
-      </motion.div>
+      </Motion.div>
 
-      <motion.div animate={{ y: [0, 7, 0], rotate: [-1, 1, -1] }} transition={{ duration: 4.4, repeat: Infinity, ease: "easeInOut" }} style={{ position: "absolute", right: -8, bottom: 5, zIndex: 3, padding: "10px 14px", borderRadius: 14, background: "linear-gradient(135deg,#f59e0b,#e67908)", color: "#fff", boxShadow: "0 15px 34px rgba(190,105,8,.3)", font: "800 10.5px 'Cabinet Grotesk', sans-serif" }}>Every plate counts ✦</motion.div>
+      <Motion.div animate={{ y: [0, 7, 0], rotate: [-1, 1, -1] }} transition={{ duration: 4.4, repeat: Infinity, ease: "easeInOut" }} style={{ position: "absolute", right: -8, bottom: 5, zIndex: 3, padding: "10px 14px", borderRadius: 14, background: "linear-gradient(135deg,#f59e0b,#e67908)", color: "#fff", boxShadow: "0 15px 34px rgba(190,105,8,.3)", font: "800 10.5px 'Cabinet Grotesk', sans-serif" }}>Every plate counts ✦</Motion.div>
     </div>
   );
 };
 
-/* ══════════════════════════════════════════════════
-   HERO
-══════════════════════════════════════════════════ */
 const Hero = ({ c }) => {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
@@ -1162,7 +1112,7 @@ const Hero = ({ c }) => {
       id="hero"
       ref={ref}
       style={{
-        minHeight: "100vh",
+    minHeight: 620,
         background: c.heroBg,
         display: "flex", alignItems: "center",
         position: "relative", overflow: "visible",
@@ -1182,7 +1132,7 @@ const Hero = ({ c }) => {
         <Particles c={c} />
       </div>
 
-      <motion.div style={{ opacity, width: "100%", position: "relative", zIndex: 2 }}>
+      <Motion.div style={{ opacity, width: "100%", position: "relative", zIndex: 2 }}>
         <div
           className="rq-hero-grid"
           style={{
@@ -1192,7 +1142,7 @@ const Hero = ({ c }) => {
           }}
         >
           <div>
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, scale: 0.8, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
@@ -1203,7 +1153,7 @@ const Hero = ({ c }) => {
                 padding: "8px 18px", marginBottom: 26, cursor: "default",
               }}
             >
-              <motion.span
+              <Motion.span
                 animate={{ opacity: [1, 0.3, 1], scale: [1, 1.5, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
                 style={{ width: 7, height: 7, borderRadius: "50%", background: c.amber, display: "inline-block", flexShrink: 0 }}
@@ -1211,14 +1161,14 @@ const Hero = ({ c }) => {
               <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: c.mint, letterSpacing: "0.09em" }}>
                 FOOD RESCUE PLATFORM · INDIA
               </span>
-            </motion.div>
+            </Motion.div>
 
-            <motion.h1
+            <Motion.h1
               initial={{ opacity: 0, y: 60 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35, duration: 1, ease: [0.22, 1, 0.36, 1] }}
               style={{
-                fontFamily: "'Fraunces', serif",
+                fontFamily: "'Playfair Display', serif",
                 fontSize: "clamp(52px, 7.5vw, 104px)",
                 fontWeight: 900, color: "#fff",
                 lineHeight: 0.91, letterSpacing: "-0.03em", margin: "0 0 24px",
@@ -1226,9 +1176,9 @@ const Hero = ({ c }) => {
             >
               Every Meal<br />
               <span className="rq-hero-em">Matters.</span>
-            </motion.h1>
+            </Motion.h1>
 
-            <motion.p
+            <Motion.p
               initial={{ opacity: 0, y: 38 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
@@ -1241,9 +1191,9 @@ const Hero = ({ c }) => {
             >
               ResQPlate bridges surplus food with hungry families — in real time,
               with zero friction and maximum impact across India.
-            </motion.p>
+            </Motion.p>
 
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.65, duration: 0.85 }}
@@ -1251,7 +1201,7 @@ const Hero = ({ c }) => {
               style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 48 }}
             >
               <Link to="/register?role=donor">
-                <motion.button
+                <Motion.button
                   whileHover={{ background: c.gold, transform: "translateY(-3px)", boxShadow: "0 20px 48px rgba(232,168,56,0.42)" }}
                   whileTap={{ scale: 0.97 }}
                   style={{
@@ -1259,10 +1209,10 @@ const Hero = ({ c }) => {
                     background: c.amber, color: c.leaf,
                     fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 700, fontSize: 15, cursor: "pointer",
                   }}
-                >Donate Food →</motion.button>
+                >Donate Food →</Motion.button>
               </Link>
               <Link to="/register?role=ngo">
-                <motion.button
+                <Motion.button
                   whileHover={{ background: "rgba(255,255,255,0.14)" }}
                   whileTap={{ scale: 0.97 }}
                   style={{
@@ -1271,23 +1221,23 @@ const Hero = ({ c }) => {
                     background: "rgba(255,255,255,0.07)", color: "#fff",
                     fontFamily: "'Cabinet Grotesk', sans-serif", fontSize: 15, cursor: "pointer",
                   }}
-                >Request Food</motion.button>
+                >Request Food</Motion.button>
               </Link>
-            </motion.div>
+            </Motion.div>
 
           </div>
 
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, x: 80 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.9, duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
           >
             <FoodCard c={c} />
-          </motion.div>
+          </Motion.div>
         </div>
-      </motion.div>
+      </Motion.div>
 
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.6, duration: 0.8 }}
@@ -1299,19 +1249,16 @@ const Hero = ({ c }) => {
         <span style={{ fontSize: 9, color: "rgba(255,255,255,0.28)", fontFamily: "'DM Mono', monospace", letterSpacing: "0.2em" }}>
           SCROLL
         </span>
-        <motion.div
+        <Motion.div
           animate={{ opacity: [0.55, 1, 0.55], scaleY: [1, 1.3, 1] }}
           transition={{ duration: 1.8, repeat: Infinity }}
           style={{ width: 1, height: 36, background: "linear-gradient(to bottom,rgba(255,255,255,.38),transparent)" }}
         />
-      </motion.div>
+      </Motion.div>
     </section>
   );
 };
 
-/* ══════════════════════════════════════════════════
-   STATS
-══════════════════════════════════════════════════ */
 const STATS = [
   { value: "List", label: "Surplus food clearly", icon: "🍽️", color: "#52b788", to: "/dashboard/donate" },
   { value: "Find", label: "Food available nearby", icon: "📍", color: "#e8a838", to: "/dashboard/search" },
@@ -1334,8 +1281,8 @@ const Stats = ({ c }) => (
         {STATS.map((s, i) => (
           <Reveal key={i} delay={i * 0.1}>
             <Link to={s.to}>
-              <motion.div whileHover={{ scale: 1.04, y: -4 }} style={{ textAlign: "center", cursor: "pointer" }}>
-                <motion.div
+              <Motion.div whileHover={{ scale: 1.04, y: -4 }} style={{ textAlign: "center", cursor: "pointer" }}>
+                <Motion.div
                   whileHover={{ scale: 1.15, rotate: [0, -10, 10, 0] }}
                   transition={{ duration: 0.4 }}
                   style={{
@@ -1344,12 +1291,12 @@ const Stats = ({ c }) => (
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 26, margin: "0 auto 14px",
                   }}
-                >{s.icon}</motion.div>
-                <div style={{ fontFamily: "'Fraunces', serif", fontSize: 44, fontWeight: 900, color: s.color, lineHeight: 1 }}>
+                >{s.icon}</Motion.div>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 44, fontWeight: 900, color: s.color, lineHeight: 1 }}>
                   {s.value}
                 </div>
                 <div style={{ fontSize: 13, color: c.text2, marginTop: 7 }}>{s.label}</div>
-              </motion.div>
+              </Motion.div>
             </Link>
           </Reveal>
         ))}
@@ -1358,9 +1305,6 @@ const Stats = ({ c }) => (
   </section>
 );
 
-/* ══════════════════════════════════════════════════
-   MISSION
-══════════════════════════════════════════════════ */
 const Mission = ({ c }) => (
   <section style={{ background: c.bg2, padding: "80px 32px", textAlign: "center", position: "relative", overflow: "hidden" }}>
     <LeafDeco c={c} style={{ width: 260, top: -40, right: 40, opacity: 0.9 }} />
@@ -1375,7 +1319,7 @@ const Mission = ({ c }) => (
       </Reveal>
       <Reveal delay={0.12}>
         <blockquote style={{
-          fontFamily: "'Fraunces', serif",
+          fontFamily: "'Playfair Display', serif",
           fontSize: "clamp(26px,3.8vw,50px)", fontWeight: 700,
           color: c.text, lineHeight: 1.22, fontStyle: "italic", margin: "0 0 26px",
         }}>
@@ -1383,7 +1327,7 @@ const Mission = ({ c }) => (
         </blockquote>
       </Reveal>
       <Reveal delay={0.22}>
-        <p style={{ fontFamily: "'Fraunces', serif", fontSize: 21, fontStyle: "italic", color: c.text2, lineHeight: 1.7, maxWidth: 680, margin: "0 auto 44px" }}>
+        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 21, fontStyle: "italic", color: c.text2, lineHeight: 1.7, maxWidth: 680, margin: "0 auto 44px" }}>
           “Good food deserves a second destination.”
         </p>
       </Reveal>
@@ -1394,18 +1338,18 @@ const Mission = ({ c }) => (
             "Make surplus visible.",
             "Let every rescue be real.",
           ].map((quote) => (
-            <motion.div
+            <Motion.div
               key={quote}
               whileHover={{ y: -4, boxShadow: `0 12px 32px ${c.shadow}` }}
               style={{
                 background: c.surface, border: `1px solid ${c.border}`,
                 borderRadius: 18, padding: "22px 28px", textAlign: "center",
-                fontFamily: "'Fraunces', serif", fontSize: 18,
+                fontFamily: "'Playfair Display', serif", fontSize: 18,
                 fontStyle: "italic", fontWeight: 700, color: c.text,
               }}
             >
               “{quote}”
-            </motion.div>
+            </Motion.div>
           ))}
         </div>
       </Reveal>
@@ -1413,9 +1357,6 @@ const Mission = ({ c }) => (
   </section>
 );
 
-/* ══════════════════════════════════════════════════
-   FEATURES
-══════════════════════════════════════════════════ */
 const FEATURES = [
   { emoji: "🍱", title: "Real Food Listings", desc: "Publish the food type, meal quantity, pickup location, collection window, and an optional photograph.", tag: "", accent: "#52b788", to: "/dashboard/donate" },
   { emoji: "🔎", title: "Available Food", desc: "Browse pending Appwrite listings and search by food or pickup location without placeholder inventory.", tag: "", accent: "#e8a838", to: "/dashboard/search" },
@@ -1426,9 +1367,9 @@ const FEATURES = [
 ];
 
 const Features = ({ c }) => (
-  <section style={{ background: c.bg, padding: "100px 32px" }} id="features">
+  <section style={{ background: c.bg, padding: "72px 32px" }} id="features">
     <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-      <div className="rq-feat-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20, marginBottom: 64 }}>
+      <div className="rq-feat-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20, marginBottom: 38 }}>
         <Reveal>
           <div>
             <span style={{
@@ -1437,7 +1378,7 @@ const Features = ({ c }) => (
               padding: "6px 16px", borderRadius: 100, marginBottom: 18,
             }}>PLATFORM FEATURES</span>
             <h2 style={{
-              fontFamily: "'Fraunces', serif", fontSize: "clamp(34px,4.5vw,60px)",
+              fontFamily: "'Playfair Display', serif", fontSize: "clamp(34px,4.5vw,60px)",
               fontWeight: 900, color: c.text, lineHeight: 1.06, margin: 0, maxWidth: 480, letterSpacing: "-0.02em",
             }}>
               Built for <em style={{ color: c.leafm, fontStyle: "italic" }}>speed,</em> trust &amp; impact.
@@ -1452,10 +1393,10 @@ const Features = ({ c }) => (
       </div>
 
       <div className="rq-feat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20 }}>
-        {FEATURES.map((f, i) => (
+        {FEATURES.slice(0, 3).map((f, i) => (
           <Reveal key={i} delay={i * 0.08}>
             <Link to={f.to}>
-              <motion.div
+              <Motion.div
                 whileHover={{ y: -8, boxShadow: `0 28px 70px ${f.accent}18` }}
                 style={{
                   background: c.surface, border: `1px solid ${c.border}`,
@@ -1471,7 +1412,7 @@ const Features = ({ c }) => (
                     padding: "3px 9px", borderRadius: 100, fontFamily: "'DM Mono', monospace",
                   }}>{f.tag}</div>
                 )}
-                <motion.div
+                <Motion.div
                   whileHover={{ rotate: [0, -8, 8, 0], scale: 1.1 }}
                   transition={{ duration: 0.4 }}
                   style={{
@@ -1480,10 +1421,10 @@ const Features = ({ c }) => (
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 24, marginBottom: 20,
                   }}
-                >{f.emoji}</motion.div>
+                >{f.emoji}</Motion.div>
                 <h3 style={{ fontSize: 17, fontWeight: 500, color: c.text, marginBottom: 10 }}>{f.title}</h3>
                 <p style={{ fontSize: 14, color: c.text2, lineHeight: 1.72, margin: 0 }}>{f.desc}</p>
-                <motion.div
+                <Motion.div
                   initial={{ scaleX: 0, originX: 0 }}
                   whileHover={{ scaleX: 1 }}
                   style={{
@@ -1491,7 +1432,7 @@ const Features = ({ c }) => (
                     background: `linear-gradient(90deg,${f.accent},${f.accent}88)`,
                   }}
                 />
-              </motion.div>
+              </Motion.div>
             </Link>
           </Reveal>
         ))}
@@ -1500,24 +1441,21 @@ const Features = ({ c }) => (
   </section>
 );
 
-/* ══════════════════════════════════════════════════
-   HOW IT WORKS
-══════════════════════════════════════════════════ */
 const HOW_STEPS = [
   { num: "01", emoji: "📸", title: "List Surplus Food", desc: "Add accurate food details, quantity, pickup location, collection time, and a photo.", color: "#52b788", to: "/dashboard/donate" },
   { num: "02", emoji: "🔎", title: "Make It Discoverable", desc: "The pending donation appears in the dashboard and available-food listing.", color: "#e8a838", to: "/dashboard/search" },
-  { num: "03", emoji: "🤝", title: "Claim the Pickup", desc: "A signed-in receiver chooses food and supplies the required destination information.", color: "#d4622a", to: "/dashboard/search" },
+  { num: "03", emoji: "🤝", title: "Claim, Collect & Track", desc: "A receiver claims the food, arranges collection, and records the completed rescue.", color: "#d4622a", to: "/dashboard/search" },
   { num: "04", emoji: "📋", title: "Record the Outcome", desc: "Pickup status and completed rescue data become part of the project's real impact history.", color: "#2d6a4f", to: "/dashboard/impact-delivered" },
 ];
 
 const HowItWorks = ({ c }) => (
-  <section style={{ background: c.leafm, padding: "100px 32px", position: "relative", overflow: "hidden" }} id="how">
+  <section style={{ background: c.leafm, padding: "72px 32px", position: "relative", overflow: "hidden" }} id="how">
     <svg style={{ position: "absolute", top: -150, right: -150, width: 600, opacity: 0.04, pointerEvents: "none" }} viewBox="0 0 400 400">
       <circle cx="200" cy="200" r="160" stroke="#fff" strokeWidth="80" fill="none" />
     </svg>
     <div style={{ maxWidth: 1100, margin: "0 auto" }}>
       <Reveal>
-        <div style={{ textAlign: "center", marginBottom: 80 }}>
+        <div style={{ textAlign: "center", marginBottom: 44 }}>
           <span style={{
             display: "inline-block", background: "rgba(255,255,255,0.10)",
             border: "1px solid rgba(255,255,255,0.18)", color: c.mint,
@@ -1525,7 +1463,7 @@ const HowItWorks = ({ c }) => (
             padding: "6px 16px", borderRadius: 100, marginBottom: 18,
           }}>HOW IT WORKS</span>
           <h2 style={{
-            fontFamily: "'Fraunces', serif", fontSize: "clamp(32px,4.8vw,60px)",
+            fontFamily: "'Playfair Display', serif", fontSize: "clamp(32px,4.8vw,60px)",
             fontWeight: 900, color: "#fff", lineHeight: 1.08, margin: 0,
           }}>
             From surplus to smiles —{" "}
@@ -1533,24 +1471,24 @@ const HowItWorks = ({ c }) => (
           </h2>
         </div>
       </Reveal>
-      <div className="rq-how-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 24, position: "relative" }}>
+      <div className="rq-how-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24, position: "relative" }}>
         <div className="rq-how-line" style={{ position: "absolute", top: 56, left: "12%", right: "12%", height: 1, background: "rgba(255,255,255,0.10)" }} />
-        {HOW_STEPS.map((s, i) => (
+        {HOW_STEPS.slice(0, 3).map((s, i) => (
           <Reveal key={i} delay={i * 0.14}>
             <Link to={s.to}>
-              <motion.div whileHover={{ y: -8 }} style={{ textAlign: "center", position: "relative", zIndex: 1, cursor: "pointer" }}>
-                <motion.div
+              <Motion.div whileHover={{ y: -8 }} style={{ textAlign: "center", position: "relative", zIndex: 1, cursor: "pointer" }}>
+                <Motion.div
                   whileHover={{ scale: 1.1 }}
                   style={{
                     width: 80, height: 80, borderRadius: "50%", background: s.color,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 30, margin: "0 auto 20px", boxShadow: `0 0 0 12px ${s.color}28`,
                   }}
-                >{s.emoji}</motion.div>
+                >{s.emoji}</Motion.div>
                 <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: s.color, letterSpacing: "0.1em", marginBottom: 10 }}>{s.num}</div>
                 <h3 style={{ fontSize: 16, fontWeight: 500, color: "#fff", marginBottom: 10 }}>{s.title}</h3>
                 <p style={{ fontSize: 13, color: "rgba(255,255,255,0.52)", lineHeight: 1.68 }}>{s.desc}</p>
-              </motion.div>
+              </Motion.div>
             </Link>
           </Reveal>
         ))}
@@ -1559,9 +1497,6 @@ const HowItWorks = ({ c }) => (
   </section>
 );
 
-/* ══════════════════════════════════════════════════
-   IMPACT MAP
-══════════════════════════════════════════════════ */
 const CITIES = [
   { city: "New Delhi",  meals: 124, color: "#52b788", pct: 100 },
   { city: "Mumbai",     meals: 98,  color: "#e8a838", pct: 79  },
@@ -1579,7 +1514,7 @@ const MAP_DOTS = [
 ];
 
 const ImpactMap = ({ c }) => (
-  <section style={{ background: c.bg2, padding: "100px 32px" }} id="impact">
+  <section style={{ background: c.bg2, padding: "72px 32px" }} id="impact">
     <div className="rq-map-grid" style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
       <Reveal x={-36} y={0}>
         <div>
@@ -1589,7 +1524,7 @@ const ImpactMap = ({ c }) => (
             padding: "6px 16px", borderRadius: 100, marginBottom: 18,
           }}><span className="rq-remove-live-impact">REAL-TIME IMPACT</span></span>
           <h2 style={{
-            fontFamily: "'Fraunces', serif", fontSize: "clamp(32px,4.2vw,56px)",
+            fontFamily: "'Playfair Display', serif", fontSize: "clamp(32px,4.2vw,56px)",
             fontWeight: 900, color: c.text, lineHeight: 1.1, marginBottom: 22, letterSpacing: "-0.02em",
           }}>
             Rescues happening right now, across India.
@@ -1601,7 +1536,7 @@ const ImpactMap = ({ c }) => (
 
           {CITIES.map((ct, i) => (
             <Link key={i} to="/map">
-              <motion.div whileHover={{ x: 4 }} style={{ marginBottom: 18, cursor: "pointer" }}>
+              <Motion.div whileHover={{ x: 4 }} style={{ marginBottom: 18, cursor: "pointer" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <div style={{ width: 9, height: 9, borderRadius: "50%", background: ct.color }} />
@@ -1612,7 +1547,7 @@ const ImpactMap = ({ c }) => (
                   </span>
                 </div>
                 <div style={{ height: 5, background: c.border, borderRadius: 100, overflow: "hidden" }}>
-                  <motion.div
+                  <Motion.div
                     initial={{ width: 0 }}
                     whileInView={{ width: `${ct.pct}%` }}
                     viewport={{ once: true }}
@@ -1620,12 +1555,12 @@ const ImpactMap = ({ c }) => (
                     style={{ height: "100%", background: ct.color, borderRadius: 100 }}
                   />
                 </div>
-              </motion.div>
+              </Motion.div>
             </Link>
           ))}
 
           <Link to="/map">
-            <motion.button
+            <Motion.button
               whileHover={{ background: c.leafm, transform: "translateY(-2px)" }}
               whileTap={{ scale: 0.97 }}
               style={{
@@ -1634,7 +1569,7 @@ const ImpactMap = ({ c }) => (
                 fontFamily: "'Cabinet Grotesk', sans-serif", fontSize: 14,
                 fontWeight: 600, color: c.text2, cursor: "pointer", transition: "all 0.25s",
               }}
-            >View Live Map →</motion.button>
+            >View Live Map →</Motion.button>
           </Link>
         </div>
       </Reveal>
@@ -1648,7 +1583,7 @@ const ImpactMap = ({ c }) => (
             />
             {MAP_DOTS.map((d, i) => (
               <g key={i}>
-                <motion.circle
+                <Motion.circle
                   cx={d.x} cy={d.y} r={d.r + 8} fill={d.c} opacity={0.16}
                   animate={{ r: [d.r + 8, d.r + 18, d.r + 8] }}
                   transition={{ duration: 2.8, repeat: Infinity, delay: i * 0.48, ease: "easeInOut" }}
@@ -1660,7 +1595,7 @@ const ImpactMap = ({ c }) => (
               </g>
             ))}
           </svg>
-          <motion.div
+          <Motion.div
             animate={{ y: [0, -8, 0] }}
             transition={{ duration: 3.5, repeat: Infinity }}
             style={{
@@ -1670,18 +1605,15 @@ const ImpactMap = ({ c }) => (
             }}
           >
             <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: c.text3, marginBottom: 5, textTransform: "uppercase" }}>Active Now</div>
-            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 900, color: c.sage }}>47</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 900, color: c.sage }}>47</div>
             <div style={{ fontSize: 11, color: c.text2, fontFamily: "'Cabinet Grotesk', sans-serif" }}>Live pickups</div>
-          </motion.div>
+          </Motion.div>
         </Link>
       </Reveal>
     </div>
   </section>
 );
 
-/* ══════════════════════════════════════════════════
-   TESTIMONIALS
-══════════════════════════════════════════════════ */
 const TESTIMONIALS = [
   { name: "Waste less", role: "Our environmental mission", text: "Keep safe, usable food in circulation instead of treating every surplus meal as waste.", av: "01", color: "#52b788" },
   { name: "Share locally", role: "Our community mission", text: "Give donors and receivers one clear place to publish, discover, claim, and follow a food rescue.", av: "02", color: "#e8a838" },
@@ -1698,7 +1630,7 @@ const Testimonials = ({ c }) => (
           padding: "6px 16px", borderRadius: 100, marginBottom: 18,
         }}>WHAT GUIDES US</span>
         <h2 style={{
-          fontFamily: "'Fraunces', serif", fontSize: "clamp(34px,4.5vw,60px)",
+          fontFamily: "'Playfair Display', serif", fontSize: "clamp(34px,4.5vw,60px)",
           fontWeight: 900, color: c.text, lineHeight: 1.06, margin: 0, letterSpacing: "-0.02em",
         }}>
           A product built around{" "}
@@ -1708,7 +1640,7 @@ const Testimonials = ({ c }) => (
       <div className="rq-test-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24 }}>
         {TESTIMONIALS.map((t, i) => (
           <Reveal key={i} delay={i * 0.13}>
-            <motion.div
+            <Motion.div
               whileHover={{ y: -8, boxShadow: `0 32px 70px ${t.color}18` }}
               style={{
                 background: c.surface, border: `1px solid ${c.border}`,
@@ -1717,11 +1649,11 @@ const Testimonials = ({ c }) => (
             >
               <div style={{ color: c.amber, fontSize: 12, marginBottom: 18, letterSpacing: 2 }}>RESQPLATE PRINCIPLE</div>
               <p style={{
-                fontFamily: "'Fraunces', serif", fontSize: 16.5, color: c.text,
+                fontFamily: "'Playfair Display', serif", fontSize: 16.5, color: c.text,
                 lineHeight: 1.62, fontStyle: "italic", marginBottom: 24,
               }}>"{t.text}"</p>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <motion.div
+                <Motion.div
                   whileHover={{ scale: 1.1 }}
                   style={{
                     width: 44, height: 44, borderRadius: "50%",
@@ -1730,13 +1662,13 @@ const Testimonials = ({ c }) => (
                     fontSize: 13, fontWeight: 700, color: "#fff", flexShrink: 0,
                     fontFamily: "'Cabinet Grotesk', sans-serif",
                   }}
-                >{t.av}</motion.div>
+                >{t.av}</Motion.div>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 500, color: c.text }}>{t.name}</div>
                   <div style={{ fontSize: 12, color: c.text3, marginTop: 2 }}>{t.role}</div>
                 </div>
               </div>
-            </motion.div>
+            </Motion.div>
           </Reveal>
         ))}
       </div>
@@ -1744,9 +1676,6 @@ const Testimonials = ({ c }) => (
   </section>
 );
 
-/* ══════════════════════════════════════════════════
-   NEWSLETTER
-══════════════════════════════════════════════════ */
 const Newsletter = ({ c }) => {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
@@ -1786,7 +1715,7 @@ const Newsletter = ({ c }) => {
             padding: "6px 16px", borderRadius: 100, marginBottom: 18,
           }}>STAY UPDATED</span>
           <h3 style={{
-            fontFamily: "'Fraunces', serif", fontSize: "clamp(26px,3.5vw,40px)",
+            fontFamily: "'Playfair Display', serif", fontSize: "clamp(26px,3.5vw,40px)",
             fontWeight: 900, color: c.text, marginBottom: 14, lineHeight: 1.1,
           }}>Get impact stories in your inbox</h3>
           <p style={{ fontSize: 15, color: c.text2, marginBottom: 36, lineHeight: 1.75 }}>
@@ -1806,7 +1735,7 @@ const Newsletter = ({ c }) => {
                 fontSize: 14, color: sent ? c.text3 : c.text, outline: "none", transition: "all 0.3s ease",
               }}
             />
-            <motion.button
+            <Motion.button
               whileHover={!sent && !loading ? { background: c.leaf, scale: 1.02 } : {}}
               whileTap={!sent && !loading ? { scale: 0.98 } : {}}
               onClick={handleSubscribe} disabled={loading || sent}
@@ -1818,16 +1747,16 @@ const Newsletter = ({ c }) => {
                 minWidth: "140px", display: "flex", alignItems: "center", justifyContent: "center",
                 transition: "background 0.5s ease",
               }}
-            >{loading ? "Joining..." : sent ? "Subscribed! 🎉" : "Subscribe"}</motion.button>
+            >{loading ? "Joining..." : sent ? "Subscribed! 🎉" : "Subscribe"}</Motion.button>
           </div>
           <AnimatePresence>
             {sent && (
-              <motion.div
+              <Motion.div
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                style={{ fontFamily: "'Fraunces', serif", fontSize: 18, fontWeight: 700, color: c.leafm, marginTop: 15 }}
+                style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: c.leafm, marginTop: 15 }}
               >
                 🎉 Welcome to the movement! Check your inbox.
-              </motion.div>
+              </Motion.div>
             )}
           </AnimatePresence>
         </Reveal>
@@ -1836,12 +1765,9 @@ const Newsletter = ({ c }) => {
   );
 };
 
-/* ══════════════════════════════════════════════════
-   CTA
-══════════════════════════════════════════════════ */
 const CTA = ({ c }) => (
   <section style={{
-    background: c.heroBg, padding: "130px 32px", textAlign: "center",
+    background: c.heroBg, padding: "82px 32px", textAlign: "center",
     position: "relative", overflow: "hidden", transition: "background 0.45s",
   }}>
     <Particles c={c} />
@@ -1857,14 +1783,14 @@ const CTA = ({ c }) => (
           JOIN THE MOVEMENT
         </div>
         <h2 style={{
-          fontFamily: "'Fraunces', serif", fontSize: "clamp(44px,7vw,88px)",
+          fontFamily: "'Playfair Display', serif", fontSize: "clamp(44px,7vw,88px)",
           fontWeight: 900, color: "#fff", lineHeight: 0.95, marginBottom: 24, letterSpacing: "-0.03em",
         }}>
           Ready to rescue<br />your first meal?
         </h2>
         <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", marginTop: 40 }}>
           <Link to="/register?role=donor">
-            <motion.button
+            <Motion.button
               whileHover={{ background: c.gold, transform: "translateY(-3px)", boxShadow: "0 24px 56px rgba(232,168,56,0.45)" }}
               whileTap={{ scale: 0.97 }}
               style={{
@@ -1872,10 +1798,10 @@ const CTA = ({ c }) => (
                 background: c.amber, color: c.leaf,
                 fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 700, fontSize: 16, cursor: "pointer",
               }}
-            >Start Donating →</motion.button>
+            >Start Donating →</Motion.button>
           </Link>
           <Link to="/register?role=ngo">
-            <motion.button
+            <Motion.button
               whileHover={{ background: "rgba(255,255,255,0.14)" }}
               whileTap={{ scale: 0.97 }}
               style={{
@@ -1884,7 +1810,7 @@ const CTA = ({ c }) => (
                 background: "rgba(255,255,255,0.07)", color: "#fff",
                 fontFamily: "'Cabinet Grotesk', sans-serif", fontSize: 16, cursor: "pointer",
               }}
-            >Request Food</motion.button>
+            >Request Food</Motion.button>
           </Link>
         </div>
         <div style={{ display: "flex", gap: 28, justifyContent: "center", marginTop: 36, flexWrap: "wrap" }}>
@@ -1894,14 +1820,14 @@ const CTA = ({ c }) => (
             { label: "Browse Listings", to: "/dashboard/search" },
           ].map((l) => (
             <Link key={l.label} to={l.to}>
-              <motion.span
+              <Motion.span
                 whileHover={{ color: c.mint }}
                 style={{
                   fontSize: 13, color: "rgba(255,255,255,0.38)",
                   fontFamily: "'DM Mono', monospace", letterSpacing: "0.06em",
                   cursor: "pointer", transition: "color 0.2s",
                 }}
-              >{l.label}</motion.span>
+              >{l.label}</Motion.span>
             </Link>
           ))}
         </div>
@@ -1910,9 +1836,6 @@ const CTA = ({ c }) => (
   </section>
 );
 
-/* ══════════════════════════════════════════════════
-   FOOTER
-══════════════════════════════════════════════════ */
 const FOOTER_COLS = [
   {
     title: "Platform",
@@ -1935,8 +1858,8 @@ const FOOTER_COLS = [
 ];
 
 const Footer = ({ c }) => (
-  <footer style={{ background: "#0a1a0d", color: "rgba(255,255,255,0.4)", padding: "76px 32px 44px" }}>
-    <div className="rq-footer-grid" style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 56, marginBottom: 56 }}>
+  <footer style={{ background: "#0a1a0d", color: "rgba(255,255,255,0.4)", padding: "38px 32px 26px" }}>
+    <div className="rq-footer-grid" style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 40, marginBottom: 34 }}>
       <div>
         <div style={{ color: "#fff", marginBottom: 14 }}><Logo size={40} /></div>
         <p style={{ fontSize: 14, lineHeight: 1.78, maxWidth: 280, marginBottom: 22 }}>
@@ -1944,7 +1867,7 @@ const Footer = ({ c }) => (
         </p>
         <div style={{ display: "flex", gap: 10 }}>
           {[{ icon: "🐦", href: "https://x.com/itsSalonyy" }, { icon: "📸", href: "https://salonyranjan.github.io/" }, { icon: "💼", href: "https://www.linkedin.com/in/salony-ranjan-b63200280/" }].map(({ icon, href }) => (
-            <motion.a
+            <Motion.a
               key={icon} href={href} target="_blank" rel="noopener noreferrer"
               whileHover={{ scale: 1.15, background: "rgba(255,255,255,0.14)" }}
               style={{
@@ -1953,7 +1876,7 @@ const Footer = ({ c }) => (
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 14, cursor: "pointer", textDecoration: "none",
               }}
-            >{icon}</motion.a>
+            >{icon}</Motion.a>
           ))}
         </div>
       </div>
@@ -1965,10 +1888,10 @@ const Footer = ({ c }) => (
           </div>
           {col.links.map((l) => (
             <Link key={l.label} to={l.to}>
-              <motion.div
+              <Motion.div
                 whileHover={{ x: 4, color: "#fff" }}
                 style={{ fontSize: 14, marginBottom: 11, cursor: "pointer", transition: "color 0.2s", color: "rgba(255,255,255,0.4)" }}
-              >{l.label}</motion.div>
+              >{l.label}</Motion.div>
             </Link>
           ))}
         </div>
@@ -1985,9 +1908,6 @@ const Footer = ({ c }) => (
   </footer>
 );
 
-/* ══════════════════════════════════════════════════
-   ROOT EXPORT
-══════════════════════════════════════════════════ */
 const Landing = () => {
   const { dark } = useTheme();
   const c = C(dark);
@@ -1998,16 +1918,10 @@ const Landing = () => {
       <GlobalStyles c={c} />
       <Grain />
       <ScrollProgress c={c} />
-      <Ticker c={c} />
       <Hero c={c} />
       <Stats c={c} />
-      <Mission c={c} />
       <Features c={c} />
       <HowItWorks c={c} />
-      <ImpactMap c={c} />
-      <Testimonials c={c} />
-      <Newsletter c={c} />
-      <CTA c={c} />
       <Footer c={c} />
     </>
   );

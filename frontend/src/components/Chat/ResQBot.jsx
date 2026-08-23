@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import {
@@ -199,7 +199,7 @@ function TypingDots({ color }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 2px" }}>
       {[0, 1, 2].map((i) => (
-        <motion.span
+        <Motion.span
           key={i}
           style={{
             width: 7,
@@ -232,7 +232,7 @@ function MessageBubble({ msg, t }) {
   };
 
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0, y: 10, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.22, ease: [0.34, 1.56, 0.64, 1] }}
@@ -284,7 +284,7 @@ function MessageBubble({ msg, t }) {
           </div>
 
           {!isUser && hovered && (
-            <motion.button
+            <Motion.button
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               onClick={handleCopy}
@@ -310,7 +310,7 @@ function MessageBubble({ msg, t }) {
                 ? <HiOutlineCheckCircle style={{ width: 12, height: 12 }} />
                 : <HiOutlineClipboardDocument style={{ width: 12, height: 12 }} />
               }
-            </motion.button>
+            </Motion.button>
           )}
         </div>
 
@@ -318,7 +318,7 @@ function MessageBubble({ msg, t }) {
           {formatTime(msg.id)}
         </span>
       </div>
-    </motion.div>
+    </Motion.div>
   );
 }
 
@@ -352,7 +352,7 @@ function HeaderBtn({ onClick, title, children, t }) {
 function ActionBtn({ onClick, disabled, active, children, t, title }) {
   const [hovered, setHovered] = useState(false);
   return (
-    <motion.button
+    <Motion.button
       onClick={onClick}
       disabled={disabled}
       title={title}
@@ -378,7 +378,7 @@ function ActionBtn({ onClick, disabled, active, children, t, title }) {
       }}
     >
       {children}
-    </motion.button>
+    </Motion.button>
   );
 }
 
@@ -522,7 +522,6 @@ export default function ResQBot() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
         @keyframes resqPulse {
           0%, 100% { transform: scale(1); opacity: 1; }
@@ -537,11 +536,11 @@ export default function ResQBot() {
           100% { transform: scale(1.8); opacity: 0; }
         }
 
-        .resqbot-wrap { font-family: 'Inter', -apple-system, sans-serif; }
+        .resqbot-wrap { font-family: 'Cabinet Grotesk', 'Segoe UI', sans-serif; }
         .resqbot-scrollbar::-webkit-scrollbar { width: 4px; }
         .resqbot-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .resqbot-scrollbar::-webkit-scrollbar-thumb { border-radius: 4px; background: #1f2937; }
-        .resqbot-textarea { font-family: 'Inter', sans-serif; outline: none; }
+        .resqbot-textarea { font-family: 'Cabinet Grotesk', sans-serif; outline: none; }
         .resqbot-quick-btn { transition: all 0.18s cubic-bezier(0.34,1.56,0.64,1); }
         .resqbot-quick-btn:hover { transform: translateY(-1px); }
         .resqbot-fab-ring {
@@ -576,7 +575,7 @@ export default function ResQBot() {
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: 28, scale: 0.88 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 28, scale: 0.88 }}
@@ -616,12 +615,12 @@ export default function ResQBot() {
               <div className="resqbot-header-glow" />
 
               <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-                <motion.div
+                <Motion.div
                   animate={{ y: [0, -2, 0] }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 >
                   <BotAvatar size={38} pulse borderColor={isDark ? "#0a0d11" : "#047857"} />
-                </motion.div>
+                </Motion.div>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <span style={{ color: "#ffffff", fontWeight: 700, fontSize: 15, letterSpacing: "-0.01em" }}>
@@ -668,7 +667,7 @@ export default function ResQBot() {
             {/* Body */}
             <AnimatePresence initial={false}>
               {!isMinimized && (
-                <motion.div
+                <Motion.div
                   key="body"
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
@@ -699,7 +698,7 @@ export default function ResQBot() {
 
                     <AnimatePresence>
                       {isTyping && (
-                        <motion.div
+                        <Motion.div
                           key="typing"
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -719,7 +718,7 @@ export default function ResQBot() {
                           <span style={{ fontSize: 10, color: t.timestampColor, marginBottom: 4 }}>
                             ResQBot is responding…
                           </span>
-                        </motion.div>
+                        </Motion.div>
                       )}
                     </AnimatePresence>
 
@@ -730,7 +729,7 @@ export default function ResQBot() {
                   {/* Quick Replies */}
                   <AnimatePresence>
                     {messages.length <= 1 && !isTyping && (
-                      <motion.div
+                      <Motion.div
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
@@ -774,7 +773,7 @@ export default function ResQBot() {
                             {emoji} {label}
                           </button>
                         ))}
-                      </motion.div>
+                      </Motion.div>
                     )}
                   </AnimatePresence>
 
@@ -829,12 +828,12 @@ export default function ResQBot() {
                         t={t}
                         title="Send"
                       >
-                        <motion.div
+                        <Motion.div
                           animate={canSend ? { x: [0, 2, 0] } : {}}
                           transition={{ duration: 0.4, repeat: Infinity, repeatDelay: 2 }}
                         >
                           <HiOutlinePaperAirplane style={{ width: 16, height: 16 }} />
-                        </motion.div>
+                        </Motion.div>
                       </ActionBtn>
                     </div>
                   </div>
@@ -852,15 +851,15 @@ export default function ResQBot() {
                       ResQPlate assistant · Responses may need verification
                     </span>
                   </div>
-                </motion.div>
+                </Motion.div>
               )}
             </AnimatePresence>
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
 
       {/* FAB */}
-      <motion.button
+      <Motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.88 }}
         onClick={toggleOpen}
@@ -888,7 +887,7 @@ export default function ResQBot() {
 
         <AnimatePresence mode="wait">
           {isOpen && !isMinimized ? (
-            <motion.div
+            <Motion.div
               key="close"
               initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
               animate={{ rotate: 0, opacity: 1, scale: 1 }}
@@ -896,9 +895,9 @@ export default function ResQBot() {
               transition={{ duration: 0.18 }}
             >
               <HiOutlineXMark style={{ width: 26, height: 26, color: "#fff" }} />
-            </motion.div>
+            </Motion.div>
           ) : (
-            <motion.div
+            <Motion.div
               key="open"
               initial={{ rotate: 90, opacity: 0, scale: 0.5 }}
               animate={{ rotate: 0, opacity: 1, scale: 1 }}
@@ -909,7 +908,7 @@ export default function ResQBot() {
               🤖
               <AnimatePresence>
                 {hasUnread && (
-                  <motion.span
+                  <Motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
@@ -927,10 +926,10 @@ export default function ResQBot() {
                   />
                 )}
               </AnimatePresence>
-            </motion.div>
+            </Motion.div>
           )}
         </AnimatePresence>
-      </motion.button>
+      </Motion.button>
     </>
   );
 }

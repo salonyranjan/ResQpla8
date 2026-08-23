@@ -1,131 +1,214 @@
+<div align="center">
+
+<img src="./frontend/public/logo.svg" width="108" alt="ResQPlate logo" />
+
 # ResQPlate
 
-ResQPlate is a responsive food-rescue web application. People can create an account, post surplus food, browse currently available donations, claim food, and follow a rescue through its pickup status. Appwrite provides authentication, database storage, file storage, and realtime updates.
+### Rescue surplus food. Coordinate pickups. Measure real impact.
 
-The application displays records returned by Appwrite. It does not seed demo donations or invented impact statistics.
+A responsive food-rescue platform connecting surplus-food donors with people and organizations that can put it to use.
 
-## What works
+[![React](https://img.shields.io/badge/React-19-149ECA?style=for-the-badge&logo=react&logoColor=white)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
+[![Appwrite](https://img.shields.io/badge/Appwrite-Cloud-F02E65?style=for-the-badge&logo=appwrite&logoColor=white)](https://appwrite.io/)
+[![Leaflet](https://img.shields.io/badge/Maps-Leaflet-199900?style=for-the-badge&logo=leaflet&logoColor=white)](https://leafletjs.com/)
+[![Groq](https://img.shields.io/badge/AI-Groq-F55036?style=for-the-badge)](https://groq.com/)
 
-- Email and password registration, login, session restoration, and logout
-- Protected dashboard routes
-- Food donation creation with an optional image
-- Live listing of pending, unexpired donations
-- Cart and checkout flow that claims available donations
-- Pickup status and order tracking
-- Dashboard analytics calculated from stored pickup records
-- Realtime refresh when pickup documents change
-- Public map built with Leaflet and OpenStreetMap tiles
-- ResQBot guidance, with an optional Groq integration
-- Optional EmailJS contact forms
-- One shared light/dark theme
-- Responsive desktop and mobile navigation
+[Explore Features](#-feature-highlights) · [Architecture](#-architecture) · [Run Locally](#-run-locally) · [Configure Appwrite](#-appwrite-setup) · [Deploy](#-deployment)
 
-## Important data behavior
+> **Demo project:** ResQPlate demonstrates a complete food-rescue workflow. Donation records, availability, tracking states, and analytics are read from Appwrite rather than fabricated in the interface.
 
-- A new donation is saved with the `pending` status and appears in the dashboard and food listing.
-- Claiming food changes its status to `confirmed`, so it is no longer shown as available.
-- Expired donations are hidden from the available-food listing.
-- The browser does **not** delete completed or expired Appwrite documents. Keeping those records allows tracking and real analytics. If permanent automatic deletion is required, implement it as an Appwrite Function with a schedule and an API key that has the minimum required scope.
+</div>
 
-## Technology
+---
 
-- React 19
-- Vite 7
-- React Router 7
-- Tailwind CSS 4 and component-level responsive styles
-- Appwrite Web SDK
-- Leaflet and React Leaflet
-- Framer Motion
-- Groq SDK for optional AI features
-- EmailJS for optional contact forms
+## 🌱 Why ResQPlate?
 
-## Repository layout
+Perfectly usable food is often discarded because donors and receivers lack a fast coordination channel. ResQPlate turns that gap into a simple operational flow:
+
+```mermaid
+flowchart LR
+  A["Donor posts surplus food"] --> B["Listing becomes available"]
+  B --> C["Receiver claims food"]
+  C --> D["Pickup is coordinated"]
+  D --> E["Rescue status is tracked"]
+  E --> F["Completed impact is measured"]
+```
+
+The application combines a polished public experience with an authenticated workspace for posting food, browsing live donations, claiming items, following pickups, and reviewing impact.
+
+---
+
+## 🎨 Visual direction
+
+<div align="center">
+  <img src="./frontend/src/assets/about/food-rescue-story.png" width="820" alt="ResQPlate food rescue story illustration" />
+  <br />
+  <sub>A human-centered visual system built around dignity, clarity, and community action.</sub>
+</div>
+
+### Experience map
+
+| Public experience | Rescue workspace | Fulfilment |
+| --- | --- | --- |
+| Focused landing page | Operational overview | Persistent rescue cart |
+| About and contact pages | Post surplus food | Free checkout and claim flow |
+| Interactive rescue-plate game | Browse live listings | Pickup status tracking |
+| Responsive food-rescue map | Analytics and activity alerts | Light and dark themes |
+| ResQBot support assistant | Profile and preferences | Mobile-first navigation |
+
+> Add product screenshots under `frontend/public/screenshots/` for a portfolio or hackathon submission. Keeping screenshots in the repository ensures this README never depends on temporary links.
+
+---
+
+## ✨ Feature highlights
+
+| Area | Capability |
+| --- | --- |
+| 🔐 Authentication | Registration, login, session restoration, logout, and protected routes through Appwrite Auth |
+| 🍱 Donations | Post food type, meal quantity, description, pickup location, expiry, and a validated food image |
+| 🔎 Discovery | Search, filter, and sort pending donations while automatically hiding expired listings |
+| 🛒 Rescue flow | Add available donations to a persistent cart and claim them through a free checkout flow |
+| 📍 Tracking | Follow a rescue from `pending` through confirmation, preparation, transit, and completion |
+| 📊 Dashboard | Live overview, donor history, record-based analytics, activity alerts, and operational pages |
+| 🗺️ Map | Leaflet and OpenStreetMap-powered public map experience |
+| 🤖 Assistance | ResQBot food-rescue guidance and optional Groq-powered responses |
+| ✉️ Contact | Optional EmailJS-powered contact delivery |
+| 🌓 Design system | Shared typography, responsive layouts, accessible controls, and persistent light/dark mode |
+| ⚡ Performance | Route-level code splitting so dashboard, map, AI, and tracking screens load on demand |
+
+---
+
+## 🏗 Architecture
+
+```mermaid
+flowchart TD
+  U["Donor / receiver / volunteer"] --> UI["React 19 + Vite client"]
+  UI --> AUTH["Auth context"]
+  UI --> CART["Persistent cart context"]
+  UI --> THEME["Theme context"]
+  UI --> ROUTER["React Router"]
+  ROUTER --> PUBLIC["Landing · About · Contact · Map"]
+  ROUTER --> DASH["Protected dashboard"]
+  ROUTER --> FLOW["Cart · Checkout · Tracking"]
+  AUTH --> AW["Appwrite"]
+  DASH --> AW
+  FLOW --> AW
+  AW --> ACCOUNT["Authentication"]
+  AW --> DB[("Pickup documents")]
+  AW --> STORAGE[("Donation images")]
+  AW --> REALTIME["Realtime updates"]
+  UI --> GROQ["Groq · optional"]
+  UI --> EMAIL["EmailJS · optional"]
+  PUBLIC --> OSM["OpenStreetMap tiles"]
+```
+
+### Data lifecycle
+
+```text
+pending → confirmed → preparing → out_for_delivery → completed
+   └──────────────── cancelled can end an active rescue ────────────────┘
+```
+
+- New donations are stored as `pending`.
+- Browse Food displays only pending, unexpired records.
+- Claiming a donation changes it to `confirmed`, removing it from availability.
+- Historical records remain in Appwrite so tracking and analytics stay accurate.
+
+---
+
+## 🧰 Tech stack
+
+| Layer | Technology |
+| --- | --- |
+| Application | React 19, React Router 7, Vite 7 |
+| Styling | Tailwind CSS 4, responsive component CSS, shared design tokens |
+| Motion | Framer Motion |
+| Backend platform | Appwrite Auth, Databases, Storage, and Realtime |
+| Mapping | Leaflet, React Leaflet, OpenStreetMap |
+| AI | Groq SDK (optional) |
+| Contact delivery | EmailJS (optional) |
+| Icons | React Icons, Lucide React |
+| Deployment | Static SPA hosting; Vercel rewrite configuration included |
+
+---
+
+## 🗂 Project map
 
 ```text
 ResQPlate_frontend/
-├── .github/workflows/       # Appwrite health check and console reminder
+├── .github/workflows/          Appwrite availability and reminder workflows
 ├── frontend/
-│   ├── public/              # Public assets, including the canonical logo.svg
+│   ├── public/                 Logo, sitemap, and public assets
 │   ├── src/
-│   │   ├── components/      # Shared and public UI
-│   │   ├── context/         # Authentication, cart, and theme state
-│   │   ├── hooks/           # Tracking, alert, and volunteer data hooks
-│   │   ├── layouts/         # Dashboard shell
-│   │   ├── pages/           # Route-level screens
-│   │   └── services/        # Appwrite, food data, and optional AI services
-│   ├── .env.example
-│   ├── package.json
-│   └── vite.config.js
+│   │   ├── components/         Marketing UI, navigation, map, cards, and ResQBot
+│   │   ├── context/            Authentication, cart, and theme state
+│   │   ├── hooks/              Tracking, alerts, and pickup data hooks
+│   │   ├── layouts/            Responsive dashboard shell
+│   │   ├── pages/              Route-level application screens
+│   │   ├── services/           Appwrite, food data, and optional AI integrations
+│   │   ├── App.jsx             Route configuration and lazy-loaded screens
+│   │   └── main.jsx            Application providers and browser entry point
+│   ├── .env.example            Safe environment-variable template
+│   ├── vercel.json             SPA rewrites and caching headers
+│   └── package.json            Commands and dependencies
 └── README.md
 ```
 
-## Requirements
+---
 
-- Node.js 20.19+ or 22.12+
+## ⚙️ Requirements
+
+- Node.js **20.19+** or **22.12+**
 - npm
-- An Appwrite project
+- An [Appwrite](https://appwrite.io/) project
+- Optional Groq and EmailJS accounts for AI and contact features
 
-Groq and EmailJS accounts are optional. The core authentication and donation flows use Appwrite.
+---
 
-## Local setup
+## 🚀 Run locally
 
-1. Clone the repository and open its frontend directory:
+```bash
+# 1. Clone the repository
+git clone https://github.com/salonyranjan/ResQpla8.git
+cd ResQpla8/frontend
 
-   ```bash
-   git clone https://github.com/salonyranjan/frontend-ResQplate-.git
-   cd frontend-ResQplate-/frontend
-   ```
+# 2. Install locked dependencies
+npm ci
 
-2. Install the locked dependencies:
+# 3. Create your local environment file
+cp .env.example .env
 
-   ```bash
-   npm ci
-   ```
+# 4. Start the development server
+npm run dev
+```
 
-3. Copy the environment template:
+On Windows PowerShell:
 
-   macOS or Linux:
+```powershell
+Copy-Item .env.example .env
+```
 
-   ```bash
-   cp .env.example .env
-   ```
+Open the URL printed by Vite—normally **http://localhost:5173**.
 
-   Windows PowerShell:
+---
 
-   ```powershell
-   Copy-Item .env.example .env
-   ```
-
-4. Fill in the required Appwrite values in `frontend/.env`.
-
-5. Start the development server:
-
-   ```bash
-   npm run dev
-   ```
-
-6. Open the URL printed by Vite, normally `http://localhost:5173`.
-
-## Environment variables
-
-Only variables prefixed with `VITE_` are available to browser code. They are bundled into the client and must never contain an Appwrite server API key or another privileged secret.
+## 🔐 Environment variables
 
 | Variable | Required | Purpose |
-| --- | --- | --- |
-| `VITE_APPWRITE_ENDPOINT` | Yes | Appwrite API endpoint, such as `https://fra.cloud.appwrite.io/v1` |
-| `VITE_APPWRITE_PROJECT_ID` | Yes | Appwrite project ID |
-| `VITE_APPWRITE_DATABASE_ID` | Yes | Database containing the pickup collection |
-| `VITE_APPWRITE_PICKUPS_COLLECTION_ID` | Yes | Pickup collection ID |
-| `VITE_APPWRITE_BUCKET_ID` | No | Storage bucket for donation images |
-| `VITE_GROQ_API_KEY` | No | Enables Groq-backed ResQBot and AI utilities |
-| `VITE_EMAILJS_SERVICE_ID` | No | EmailJS service used by contact forms |
-| `VITE_EMAILJS_TEMPLATE_ID` | No | EmailJS template used by the landing-page form |
-| `VITE_EMAILJS_CONTACT_TEMPLATE_ID` | No | EmailJS template used by the contact page |
-| `VITE_EMAILJS_PUBLIC_KEY` | No | EmailJS browser public key |
+| --- | :---: | --- |
+| `VITE_APPWRITE_ENDPOINT` | ✅ | Appwrite API endpoint, such as `https://fra.cloud.appwrite.io/v1` |
+| `VITE_APPWRITE_PROJECT_ID` | ✅ | Appwrite project identifier |
+| `VITE_APPWRITE_DATABASE_ID` | ✅ | Database containing rescue pickup records |
+| `VITE_APPWRITE_PICKUPS_COLLECTION_ID` | ✅ | Pickup collection identifier |
+| `VITE_APPWRITE_BUCKET_ID` | Optional | Storage bucket for donation photographs |
+| `VITE_GROQ_API_KEY` | Optional | Enables Groq-backed assistant and AI utilities |
+| `VITE_EMAILJS_SERVICE_ID` | Optional | EmailJS service identifier |
+| `VITE_EMAILJS_TEMPLATE_ID` | Optional | Landing form template identifier |
+| `VITE_EMAILJS_CONTACT_TEMPLATE_ID` | Optional | Contact form template identifier |
+| `VITE_EMAILJS_PUBLIC_KEY` | Optional | EmailJS browser public key |
 
-Example:
-
-```env
+```dotenv
 VITE_APPWRITE_ENDPOINT=https://fra.cloud.appwrite.io/v1
 VITE_APPWRITE_PROJECT_ID=your_project_id
 VITE_APPWRITE_DATABASE_ID=your_database_id
@@ -139,171 +222,162 @@ VITE_EMAILJS_CONTACT_TEMPLATE_ID=
 VITE_EMAILJS_PUBLIC_KEY=
 ```
 
-`VITE_APPWRITE_ENDPOINT` and `VITE_APPWRITE_PROJECT_ID` are validated when the application starts. Database values are validated when a food-data feature is used.
+> **Security:** every `VITE_` value is bundled into browser code. Never place an Appwrite server API key or another privileged secret here. For production AI, proxy Groq calls through an Appwrite Function or another server endpoint.
 
-### Client-side AI key warning
+---
 
-`VITE_GROQ_API_KEY` is currently read by browser code. A `VITE_` key is visible to users of the deployed site. For a public production deployment, move Groq calls to an Appwrite Function or another server-side endpoint and keep the secret there. Apply provider usage limits while the browser integration remains enabled.
+## 🗄 Appwrite setup
 
-## Appwrite configuration
+### 1. Register the frontend
 
-### 1. Add web platforms
+Add `localhost` and every deployed hostname under **Appwrite Console → Project → Platforms → Web**. Authentication rejects unregistered origins.
 
-In the Appwrite Console, add every frontend hostname under the project's Web platforms. During development, add `localhost`. For deployment, add the exact production hostname.
+### 2. Enable authentication
 
-Authentication can fail with an “unknown origin” error when the hostname is missing.
+Enable Appwrite's Email/Password authentication method.
 
-### 2. Enable email/password authentication
-
-Enable the Email/Password authentication method in the Appwrite project.
-
-### 3. Create the database and collection
-
-Create a database and a collection, then place their IDs in `.env`. The frontend writes and reads the following pickup attributes:
+### 3. Create the pickup collection
 
 | Attribute | Suggested type | Required |
-| --- | --- | --- |
-| `pickupId` | String | Yes |
-| `pickupLocation` | String | Yes |
-| `dropOffLocation` | String | No |
-| `scheduledTime` | Datetime | Yes |
-| `status` | String or enum | Yes |
-| `vehicleType` | String | Yes |
-| `donorId` | String | Yes |
-| `weight` | Float | Yes |
-| `mealsCount` | Integer | Yes |
-| `foodType` | String, at least 250 characters | Yes |
-| `location` | String | Yes |
+| --- | --- | :---: |
+| `pickupId` | String | ✅ |
+| `pickupLocation` | String | ✅ |
+| `dropOffLocation` | String |  |
+| `scheduledTime` | Datetime | ✅ |
+| `status` | String or enum | ✅ |
+| `vehicleType` | String | ✅ |
+| `donorId` | String | ✅ |
+| `weight` | Float | ✅ |
+| `mealsCount` | Integer | ✅ |
+| `foodType` | String (250+ characters) | ✅ |
+| `location` | String | ✅ |
 
-Statuses currently understood by the UI are:
-
-```text
-pending
-confirmed
-preparing
-out_for_delivery
-completed
-cancelled
-```
-
-Create indexes required by Appwrite for the queries used by the app:
-
-- `status` for equality filtering
-- `$createdAt` in descending order
-- A combined index for `status` and `$createdAt` if the Appwrite Console requests it
+Create indexes for `status`, descending `$createdAt`, and their combination if requested by Appwrite.
 
 ### 4. Configure permissions
 
-The application uses the logged-in user's browser session and does not use an API key. Configure collection permissions deliberately:
+- Authenticated donors need document-create permission.
+- Intended users need read permission for available donations.
+- Claim and status workflows require carefully scoped update permission.
+- Do **not** grant public update or delete permission.
+- Enable document security and role-specific permissions before production.
 
-- Authenticated users need permission to create pickup documents.
-- Users who browse food need permission to read the appropriate pickup documents.
-- Claiming and status workflows require permission to update the relevant documents.
+### 5. Optional image storage
 
-Use document security and per-document permissions before a public production launch if donors, receivers, and volunteers should have different access. Do not grant public update or delete access.
+Create a Storage bucket when `VITE_APPWRITE_BUCKET_ID` is configured. Authenticated users need create permission and intended viewers need read permission. Donation file IDs match pickup document IDs.
 
-### 5. Optional image bucket
+---
 
-If `VITE_APPWRITE_BUCKET_ID` is set, create that Storage bucket and allow authenticated users to create files and intended users to read them. Donation image file IDs match their pickup document IDs. If the variable is empty, donations still work without image uploads.
+## 🧭 Routes
 
-## Routes
+### Public routes
 
-Public routes:
-
-| Route | Screen |
+| Route | Experience |
 | --- | --- |
-| `/` | Landing page |
-| `/about` | Project information |
-| `/contact` | Contact page |
+| `/` | Landing page and quick rescue game |
+| `/about` | Project story |
+| `/contact` | Contact experience |
 | `/map` | Food-rescue map |
 | `/login` | Sign in |
 | `/register` | Create an account |
 
-Protected routes require a valid Appwrite session:
+### Protected routes
 
-| Route | Screen |
+| Route | Experience |
 | --- | --- |
 | `/dashboard` | Operational overview |
 | `/dashboard/donate` | Post surplus food |
 | `/dashboard/search` | Browse available food |
-| `/dashboard/orders` | Pickup activity |
-| `/dashboard/analytics` | Analytics from Appwrite records |
-| `/dashboard/smart-alerts` | Record-based activity alerts |
-| `/dashboard/profile` | User profile |
-| `/dashboard/settings` | Account settings |
+| `/dashboard/analytics` | Live record-based analytics |
+| `/dashboard/smart-alerts` | Rescue activity alerts |
+| `/dashboard/ai-matching` | Donation matching preview |
+| `/dashboard/volunteer` | Volunteer pickup operations |
+| `/dashboard/impact-delivered` | Completed impact view |
+| `/dashboard/leader-board` | Rescue leaderboard |
+| `/dashboard/profile` | Profile and donation history |
+| `/dashboard/settings` | Account preferences |
 | `/cart` | Selected donations |
-| `/checkout` | Claim selected donations |
-| `/tracking/:orderId` | Track one pickup document |
+| `/checkout` | Claim flow |
+| `/tracking/:orderId` | Individual rescue tracking |
 
-Unknown routes redirect to the landing page.
+Unknown routes safely redirect to `/`.
 
-## Commands
+---
 
-Run commands from `frontend/`:
+## ✅ Quality checks
+
+```bash
+cd frontend
+npm run lint
+npm run build
+npm run preview
+```
 
 | Command | Result |
 | --- | --- |
 | `npm run dev` | Starts the Vite development server |
-| `npm run build` | Creates the production build in `frontend/dist/` |
-| `npm run preview` | Serves the production build locally |
-| `npm run lint` | Runs ESLint across the frontend |
+| `npm run lint` | Checks the frontend with ESLint |
+| `npm run build` | Generates the optimized production bundle in `dist/` |
+| `npm run preview` | Serves the production bundle locally |
 
-Recommended verification before a pull request:
+---
 
-```bash
-npm run lint
-npm run build
-```
+## 🌐 Deployment
 
-## Deployment
+ResQPlate is a client-side SPA and can be deployed to Vercel, Netlify, Cloudflare Pages, or another static host.
 
-1. Set the deployment root directory to `frontend`.
-2. Use `npm ci` as the install command.
-3. Use `npm run build` as the build command.
-4. Publish `frontend/dist` (or `dist` when the platform root is already `frontend`).
-5. Add the required environment variables in the hosting dashboard.
-6. Configure SPA fallback so unknown server paths serve `index.html`.
-7. Add the deployed hostname as an Appwrite Web platform.
+| Setting | Value |
+| --- | --- |
+| Root directory | `frontend` |
+| Install command | `npm ci` |
+| Build command | `npm run build` |
+| Output directory | `dist` |
 
-Never commit `frontend/.env`. It is ignored by Git.
+Deployment checklist:
 
-## Appwrite Free project reminders
+1. Add required environment variables in the hosting dashboard.
+2. Configure an SPA fallback so application paths serve `index.html`.
+3. Add the production hostname as an Appwrite Web platform.
+4. Verify signup, login, donation creation, image access, claiming, and realtime updates.
+5. Never commit `frontend/.env`.
 
-Two GitHub Actions are included:
+The included `frontend/vercel.json` already provides Vercel SPA rewrites and immutable asset caching.
 
-- `appwrite-activity-check.yml` checks the configured Appwrite health endpoint every three days. Add repository secrets named `APPWRITE_ENDPOINT` and `APPWRITE_PROJECT_ID`.
-- `appwrite-console-reminder.yml` opens a reminder issue on Monday and Thursday when no reminder is already open.
+---
 
-The health request verifies availability, but it may not count as Appwrite Console development activity. The reminder exists because a GitHub workflow cannot guarantee that a free Appwrite project will never be paused. Do not add an Appwrite password or server API key to these workflows.
+## 🛠 Troubleshooting
 
-## Troubleshooting
+| Problem | Check |
+| --- | --- |
+| Appwrite configuration error | Confirm endpoint and project ID, then restart Vite |
+| Login reports unknown origin | Register the exact hostname as an Appwrite Web platform |
+| Dashboard cannot load data | Verify IDs, attributes, permissions, and indexes |
+| Images do not appear | Verify bucket ID plus file create/read permissions |
+| Claimed food disappears from Browse Food | Expected: its status changed from `pending` to `confirmed` |
+| Refreshing a deployed route returns 404 | Add the SPA rewrite to `index.html` |
+| ResQBot is unavailable | Add a valid Groq key or move the integration to a server function |
+| Contact messages fail | Verify EmailJS identifiers and the selected template |
 
-### App starts with “Appwrite is not configured”
+---
 
-Set `VITE_APPWRITE_ENDPOINT` and `VITE_APPWRITE_PROJECT_ID` in `frontend/.env`, then restart Vite.
+## 🤝 Contributing
 
-### Login or registration reports an unknown origin
+1. Fork the repository.
+2. Create a focused branch: `git checkout -b feature/your-feature`.
+3. Make and verify your changes.
+4. Run `npm run lint` and `npm run build`.
+5. Open a pull request explaining the user-facing impact.
 
-Add the current hostname to the project's Web platforms in Appwrite.
+---
 
-### Food listing or dashboard cannot load records
-
-Check the database ID, collection ID, collection permissions, and required indexes. Confirm the collection attributes match the schema above.
-
-### Donation uploads work without an image
-
-This is expected when `VITE_APPWRITE_BUCKET_ID` is empty. Configure a bucket and its permissions to enable images.
-
-### A claimed donation disappeared from Browse Food
-
-This is expected. Claiming changes the document from `pending` to `confirmed`, and Browse Food only shows pending, unexpired donations.
-
-### A deployed route returns 404 after refresh
-
-Configure the host's single-page application fallback to serve `index.html`.
-
-## Maintainer
+## 👩‍💻 Maintainer
 
 Developed and maintained by [Salony Ranjan](https://github.com/salonyranjan).
 
-Issues and contributions are welcome through the [GitHub repository](https://github.com/salonyranjan/frontend-ResQplate-).
+Issues and contributions are welcome in the [ResQPlate repository](https://github.com/salonyranjan/ResQpla8).
+
+<div align="center">
+
+**Built to make every surplus meal easier to rescue.**
+
+</div>

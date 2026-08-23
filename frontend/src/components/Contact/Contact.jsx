@@ -1,14 +1,11 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { motion, useInView, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion as Motion, useInView, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import emailjs from "@emailjs/browser";
 import { useTheme } from "../../context/ThemeContext";
 import AppLogo from "../Logo";
 
-/* ═══════════════════════════════════════════════════════════
-   FONTS
-═══════════════════════════════════════════════════════════ */
 const FontLoader = () => {
   useEffect(() => {
     const l = document.createElement("link");
@@ -20,9 +17,6 @@ const FontLoader = () => {
   return null;
 };
 
-/* ═══════════════════════════════════════════════════════════
-   THEME TOKENS
-═══════════════════════════════════════════════════════════ */
 const DARK = {
   bg:          "#080e09",
   bg2:         "#0d160e",
@@ -73,9 +67,6 @@ const LIGHT = {
   heroOverlay: "rgba(5,20,8,0.62)",
 };
 
-/* ═══════════════════════════════════════════════════════════
-   GLOBAL STYLES
-═══════════════════════════════════════════════════════════ */
 const GlobalStyles = ({ dark }) => {
   const T = dark ? DARK : LIGHT;
   useEffect(() => {
@@ -162,13 +153,10 @@ const GlobalStyles = ({ dark }) => {
     `;
     document.head.appendChild(s);
     return () => { const el = document.getElementById(id); if (el) el.remove(); };
-  }, [dark]);
+  }, [dark, T.accentGlow, T.bg, T.bg2, T.bgCard2, T.border, T.ink, T.inkHint, T.sage]);
   return null;
 };
 
-/* ═══════════════════════════════════════════════════════════
-   PRIMITIVES
-═══════════════════════════════════════════════════════════ */
 const Grain = () => (
   <div style={{
     position: "fixed", inset: 0, zIndex: 9999, pointerEvents: "none", opacity: 0.032,
@@ -182,13 +170,13 @@ const Reveal = ({ children, delay = 0, y = 32, once = true }) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once, margin: "-60px" });
   return (
-    <motion.div ref={ref}
+    <Motion.div ref={ref}
       initial={{ opacity: 0, y }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
-    </motion.div>
+    </Motion.div>
   );
 };
 
@@ -205,9 +193,6 @@ const Label = ({ children, T }) => (
   </div>
 );
 
-/* ═══════════════════════════════════════════════════════════
-   LOGO (kept for Footer)
-═══════════════════════════════════════════════════════════ */
 const Logo = ({ T, size = 36 }) => (
   <div style={{
     width: size, height: size, borderRadius: Math.round(size * 0.28),
@@ -224,9 +209,6 @@ const Logo = ({ T, size = 36 }) => (
   </div>
 );
 
-/* ═══════════════════════════════════════════════════════════
-   NAVBAR — logo & name removed, toggle only
-═══════════════════════════════════════════════════════════ */
 const Navbar = ({ dark, onToggle, T }) => {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -236,7 +218,7 @@ const Navbar = ({ dark, onToggle, T }) => {
   }, []);
 
   return (
-    <motion.nav
+    <Motion.nav
       initial={{ y: -60, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
@@ -263,7 +245,7 @@ const Navbar = ({ dark, onToggle, T }) => {
         </span>
 
         {/* Toggle */}
-        <motion.button
+        <Motion.button
           onClick={onToggle}
           aria-label="Toggle theme"
           style={{
@@ -274,7 +256,7 @@ const Navbar = ({ dark, onToggle, T }) => {
             transition: "background 0.35s, border-color 0.35s",
           }}
         >
-          <motion.div
+          <Motion.div
             animate={{ x: dark ? 24 : 2 }}
             transition={{ type: "spring", stiffness: 500, damping: 32 }}
             style={{
@@ -302,16 +284,13 @@ const Navbar = ({ dark, onToggle, T }) => {
                 <path d="M9.5 6.8A4 4 0 015.2 2.5 4 4 0 109.5 6.8z" fill="#f3f0e8" />
               </svg>
             )}
-          </motion.div>
-        </motion.button>
+          </Motion.div>
+        </Motion.button>
       </div>
-    </motion.nav>
+    </Motion.nav>
   );
 };
 
-/* ═══════════════════════════════════════════════════════════
-   HERO
-═══════════════════════════════════════════════════════════ */
 const Hero = ({ T, dark }) => {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
@@ -320,7 +299,7 @@ const Hero = ({ T, dark }) => {
 
   return (
     <section ref={ref} style={{
-      position: "relative", minHeight: "88vh",
+      position: "relative", minHeight: 620,
       display: "flex", alignItems: "center",
       background: dark
         ? `radial-gradient(ellipse at 30% 60%, rgba(29,76,50,0.35) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(45,106,79,0.18) 0%, transparent 50%), ${T.bg}`
@@ -340,7 +319,7 @@ const Hero = ({ T, dark }) => {
         </svg>
 
         {/* Decorative large circle */}
-        <motion.div
+        <Motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 90, repeat: Infinity, ease: "linear" }}
           style={{
@@ -349,7 +328,7 @@ const Hero = ({ T, dark }) => {
             border: `1px dashed ${T.border}`, opacity: 0.6,
           }}
         />
-        <motion.div
+        <Motion.div
           animate={{ rotate: -360 }}
           transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
           style={{
@@ -372,13 +351,13 @@ const Hero = ({ T, dark }) => {
         </svg>
       </div>
 
-      <motion.div style={{ y, opacity }} className="rq-section-pad">
+      <Motion.div style={{ y, opacity }} className="rq-section-pad">
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 40 }}>
 
           {/* Left: text */}
           <div style={{ maxWidth: 580, flex: "0 0 auto" }}>
             {/* Eyebrow */}
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
@@ -388,7 +367,7 @@ const Hero = ({ T, dark }) => {
                 borderRadius: 100, padding: "6px 16px 6px 12px",
               }}
             >
-              <motion.div
+              <Motion.div
                 animate={{ scale: [1, 1.4, 1] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 style={{ width: 7, height: 7, borderRadius: "50%", background: T.sage, flexShrink: 0 }}
@@ -396,10 +375,10 @@ const Hero = ({ T, dark }) => {
               <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10.5, letterSpacing: "0.15em", textTransform: "uppercase", color: T.mint }}>
                 Get in Touch · ResQPlate
               </span>
-            </motion.div>
+            </Motion.div>
 
             {/* Headline */}
-            <motion.h1
+            <Motion.h1
               className="rq-hero-h1"
               initial={{ opacity: 0, y: 48 }}
               animate={{ opacity: 1, y: 0 }}
@@ -419,98 +398,46 @@ const Hero = ({ T, dark }) => {
                 WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
               }}>rescue</em>
               <br />food, together.
-            </motion.h1>
+            </Motion.h1>
 
-            <motion.p
+            <Motion.p
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              style={{ fontSize: 16, fontWeight: 300, color: T.inkMuted, lineHeight: 1.8, maxWidth: 420, marginBottom: 40 }}
+              style={{ fontSize: 16, fontWeight: 300, color: T.inkMuted, lineHeight: 1.8, maxWidth: 420, marginBottom: 0 }}
             >
               Whether you&apos;re a restaurant with surplus, an NGO serving families,
               or a volunteer ready to ride — this is where the change begins.
-            </motion.p>
+            </Motion.p>
 
-            {/* Trust badges */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.72, duration: 0.7 }}
-              style={{ display: "flex", gap: 24, flexWrap: "wrap" }}
-            >
-              {["Govt. of India Backed", "ISO 9001:2015", "2,400+ Lives Impacted"].map((t, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                  <div style={{
-                    width: 17, height: 17, borderRadius: "50%",
-                    border: `1.5px solid ${T.sage}`, display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
-                    <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
-                      <path d="M2 5.2l2 1.8 4-4" stroke={T.sage} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-                  <span style={{ fontSize: 12, color: T.inkHint, fontFamily: "'DM Mono', monospace", letterSpacing: "0.04em" }}>{t}</span>
-                </div>
-              ))}
-            </motion.div>
           </div>
 
-          {/* Right: audience-first response hub */}
-          <motion.div
-            className="rq-hero-float"
-            initial={{ opacity: 0, x: 60, y: 20 }}
-            animate={{ opacity: 1, x: 0, y: 0 }}
-            transition={{ delay: 0.75, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            style={{ width: 310, flexShrink: 0, position: "relative" }}
-          >
-            <motion.div
-              animate={{ y: [0, -7, 0] }}
-              transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
-              style={{
-                overflow: "hidden", position: "relative", padding: 22, borderRadius: 26,
-                background: dark ? "linear-gradient(145deg,#10251a,#0b1710)" : "linear-gradient(145deg,#fffdf8,#f1f6ef)",
-                border: `1px solid ${T.borderMed}`,
-                boxShadow: dark ? "0 40px 90px rgba(0,0,0,.5)" : "0 34px 80px rgba(24,61,38,.16)",
-              }}
-            >
-              <div style={{ position: "absolute", width: 150, height: 150, right: -65, top: -70, borderRadius: "50%", background: `${T.sage}22` }} />
-              <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div>
-                  <div style={{ color: T.sage, font: "600 9px 'DM Mono', monospace", letterSpacing: ".14em", textTransform: "uppercase" }}>Response hub</div>
-                  <div style={{ marginTop: 6, color: T.ink, font: "700 18px 'Cabinet Grotesk', sans-serif" }}>How can we help?</div>
-                </div>
-                <div style={{ width: 40, height: 40, borderRadius: 14, display: "grid", placeItems: "center", color: "#fff", background: `linear-gradient(135deg,${T.leaf},${T.leafBright})`, boxShadow: `0 8px 22px ${T.leaf}44`, fontSize: 18 }}>✦</div>
+          {/* Right: human conversation preview */}
+          <Motion.a className="rq-hero-float" href="#contact-form" initial={{ opacity: 0, x: 60, rotate: 2 }} animate={{ opacity: 1, x: 0, rotate: 0 }} whileHover={{ y: -5 }} transition={{ delay: .7, duration: .9, ease: [0.22, 1, 0.36, 1] }} style={{ width: 330, flexShrink: 0, position: "relative", textDecoration: "none" }}>
+            <div style={{ overflow: "hidden", borderRadius: 28, background: T.bgCard, border: `1px solid ${T.borderMed}`, boxShadow: dark ? "0 40px 90px rgba(0,0,0,.48)" : "0 34px 80px rgba(24,61,38,.15)" }}>
+              <div style={{ padding: "15px 17px", display: "flex", alignItems: "center", gap: 10, borderBottom: `1px solid ${T.border}`, background: T.bg2 }}>
+                <div style={{ width: 35, height: 35, borderRadius: 12, display: "grid", placeItems: "center", background: `linear-gradient(135deg,${T.leaf},${T.leafBright})`, color: "#fff", fontWeight: 800 }}>R</div>
+                <div style={{ flex: 1 }}><strong style={{ display: "block", color: T.ink, fontSize: 12 }}>ResQPlate team</strong><span style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2, color: T.inkMuted, font: "9px 'DM Mono', monospace" }}><Motion.i animate={{ opacity: [.4,1,.4] }} transition={{ duration: 1.7, repeat: Infinity }} style={{ width: 6, height: 6, borderRadius: "50%", background: T.sage }} />Here to help</span></div>
+                <span style={{ color: T.inkHint, fontSize: 18 }}>•••</span>
               </div>
 
-              <div style={{ display: "grid", gap: 8, marginTop: 20 }}>
-                {[
-                  { icon: "↗", title: "Share surplus food", meta: "Donor support", time: "~5 min" },
-                  { icon: "♡", title: "Request food support", meta: "NGO & community", time: "Priority" },
-                  { icon: "◎", title: "Partner with ResQPlate", meta: "Teams & institutions", time: "1 day" },
-                ].map((item, index) => (
-                  <motion.a
-                    key={item.title}
-                    href="#contact-form"
-                    whileHover={{ x: 4 }}
-                    style={{ display: "grid", gridTemplateColumns: "38px 1fr auto", alignItems: "center", gap: 10, padding: "10px", borderRadius: 14, color: T.ink, background: index === 1 ? `${T.sage}16` : T.bg2, border: `1px solid ${index === 1 ? T.borderMed : T.border}`, textDecoration: "none" }}
-                  >
-                    <span style={{ width: 38, height: 38, display: "grid", placeItems: "center", borderRadius: 12, background: index === 1 ? T.sage : T.mintSoft, color: index === 1 ? "#fff" : T.leaf, fontWeight: 800 }}>{item.icon}</span>
-                    <span><strong style={{ display: "block", fontSize: 11.5 }}>{item.title}</strong><small style={{ display: "block", marginTop: 3, color: T.inkMuted, font: "9px 'DM Mono', monospace" }}>{item.meta}</small></span>
-                    <small style={{ color: T.sage, font: "8.5px 'DM Mono', monospace" }}>{item.time}</small>
-                  </motion.a>
-                ))}
+              <div style={{ padding: 20, minHeight: 230, display: "flex", flexDirection: "column", gap: 13, background: dark ? "linear-gradient(160deg,#0d1b12,#101f16)" : "linear-gradient(160deg,#fffdf9,#f3f7f1)" }}>
+                <Motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.05 }} style={{ alignSelf: "flex-start", maxWidth: "84%", padding: "11px 13px", borderRadius: "5px 15px 15px 15px", background: T.bg2, border: `1px solid ${T.border}`, color: T.ink, fontSize: 11.5, lineHeight: 1.55 }}>Hi, I&apos;d like to help rescue surplus food.</Motion.div>
+
+                <Motion.div initial={{ opacity: 0, scale: .8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.45 }} style={{ alignSelf: "flex-end", display: "flex", gap: 4, padding: "10px 13px", borderRadius: "15px 5px 15px 15px", background: `${T.sage}18` }}>
+                  {[0,1,2].map(i => <Motion.i key={i} animate={{ y: [0,-4,0] }} transition={{ duration: .8, repeat: Infinity, delay: i*.14 }} style={{ width: 5, height: 5, borderRadius: "50%", background: T.sage }} />)}
+                </Motion.div>
+
+                <Motion.div initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 2.05 }} style={{ alignSelf: "flex-end", maxWidth: "88%", padding: "11px 13px", borderRadius: "15px 5px 15px 15px", background: `linear-gradient(135deg,${T.leaf},${T.leafBright})`, color: "#fff", fontSize: 11.5, lineHeight: 1.55, boxShadow: `0 8px 20px ${T.leaf}33` }}>Wonderful. Tell us how you&apos;d like to participate, and we&apos;ll connect you with the right person.</Motion.div>
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16, paddingTop: 14, borderTop: `1px solid ${T.border}` }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 7, color: T.inkMuted, font: "9.5px 'DM Mono', monospace" }}><motion.i animate={{ opacity: [.4, 1, .4] }} transition={{ duration: 1.8, repeat: Infinity }} style={{ width: 7, height: 7, borderRadius: "50%", background: T.sage }} />Human team online</span>
-                <span style={{ color: T.ink, fontSize: 10, fontWeight: 700 }}>Mon–Sat · 9–6</span>
-              </div>
-            </motion.div>
-
-            <motion.div animate={{ y: [0, 7, 0] }} transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }} style={{ position: "absolute", right: -22, bottom: -24, padding: "10px 14px", borderRadius: 14, background: `linear-gradient(135deg,${T.amber},${T.terra})`, color: "#fff", boxShadow: "0 14px 34px rgba(176,100,15,.28)", font: "700 10.5px 'Cabinet Grotesk', sans-serif" }}>Average reply · 12 min</motion.div>
-          </motion.div>
+              <div style={{ padding: "13px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${T.border}`, color: T.inkMuted, fontSize: 10.5 }}><span>Start a conversation</span><strong style={{ color: T.sage, fontSize: 16 }}>→</strong></div>
+            </div>
+            <Motion.div animate={{ rotate: [0,-5,5,0], y: [0,5,0] }} transition={{ duration: 4, repeat: Infinity }} style={{ position: "absolute", right: -18, top: -18, width: 44, height: 44, display: "grid", placeItems: "center", borderRadius: 15, background: `linear-gradient(135deg,${T.amber},${T.terra})`, color: "#fff", boxShadow: "0 12px 28px rgba(176,100,15,.28)", fontSize: 18 }}>✦</Motion.div>
+          </Motion.a>
 
           {/* Legacy visual retained off-screen for reference */}
-          <motion.div
+          <Motion.div
             className="rq-hero-float"
             initial={{ opacity: 0, x: 60, y: 20 }}
             animate={{ opacity: 1, x: 0, y: 0 }}
@@ -564,7 +491,7 @@ const Hero = ({ T, dark }) => {
             </div>
 
             {/* Floating CO2 badge */}
-            <motion.div
+            <Motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
               style={{
@@ -580,10 +507,10 @@ const Hero = ({ T, dark }) => {
                 <div style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>500 kg CO₂ Saved</div>
                 <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", fontFamily: "'DM Mono', monospace", marginTop: 2 }}>This month alone</div>
               </div>
-            </motion.div>
+            </Motion.div>
 
             {/* AI match badge */}
-            <motion.div
+            <Motion.div
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
               style={{
@@ -599,10 +526,10 @@ const Hero = ({ T, dark }) => {
                 <div style={{ fontSize: 11, fontWeight: 600, color: T.ink }}>AI Matched</div>
                 <div style={{ fontSize: 9.5, color: T.inkMuted, fontFamily: "'DM Mono', monospace" }}>in 87 sec</div>
               </div>
-            </motion.div>
-          </motion.div>
+            </Motion.div>
+          </Motion.div>
         </div>
-      </motion.div>
+      </Motion.div>
 
       {/* Bottom wave */}
       <div style={{ position: "absolute", bottom: -2, left: 0, right: 0, lineHeight: 0 }}>
@@ -614,9 +541,6 @@ const Hero = ({ T, dark }) => {
   );
 };
 
-/* ═══════════════════════════════════════════════════════════
-   INFO CARDS
-═══════════════════════════════════════════════════════════ */
 const INFO = [
   { icon: "✉️", title: "Email Us",   lines: ["support@resqplate.org", "logistics@resqplate.org"], accent: "#c8603a", action: { label: "Write to us", href: "mailto:support@resqplate.org" } },
   { icon: "📞", title: "Call Us",    lines: ["+91 98765 43210", "24/7 emergency line"],           accent: "#d4953c", action: null },
@@ -629,7 +553,7 @@ const InfoCards = ({ T }) => (
     <div className="rq-grid-4 rq-section-pad" style={{ maxWidth: 1100, margin: "0 auto", marginTop: -42 }}>
       {INFO.map((c, i) => (
         <Reveal key={i} delay={i * 0.08}>
-          <motion.div
+          <Motion.div
             whileHover={{ y: -5, boxShadow: dark => dark ? "0 24px 56px rgba(0,0,0,0.45)" : "0 18px 44px rgba(0,0,0,0.1)" }}
             style={{
               background: T.bgCard, borderRadius: 20,
@@ -689,16 +613,13 @@ const InfoCards = ({ T }) => (
                 )}
               </div>
             )}
-          </motion.div>
+          </Motion.div>
         </Reveal>
       ))}
     </div>
   </section>
 );
 
-/* ═══════════════════════════════════════════════════════════
-   FORM + SIDEBAR
-═══════════════════════════════════════════════════════════ */
 const FAQS = [
   {
     q: "How fast are NGOs matched to donations?",
@@ -771,14 +692,14 @@ const FormSection = ({ T }) => {
   });
 
   return (
-    <section id="contact-form" style={{ background: T.bg, padding: "80px 48px 100px", position: "relative", overflow: "hidden", scrollMarginTop: 72 }}>
+    <section id="contact-form" style={{ background: T.bg, padding: "58px 48px 70px", position: "relative", overflow: "hidden", scrollMarginTop: 72 }}>
       {/* Decorative elements */}
       <div style={{ position: "absolute", top: -100, right: -100, width: 400, height: 400, borderRadius: "50%", background: `radial-gradient(circle, ${T.accentGlow} 0%, transparent 70%)`, pointerEvents: "none" }} />
       <div style={{ position: "absolute", bottom: -60, left: -60, width: 300, height: 300, borderRadius: "50%", background: `radial-gradient(circle, ${T.amberSoft} 0%, transparent 70%)`, pointerEvents: "none" }} />
 
       <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
         <Reveal>
-          <div style={{ textAlign: "center", marginBottom: 60 }}>
+          <div style={{ textAlign: "center", marginBottom: 36 }}>
             <Label T={T}>Write to Us</Label>
             <h2 style={{
               fontFamily: "'Playfair Display', serif",
@@ -791,7 +712,7 @@ const FormSection = ({ T }) => {
           </div>
         </Reveal>
 
-        <div className="rq-grid-2">
+        <div className="rq-grid-2" style={{ gridTemplateColumns: "1fr", maxWidth: 760, margin: "0 auto" }}>
           {/* ── FORM CARD ── */}
           <Reveal>
             <div style={{
@@ -806,11 +727,11 @@ const FormSection = ({ T }) => {
               <div style={{ padding: "36px 36px 40px" }}>
                 <AnimatePresence mode="wait">
                   {sent ? (
-                    <motion.div key="sent"
+                    <Motion.div key="sent"
                       initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
                       style={{ textAlign: "center", padding: "52px 0" }}
                     >
-                      <motion.div
+                      <Motion.div
                         initial={{ scale: 0 }} animate={{ scale: 1 }}
                         transition={{ type: "spring", stiffness: 300, damping: 20 }}
                         style={{
@@ -820,14 +741,14 @@ const FormSection = ({ T }) => {
                           fontSize: 32, margin: "0 auto 20px",
                           boxShadow: `0 12px 40px ${T.leaf}44`,
                         }}
-                      >🌿</motion.div>
+                      >🌿</Motion.div>
                       <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: T.sage, marginBottom: 10 }}>Message Received</h3>
                       <p style={{ fontSize: 14, color: T.inkMuted, lineHeight: 1.75 }}>
                         We&apos;ll get back within 24 hours.<br />Thank you for reaching out!
                       </p>
-                    </motion.div>
+                    </Motion.div>
                   ) : (
-                    <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <Motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                       <div style={{ marginBottom: 28 }}>
                         <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: T.ink, marginBottom: 5 }}>Send a Message</h3>
                         <p style={{ fontSize: 13, color: T.inkMuted }}>For partnerships, logistics, or just a hello.</p>
@@ -898,7 +819,7 @@ const FormSection = ({ T }) => {
                         </div>
 
                         {/* Submit */}
-                        <motion.button
+                        <Motion.button
                           type="submit" disabled={loading}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.97 }}
@@ -917,7 +838,7 @@ const FormSection = ({ T }) => {
                         >
                           {loading ? (
                             <>
-                              <motion.span
+                              <Motion.span
                                 animate={{ rotate: 360 }}
                                 transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
                                 style={{ width: 17, height: 17, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", flexShrink: 0 }}
@@ -932,9 +853,9 @@ const FormSection = ({ T }) => {
                               </svg>
                             </>
                           )}
-                        </motion.button>
+                        </Motion.button>
                       </form>
-                    </motion.div>
+                    </Motion.div>
                   )}
                 </AnimatePresence>
               </div>
@@ -942,7 +863,7 @@ const FormSection = ({ T }) => {
           </Reveal>
 
           {/* ── SIDEBAR ── */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div style={{ display: "none", flexDirection: "column", gap: 20 }}>
             {/* Map card */}
             <Reveal delay={0.1}>
               <div style={{ background: T.bgCard, borderRadius: 20, overflow: "hidden", border: `1px solid ${T.border}` }}>
@@ -958,7 +879,7 @@ const FormSection = ({ T }) => {
                   </svg>
                   {/* Pulse dot */}
                   <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
-                    <motion.div
+                    <Motion.div
                       animate={{ scale: [1, 2.8, 1], opacity: [0.4, 0, 0.4] }}
                       transition={{ duration: 2.4, repeat: Infinity }}
                       style={{ position: "absolute", width: 52, height: 52, borderRadius: "50%", background: T.amber, top: 0, left: "50%", transform: "translateX(-50%)" }}
@@ -988,7 +909,7 @@ const FormSection = ({ T }) => {
                   <h4 style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 700, color: T.ink, marginBottom: 4 }}>Central Operations Hub</h4>
                   <p style={{ fontSize: 13, color: T.inkMuted }}>Boring Road, Patna, Bihar 800001</p>
                   <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 10 }}>
-                    <motion.span
+                    <Motion.span
                       animate={{ opacity: [1, 0.3, 1] }}
                       transition={{ duration: 1.8, repeat: Infinity }}
                       style={{ width: 7, height: 7, borderRadius: "50%", background: T.sage, display: "inline-block", flexShrink: 0 }}
@@ -1025,7 +946,7 @@ const FormSection = ({ T }) => {
                       <span style={{ fontSize: 13, fontWeight: 500, color: activeFaq === i ? T.sage : T.ink, lineHeight: 1.5, flex: 1, transition: "color 0.25s" }}>
                         {faq.q}
                       </span>
-                      <motion.div
+                      <Motion.div
                         animate={{ rotate: activeFaq === i ? 45 : 0 }}
                         transition={{ duration: 0.22 }}
                         style={{
@@ -1036,11 +957,11 @@ const FormSection = ({ T }) => {
                           flexShrink: 0, marginTop: 1,
                           transition: "border-color 0.22s, color 0.22s",
                         }}
-                      >+</motion.div>
+                      >+</Motion.div>
                     </button>
                     <AnimatePresence initial={false}>
                       {activeFaq === i && (
-                        <motion.div
+                        <Motion.div
                           key="ans"
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
@@ -1054,7 +975,7 @@ const FormSection = ({ T }) => {
                               <> <Link to={faq.link.to} style={{ color: T.sage, fontWeight: 600, textDecoration: "underline", textUnderlineOffset: 3, textDecorationColor: `${T.sage}66` }}>{faq.link.label}</Link></>
                             )}
                           </p>
-                        </motion.div>
+                        </Motion.div>
                       )}
                     </AnimatePresence>
                   </div>
@@ -1068,9 +989,6 @@ const FormSection = ({ T }) => {
   );
 };
 
-/* ═══════════════════════════════════════════════════════════
-   PARTNERS SECTION
-═══════════════════════════════════════════════════════════ */
 const PARTNERS = [
   {
     emoji: "🍽️", title: "Restaurants & Caterers",
@@ -1113,7 +1031,7 @@ const Partners = ({ T }) => (
       <div className="rq-grid-3">
         {PARTNERS.map((p, i) => (
           <Reveal key={i} delay={i * 0.1}>
-            <motion.div
+            <Motion.div
               whileHover={{ y: -6 }}
               style={{
                 background: T.bgCard, borderRadius: 22,
@@ -1146,7 +1064,7 @@ const Partners = ({ T }) => (
               <p style={{ fontSize: 13.5, color: T.inkMuted, lineHeight: 1.75, flex: 1, marginBottom: 22 }}>{p.desc}</p>
 
               <Link to={p.link}>
-                <motion.div
+                <Motion.div
                   whileHover={{ x: 4 }}
                   style={{
                     display: "inline-flex", alignItems: "center", gap: 7,
@@ -1157,9 +1075,9 @@ const Partners = ({ T }) => (
                   <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                     <path d="M2 6.5h9M7 2.5l4 4-4 4" stroke={p.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                </motion.div>
+                </Motion.div>
               </Link>
-            </motion.div>
+            </Motion.div>
           </Reveal>
         ))}
       </div>
@@ -1167,9 +1085,6 @@ const Partners = ({ T }) => (
   </section>
 );
 
-/* ═══════════════════════════════════════════════════════════
-   FOOTER
-═══════════════════════════════════════════════════════════ */
 const Footer = ({ T }) => (
   <footer style={{
     background: T.bg,
@@ -1183,7 +1098,7 @@ const Footer = ({ T }) => (
       © 2026 ResQPlate · Built for Social Good
     </div>
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <motion.span
+      <Motion.span
         animate={{ opacity: [1, 0.35, 1] }}
         transition={{ duration: 1.8, repeat: Infinity }}
         style={{ width: 7, height: 7, borderRadius: "50%", background: T.sage, display: "inline-block" }}
@@ -1193,9 +1108,6 @@ const Footer = ({ T }) => (
   </footer>
 );
 
-/* ═══════════════════════════════════════════════════════════
-   ROOT
-═══════════════════════════════════════════════════════════ */
 export default function Contact() {
   const { dark } = useTheme();
   const T = dark ? DARK : LIGHT;
@@ -1207,10 +1119,7 @@ export default function Contact() {
       <Grain />
       <div style={{ background: T.bg, transition: "background 0.5s", minHeight: "100vh" }}>
         <Hero T={T} dark={dark} />
-        <InfoCards T={T} />
         <FormSection T={T} />
-        <Partners T={T} />
-        <Footer T={T} />
       </div>
     </>
   );

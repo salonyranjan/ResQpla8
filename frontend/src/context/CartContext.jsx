@@ -8,8 +8,6 @@ import React, {
   useReducer,
 } from 'react';
 
-// ─── Types (JSDoc) ───────────────────────────────────────────────────────────
-
 /**
  * @typedef {{ id: string|number, name: string, price: number, [key: string]: any }} Product
  * @typedef {{ quantity: number } & Product} CartItem
@@ -24,8 +22,6 @@ import React, {
  *   isEmpty: boolean,
  * }} CartContextValue
  */
-
-// ─── Storage helpers (safe, no side-effect leaks) ────────────────────────────
 
 const STORAGE_KEY = 'cart_v1';
 
@@ -50,8 +46,6 @@ function writeStorage(items) {
     // Quota exceeded or private-browsing restriction — fail silently
   }
 }
-
-// ─── Reducer ─────────────────────────────────────────────────────────────────
 
 const MAX_QUANTITY = 99;
 
@@ -94,7 +88,6 @@ function cartReducer(state, action) {
   }
 }
 
-// Wraps reducer with a write-through to localStorage on every state change
 function useCartReducer() {
   const [items, dispatch] = useReducer(cartReducer, undefined, readStorage);
 
@@ -105,12 +98,8 @@ function useCartReducer() {
   return [items, dispatch];
 }
 
-// ─── Context ─────────────────────────────────────────────────────────────────
-
 const CartContext = createContext(/** @type {CartContextValue | null} */ (null));
 CartContext.displayName = 'CartContext';
-
-// ─── Provider ────────────────────────────────────────────────────────────────
 
 /** @param {{ children: React.ReactNode }} props */
 export function CartProvider({ children }) {
@@ -139,7 +128,6 @@ export function CartProvider({ children }) {
     [dispatch],
   );
 
-  // Derived selectors — recomputed only when `items` changes
   const totalItems = useMemo(
     () => items.reduce((sum, i) => sum + i.quantity, 0),
     [items],
@@ -168,8 +156,6 @@ export function CartProvider({ children }) {
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
-
-// ─── Hooks ───────────────────────────────────────────────────────────────────
 
 /**
  * Primary hook — full cart state and actions.

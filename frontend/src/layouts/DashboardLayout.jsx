@@ -80,7 +80,7 @@ export default function DashboardLayout() {
   return (
     <div className={`dashboard-shell ${dark ? "dark" : "light"}`} style={{ "--dash-bg": T.bg, "--dash-panel": T.bgCard, "--dash-text": T.text, "--dash-muted": T.textMuted, "--dash-faint": T.textFaint, "--dash-line": T.border, "--dash-line-med": T.borderMed, "--dash-accent": T.accent, "--dash-accent-soft": T.accentSoft, "--dash-shadow": T.shadow }}>
       <style>{`
-        .dashboard-shell{min-height:100dvh;display:grid;grid-template-columns:250px minmax(0,1fr);background:var(--dash-bg);color:var(--dash-text);font-family:Inter,system-ui,sans-serif}
+        .dashboard-shell{min-height:100dvh;display:grid;grid-template-columns:250px minmax(0,1fr);background:var(--dash-bg);color:var(--dash-text);font-family:'Cabinet Grotesk',system-ui,sans-serif}
         .dashboard-sidebar{position:sticky;top:0;height:100dvh;display:flex;flex-direction:column;border-right:1px solid var(--dash-line);background:var(--dash-panel);z-index:80}
         .dashboard-logo{height:76px;padding:0 20px;display:flex;align-items:center;border-bottom:1px solid var(--dash-line)}
         .dashboard-nav{flex:1;overflow:auto;padding:18px 13px}
