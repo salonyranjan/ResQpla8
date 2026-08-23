@@ -14,6 +14,8 @@ A responsive food-rescue platform connecting surplus-food donors with people and
 [![Leaflet](https://img.shields.io/badge/Maps-Leaflet-199900?style=for-the-badge&logo=leaflet&logoColor=white)](https://leafletjs.com/)
 [![Groq](https://img.shields.io/badge/AI-Groq-F55036?style=for-the-badge)](https://groq.com/)
 
+[![Live Demo](https://img.shields.io/badge/OPEN_LIVE_DEMO-ResQPlate-2E8B57?style=for-the-badge&logo=vercel&logoColor=white)](https://res-q-plate.vercel.app/)
+
 [Explore Features](#-feature-highlights) · [Architecture](#-architecture) · [Run Locally](#-run-locally) · [Configure Appwrite](#-appwrite-setup) · [Deploy](#-deployment)
 
 > **Demo project:** ResQPlate demonstrates a complete food-rescue workflow. Donation records, availability, tracking states, and analytics are read from Appwrite rather than fabricated in the interface.
@@ -39,15 +41,38 @@ The application combines a polished public experience with an authenticated work
 
 ---
 
-## 🎨 Visual direction
+## 📸 App preview
 
 <div align="center">
-  <img src="./frontend/src/assets/about/food-rescue-story.png" width="820" alt="ResQPlate food rescue story illustration" />
+  <a href="https://res-q-plate.vercel.app/">
+    <img src="./frontend/public/screenshots/landing.png" width="900" alt="ResQPlate landing page with rescue plate game" />
+  </a>
   <br />
-  <sub>A human-centered visual system built around dignity, clarity, and community action.</sub>
+  <sub>Landing experience — focused messaging, direct actions, and an interactive rescue-plate game.</sub>
 </div>
 
-### Experience map
+<br />
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <strong>About ResQPlate</strong><br /><br />
+      <img src="./frontend/public/screenshots/about.png" width="440" alt="ResQPlate about page" />
+    </td>
+    <td align="center" width="50%">
+      <strong>Contact experience</strong><br /><br />
+      <img src="./frontend/public/screenshots/contact.png" width="440" alt="ResQPlate contact page" />
+    </td>
+  </tr>
+</table>
+
+<div align="center">
+
+### [Launch the live application →](https://res-q-plate.vercel.app/)
+
+</div>
+
+### Experience overview
 
 | Public experience | Rescue workspace | Fulfilment |
 | --- | --- | --- |
