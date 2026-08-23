@@ -376,7 +376,7 @@ const Hero = ({ T, dark }) => {
         </svg>
       </div>
 
-      <Motion.div style={{ y, opacity }} className="rq-section-pad">
+      <Motion.div style={{ y, opacity, width: "100%" }} className="rq-section-pad">
         <div className="rq-hero-inner" style={{ maxWidth: 900, margin: "0 auto", padding: "0 48px", display: "flex", alignItems: "center", justifyContent: "center" }}>
 
           {/* Left: text */}
