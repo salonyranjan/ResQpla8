@@ -1836,33 +1836,12 @@ const CTA = ({ c }) => (
   </section>
 );
 
-const FOOTER_COLS = [
-  {
-    title: "Platform",
-    links: [
-      { label: "How it Works", to: "#how"                     },
-      { label: "Browse Food",  to: "/dashboard/search"        },
-      { label: "Volunteer",    to: "/register?role=volunteer"  },
-      { label: "Live Map",     to: "/map"                     },
-    ],
-  },
-  {
-    title: "Get involved",
-    links: [
-      { label: "Donate food", to: "/dashboard/donate" },
-      { label: "Create account", to: "/register" },
-      { label: "Sign in", to: "/login" },
-      { label: "Contact us", to: "/contact" },
-    ],
-  },
-];
-
 const Footer = ({ c }) => (
   <footer style={{ background: "#0a1a0d", color: "rgba(255,255,255,0.4)", padding: "38px 32px 26px" }}>
-    <div className="rq-footer-grid" style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 40, marginBottom: 34 }}>
+    <div className="rq-footer-grid" style={{ maxWidth: 1100, margin: "0 auto 34px" }}>
       <div>
         <div style={{ color: "#fff", marginBottom: 14 }}><Logo size={40} /></div>
-        <p style={{ fontSize: 14, lineHeight: 1.78, maxWidth: 280, marginBottom: 22 }}>
+        <p style={{ fontSize: 14, lineHeight: 1.78, maxWidth: 480, marginBottom: 22 }}>
           A community platform helping surplus food reach people who can use it, safely and responsibly.
         </p>
         <div style={{ display: "flex", gap: 10 }}>
@@ -1880,22 +1859,6 @@ const Footer = ({ c }) => (
           ))}
         </div>
       </div>
-
-      {FOOTER_COLS.map((col) => (
-        <div key={col.title}>
-          <div style={{ fontSize: 11, fontWeight: 500, color: "#fff", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 18, fontFamily: "'DM Mono', monospace" }}>
-            {col.title}
-          </div>
-          {col.links.map((l) => (
-            <Link key={l.label} to={l.to}>
-              <Motion.div
-                whileHover={{ x: 4, color: "#fff" }}
-                style={{ fontSize: 14, marginBottom: 11, cursor: "pointer", transition: "color 0.2s", color: "rgba(255,255,255,0.4)" }}
-              >{l.label}</Motion.div>
-            </Link>
-          ))}
-        </div>
-      ))}
     </div>
 
     <div style={{ maxWidth: 1100, margin: "0 auto", borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 28, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
