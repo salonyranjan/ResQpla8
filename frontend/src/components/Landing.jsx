@@ -81,8 +81,6 @@ const GlobalStyles = ({ c }) => {
         .rq-map-grid { grid-template-columns: 1fr !important; }
         .rq-test-grid { grid-template-columns: 1fr !important; }
         .rq-footer-grid { grid-template-columns: 1fr 1fr !important; }
-        .rq-footer-cta { grid-template-columns: 1fr !important; }
-        .rq-footer-cta-actions { justify-content: flex-start !important; }
         .rq-feat-header { justify-content: center !important; text-align: center; }
         .rq-nl-form { flex-direction: column !important; align-items: center !important; }
         .rq-mob-hide { display: none !important; }
@@ -91,9 +89,9 @@ const GlobalStyles = ({ c }) => {
         .rq-stats-grid { grid-template-columns: 1fr 1fr !important; padding: 32px 20px !important; }
         .rq-feat-grid { grid-template-columns: 1fr !important; }
         .rq-how-grid { grid-template-columns: 1fr !important; }
-        .rq-footer-grid { grid-template-columns: 1fr !important; }
+        .rq-footer-grid { grid-template-columns: 1fr !important; flex-direction: column; align-items: flex-start !important; padding-bottom: 28px !important; }
         .rq-footer-bottom { align-items: flex-start !important; flex-direction: column !important; }
-        .rq-site-footer { padding: 0 18px 24px !important; }
+        .rq-site-footer { padding: 38px 18px 24px !important; }
         .rq-hero { min-height: auto !important; padding: 70px 18px 92px !important; }
         .rq-hero-title { max-width: 100%; font-size: clamp(38px, 13vw, 54px) !important; line-height: .96 !important; overflow-wrap: anywhere; }
         .rq-hero-sub { max-width: 100% !important; }
@@ -101,10 +99,6 @@ const GlobalStyles = ({ c }) => {
         .rq-hero-btns > a { flex: 1 1 100%; }
         .rq-hero-btns button { width: 100%; }
         .rq-card-col { width: 100% !important; padding: 10px 0 24px !important; }
-        .rq-footer-cta { padding: 38px 22px !important; border-radius: 0 0 24px 24px !important; }
-        .rq-footer-cta-actions { width: 100%; }
-        .rq-footer-cta-actions > a { flex: 1 1 150px; text-align: center; }
-        .rq-footer-cta-actions > a > span { width: 100%; justify-content: center; }
       }
 
       /* Mobile drawer scroll lock */
@@ -1782,27 +1776,6 @@ const CTA = ({ c }) => (
 );
 
 const Footer = ({ c }) => {
-  const linkGroups = [
-    {
-      title: "Explore",
-      links: [
-        { label: "About us", to: "/about" },
-        { label: "Browse food", to: "/dashboard/search" },
-        { label: "Rescue map", to: "/map" },
-        { label: "Contact", to: "/contact" },
-      ],
-    },
-    {
-      title: "Take action",
-      links: [
-        { label: "Donate food", to: "/dashboard/donate" },
-        { label: "Create account", to: "/register" },
-        { label: "Sign in", to: "/login" },
-        { label: "Dashboard", to: "/dashboard" },
-      ],
-    },
-  ];
-
   const socials = [
     { label: "X", name: "X / Twitter", href: "https://x.com/itsSalonyy" },
     { label: "↗", name: "Portfolio", href: "https://salonyranjan.github.io/" },
@@ -1810,62 +1783,24 @@ const Footer = ({ c }) => {
   ];
 
   return (
-    <footer className="rq-site-footer" style={{ position: "relative", overflow: "hidden", background: "#061108", color: "rgba(232,245,236,0.62)", padding: "0 32px 28px" }}>
-      <div aria-hidden style={{ position: "absolute", width: 520, height: 520, borderRadius: "50%", top: -290, right: -150, background: "radial-gradient(circle,rgba(82,183,136,.14),transparent 68%)", pointerEvents: "none" }} />
-      <div aria-hidden style={{ position: "absolute", width: 340, height: 340, borderRadius: "50%", bottom: -240, left: -100, background: "radial-gradient(circle,rgba(245,158,11,.08),transparent 70%)", pointerEvents: "none" }} />
+    <footer className="rq-site-footer" style={{ position: "relative", overflow: "hidden", background: "#061108", color: "rgba(232,245,236,0.62)", padding: "46px 32px 26px" }}>
+      <div aria-hidden style={{ position: "absolute", width: 420, height: 420, borderRadius: "50%", top: -260, right: -120, background: "radial-gradient(circle,rgba(82,183,136,.12),transparent 68%)", pointerEvents: "none" }} />
 
       <div style={{ maxWidth: 1160, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div className="rq-footer-cta" style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", alignItems: "center", gap: 36, padding: "48px clamp(24px,5vw,58px)", transform: "translateY(-1px)", border: "1px solid rgba(149,213,178,.16)", borderTop: 0, borderRadius: "0 0 30px 30px", background: "linear-gradient(125deg,rgba(45,106,79,.36),rgba(15,37,22,.72))", boxShadow: "0 26px 70px rgba(0,0,0,.22)" }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 12, fontFamily: "'DM Mono', monospace", fontSize: 10, fontWeight: 500, letterSpacing: ".18em", color: c.sage }}>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: c.sage, boxShadow: "0 0 0 5px rgba(82,183,136,.1)" }} />
-              MAKE YOUR NEXT MEAL MATTER
-            </div>
-            <h2 style={{ margin: 0, maxWidth: 620, fontFamily: "'Playfair Display', serif", fontSize: "clamp(30px,4vw,48px)", lineHeight: 1.08, letterSpacing: "-.025em", color: "#f1f8f3" }}>
-              Good food deserves a <em style={{ color: c.amber }}>second destination.</em>
-            </h2>
-          </div>
-          <div className="rq-footer-cta-actions" style={{ display: "flex", justifyContent: "flex-end", gap: 12, flexWrap: "wrap" }}>
-            <Link to="/dashboard/donate">
-              <Motion.span whileHover={{ y: -3, background: c.gold }} whileTap={{ scale: .97 }} style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "14px 22px", borderRadius: 100, background: c.amber, color: "#102416", fontSize: 14, fontWeight: 800, boxShadow: "0 14px 30px rgba(245,158,11,.18)" }}>
-                Donate food <span aria-hidden>→</span>
-              </Motion.span>
-            </Link>
-            <Link to="/dashboard/search">
-              <Motion.span whileHover={{ y: -3, background: "rgba(255,255,255,.1)" }} whileTap={{ scale: .97 }} style={{ display: "inline-flex", alignItems: "center", padding: "13px 21px", borderRadius: 100, border: "1px solid rgba(255,255,255,.16)", color: "#e8f5ec", fontSize: 14, fontWeight: 650 }}>
-                Find food
-              </Motion.span>
-            </Link>
-          </div>
-        </div>
-
-        <div className="rq-footer-grid" style={{ display: "grid", gridTemplateColumns: "minmax(260px,1.65fr) repeat(2,minmax(130px,.65fr))", gap: "48px clamp(34px,6vw,76px)", padding: "64px 8px 54px" }}>
-          <div>
-            <div style={{ color: "#fff", marginBottom: 20 }}><Logo size={42} /></div>
-            <p style={{ maxWidth: 390, margin: "0 0 26px", fontSize: 14, lineHeight: 1.8, color: "rgba(232,245,236,.52)" }}>
-              Connecting safe surplus food with nearby people and organizations through one clear, trackable rescue workflow.
+        <div className="rq-footer-grid" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 34, padding: "0 8px 34px" }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ color: "#fff", marginBottom: 14 }}><Logo size={40} /></div>
+            <p style={{ maxWidth: 520, margin: 0, fontSize: 13.5, lineHeight: 1.7, color: "rgba(232,245,236,.5)" }}>
+              Connecting safe surplus food with nearby people and organizations through one clear rescue workflow.
             </p>
-            <div style={{ display: "flex", gap: 10 }}>
-              {socials.map((social) => (
-                <Motion.a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.name} whileHover={{ y: -4, borderColor: "rgba(82,183,136,.55)", color: "#95d5b2" }} style={{ width: 40, height: 40, borderRadius: 12, border: "1px solid rgba(255,255,255,.1)", background: "rgba(255,255,255,.04)", color: "rgba(232,245,236,.64)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'DM Mono', monospace", fontSize: 12, fontWeight: 600 }}>
-                  {social.label}
-                </Motion.a>
-              ))}
-            </div>
           </div>
-
-          {linkGroups.map((group) => (
-            <nav key={group.title} aria-label={`${group.title} links`}>
-              <div style={{ marginBottom: 20, fontFamily: "'DM Mono', monospace", fontSize: 10, fontWeight: 600, letterSpacing: ".17em", textTransform: "uppercase", color: c.sage }}>{group.title}</div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14 }}>
-                {group.links.map((link) => (
-                  <Motion.div key={link.label} whileHover={{ x: 4, color: "#e8f5ec" }} style={{ color: "rgba(232,245,236,.5)", fontSize: 14 }}>
-                    <Link to={link.to}>{link.label}</Link>
-                  </Motion.div>
-                ))}
-              </div>
-            </nav>
-          ))}
+          <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+            {socials.map((social) => (
+              <Motion.a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.name} whileHover={{ y: -3, borderColor: "rgba(82,183,136,.55)", color: "#95d5b2" }} style={{ width: 40, height: 40, borderRadius: 12, border: "1px solid rgba(255,255,255,.1)", background: "rgba(255,255,255,.04)", color: "rgba(232,245,236,.64)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'DM Mono', monospace", fontSize: 12, fontWeight: 600 }}>
+                {social.label}
+              </Motion.a>
+            ))}
+          </div>
         </div>
 
         <div className="rq-footer-bottom" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 18, padding: "24px 8px 0", borderTop: "1px solid rgba(255,255,255,.08)" }}>
