@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { getCurrentUser, login, register, logout } from "../services/appwrite";
+import { getCurrentUser, login, register, logout, updateAccountEmail, updateAccountName, updateAccountPassword, updateAccountPreferences } from "../services/appwrite";
 
 /**
  * @typedef {{ $id: string, name: string, email: string, [key: string]: any }} AppwriteUser
@@ -82,6 +82,26 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  const updateProfile = useCallback(async ({ name, email, currentPassword, newPassword }) => {
+    const current = await getCurrentUser();
+    if (!current) throw new Error("Your session has expired. Sign in again.");
+    if (name.trim() !== current.name) await updateAccountName(name);
+    if (email.trim().toLowerCase() !== current.email.toLowerCase()) {
+      await updateAccountEmail(email, currentPassword);
+    }
+    if (newPassword) await updateAccountPassword(newPassword, currentPassword);
+    const updated = await getCurrentUser();
+    setUser(updated);
+    return updated;
+  }, []);
+
+  const updatePreferences = useCallback(async (changes) => {
+    await updateAccountPreferences(changes);
+    const updated = await getCurrentUser();
+    setUser(updated);
+    return updated?.prefs || {};
+  }, []);
+
   const isAuthenticated = user !== null;
 
   const value = React.useMemo(
@@ -92,9 +112,11 @@ export function AuthProvider({ children }) {
       login: handleLogin,
       register: handleRegister,
       logout: handleLogout,
+      updateProfile,
+      updatePreferences,
       refetch,
     }),
-    [user, loading, isAuthenticated, handleLogin, handleRegister, handleLogout, refetch],
+    [user, loading, isAuthenticated, handleLogin, handleRegister, handleLogout, updateProfile, updatePreferences, refetch],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

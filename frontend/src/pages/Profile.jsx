@@ -41,40 +41,74 @@ export default function ProfilePage() {
       };
 
   const [logoutModal, setLogoutModal] = useState(false);
-  const { user, logout } = useAuth();
+  const [profileModal, setProfileModal] = useState(null);
+  const [profileForm, setProfileForm] = useState({ name: "", email: "", currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
+  const { user, logout, updateProfile } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState({ donations: 0, mealsShared: 0 });
+  const [ownDonations, setOwnDonations] = useState([]);
 
   useEffect(() => {
     if (!user?.$id) return;
     listAllPickups(500).then((pickups) => {
       const own = pickups.filter((pickup) => pickup.donorId === user.$id);
       setStats({ donations: own.length, mealsShared: own.reduce((sum, pickup) => sum + Number(pickup.mealsCount || 0), 0) });
-    }).catch(() => setStats({ donations: 0, mealsShared: 0 }));
+      setOwnDonations(own);
+    }).catch(() => {
+      setStats({ donations: 0, mealsShared: 0 });
+      setOwnDonations([]);
+    });
   }, [user?.$id]);
+
+  const openProfileEditor = () => {
+    setProfileForm({ name: user?.name || "", email: user?.email || "", currentPassword: "", newPassword: "", confirmPassword: "" });
+    setFeedback({ type: "", message: "" });
+    setProfileModal("edit");
+  };
+
+  const saveProfile = async (event) => {
+    event.preventDefault();
+    if (profileForm.newPassword !== profileForm.confirmPassword) {
+      setFeedback({ type: "error", message: "New passwords do not match." });
+      return;
+    }
+    setSaving(true);
+    setFeedback({ type: "", message: "" });
+    try {
+      await updateProfile(profileForm);
+      setFeedback({ type: "success", message: "Profile updated successfully." });
+      setProfileForm((form) => ({ ...form, currentPassword: "", newPassword: "", confirmPassword: "" }));
+    } catch (error) {
+      setFeedback({ type: "error", message: error.message || "Profile update failed." });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const menuSections = [
     {
       title: "ACCOUNT",
       items: [
-        { icon: HiOutlineUser, label: "Edit Profile", sub: "Update your info", color: T.blue, bg: T.blueSoft, to: null },
-        { icon: HiOutlineClipboardList, label: "Order History", sub: "View past orders", color: T.accent, bg: T.accentSoft, to: "/dashboard/orders" },
-        { icon: HiOutlineHeart, label: "My Donations", sub: "Your contribution", color: "#ec4899", bg: "rgba(236,72,153,0.09)", to: "/dashboard/orders" },
+        { icon: HiOutlineUser, label: "Edit Profile", sub: "Update name, email or password", color: T.blue, bg: T.blueSoft, action: openProfileEditor },
+        { icon: HiOutlineClipboardList, label: "Activity History", sub: "View your recorded donation activity", color: T.accent, bg: T.accentSoft, to: "/dashboard/smart-alerts" },
+        { icon: HiOutlineHeart, label: "My Donations", sub: `${stats.donations} donation${stats.donations === 1 ? "" : "s"}`, color: "#ec4899", bg: "rgba(236,72,153,0.09)", action: () => document.getElementById("profile-donations")?.scrollIntoView({ behavior: "smooth" }) },
       ],
     },
     {
       title: "PREFERENCES",
       items: [
-        { icon: HiOutlineBell, label: "Notifications", sub: "Manage alerts", color: T.amber, bg: T.amberSoft, to: null },
-        { icon: HiOutlineCog, label: "Settings", sub: "App preferences", color: T.teal, bg: "rgba(20,184,166,0.1)", to: null },
-        { icon: HiOutlineShieldCheck, label: "Privacy", sub: "Data & security", color: T.blue, bg: T.blueSoft, to: null },
+        { icon: HiOutlineBell, label: "Notifications", sub: "Manage alert preferences", color: T.amber, bg: T.amberSoft, to: "/dashboard/settings" },
+        { icon: HiOutlineCog, label: "Settings", sub: "App preferences", color: T.teal, bg: "rgba(20,184,166,0.1)", to: "/dashboard/settings" },
+        { icon: HiOutlineShieldCheck, label: "Privacy", sub: "Account security information", color: T.blue, bg: T.blueSoft, action: () => setProfileModal("privacy") },
       ],
     },
     {
       title: "SUPPORT",
       items: [
-        { icon: HiOutlineQuestionMarkCircle, label: "Help & FAQ", sub: "Get support", color: T.textMuted, bg: T.accentSoft, to: null },
-        { icon: HiOutlineStar, label: "Rate the App", sub: "Share your feedback", color: T.amber, bg: T.amberSoft, to: null },
+        { icon: HiOutlineQuestionMarkCircle, label: "Help & FAQ", sub: "Get support", color: T.textMuted, bg: T.accentSoft, to: "/contact" },
+        { icon: HiOutlineStar, label: "Rate the App", sub: "Share feedback with the team", color: T.amber, bg: T.amberSoft, to: "/contact" },
       ],
     },
   ];
@@ -143,7 +177,7 @@ export default function ProfilePage() {
             <p style={{ fontSize: 12.5, color: T.textMuted, marginTop: 3 }}>{user.email}</p>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6 }}>
               <div style={{ background: T.accentSoft, border: `1px solid ${T.borderMed}`, borderRadius: 100, padding: "2px 10px" }}>
-                <span style={{ fontFamily: "monospace", fontSize: 10, color: T.accent, fontWeight: 700 }}>VERIFIED MEMBER</span>
+                <span style={{ fontFamily: "monospace", fontSize: 10, color: T.accent, fontWeight: 700 }}>{user?.emailVerification ? "EMAIL VERIFIED" : "RESQPLATE MEMBER"}</span>
               </div>
             </div>
           </div>
@@ -161,7 +195,7 @@ export default function ProfilePage() {
             borderRadius: 22,
             padding: "18px 20px",
             display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
+            gridTemplateColumns: "1fr 1fr",
             gap: 16,
             boxShadow: T.shadow,
           }}
@@ -169,7 +203,6 @@ export default function ProfilePage() {
           {[
             { value: stats.donations, label: "Donations", icon: "🍽️", color: T.accent },
             { value: stats.mealsShared, label: "Meals Shared", icon: "🤝", color: T.teal },
-            { value: (stats.mealsShared * 0.5).toFixed(1), label: "CO₂ saved (kg)", icon: "🌿", color: T.amber },
           ].map((s) => (
             <div key={s.label} style={{ textAlign: "center" }}>
               <div style={{ fontSize: 20, marginBottom: 4 }}>{s.icon}</div>
@@ -206,6 +239,22 @@ export default function ProfilePage() {
           ))}
         </div>
       </div>}
+
+      <div id="profile-donations" style={{ padding: "20px 16px 0", scrollMarginTop: 90 }}>
+        <p style={{ fontSize: 10, fontFamily: "monospace", color: T.textFaint, letterSpacing: "0.1em", marginBottom: 10 }}>MY DONATIONS</p>
+        <div style={{ background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 20, overflow: "hidden" }}>
+          {ownDonations.length ? ownDonations.map((donation, index) => (
+            <div key={donation.$id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 16px", borderBottom: index < ownDonations.length - 1 ? `1px solid ${T.border}` : "none" }}>
+              {donation.image ? <img src={donation.image} alt="" style={{ width: 44, height: 44, borderRadius: 11, objectFit: "cover" }} /> : <div style={{ width: 44, height: 44, borderRadius: 11, background: T.accentSoft, display: "grid", placeItems: "center" }}>🍱</div>}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ color: T.text, fontWeight: 700, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{donation.name}</p>
+                <p style={{ color: T.textFaint, fontSize: 10.5, marginTop: 3 }}>{donation.quantity} portions · {donation.status}</p>
+              </div>
+              <Link to={`/tracking/${donation.$id}`} style={{ color: T.accent, fontSize: 11, fontWeight: 700, textDecoration: "none" }}>View</Link>
+            </div>
+          )) : <p style={{ padding: 18, color: T.textMuted, fontSize: 12 }}>You have not posted any donations yet.</p>}
+        </div>
+      </div>
 
       {/* Menu sections */}
       {menuSections.map((section) => (
@@ -263,7 +312,7 @@ export default function ProfilePage() {
                   {Inner}
                 </Link>
               ) : (
-                <div key={item.label}>{Inner}</div>
+                <button key={item.label} type="button" onClick={item.action} style={{ display: "block", width: "100%", padding: 0, border: 0, background: "transparent", textAlign: "left", fontFamily: "inherit" }}>{Inner}</button>
               );
             })}
           </Motion.div>
@@ -298,6 +347,54 @@ export default function ProfilePage() {
       <p style={{ textAlign: "center", marginTop: 24, fontSize: 11, color: T.textFaint, fontFamily: "monospace" }}>
         ResQPlate v2.0.0 · Made with 🌿
       </p>
+
+      <AnimatePresence>
+        {profileModal && (
+          <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => !saving && setProfileModal(null)}
+            style={{ position: "fixed", inset: 0, zIndex: 110, background: "rgba(0,0,0,.68)", display: "grid", placeItems: "center", padding: 16 }}>
+            <Motion.div initial={{ opacity: 0, y: 24, scale: .97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 18 }} onClick={(event) => event.stopPropagation()}
+              style={{ width: "100%", maxWidth: 480, maxHeight: "calc(100dvh - 32px)", overflowY: "auto", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 24, padding: 24, boxShadow: T.shadow }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+                <div>
+                  <h3 style={{ color: T.text, fontSize: 19, fontWeight: 800 }}>{profileModal === "edit" ? "Edit profile" : "Privacy & security"}</h3>
+                  <p style={{ color: T.textMuted, fontSize: 11.5, marginTop: 3 }}>{profileModal === "edit" ? "Changes are saved to your Appwrite account." : "How ResQPlate protects your account data."}</p>
+                </div>
+                <button type="button" aria-label="Close" disabled={saving} onClick={() => setProfileModal(null)} style={{ width: 34, height: 34, borderRadius: 10, border: `1px solid ${T.border}`, background: T.bgAlt, color: T.text, cursor: "pointer" }}>×</button>
+              </div>
+
+              {profileModal === "privacy" ? (
+                <div style={{ display: "grid", gap: 12 }}>
+                  {[
+                    ["Authentication", "Your session and credentials are managed by Appwrite Auth."],
+                    ["Password security", "Passwords are never stored in this application or displayed after submission."],
+                    ["Donation records", "Profile statistics include only donation documents associated with your account ID."],
+                    ["Local preferences", "Theme and notification preferences are stored in this browser."],
+                  ].map(([title, description]) => <div key={title} style={{ padding: 14, borderRadius: 14, background: T.bgAlt, border: `1px solid ${T.border}` }}><p style={{ color: T.text, fontSize: 13, fontWeight: 700 }}>{title}</p><p style={{ color: T.textMuted, fontSize: 11.5, lineHeight: 1.55, marginTop: 4 }}>{description}</p></div>)}
+                </div>
+              ) : (
+                <form onSubmit={saveProfile} style={{ display: "grid", gap: 13 }}>
+                  {[
+                    ["Full name", "name", "text", "Your name"],
+                    ["Email address", "email", "email", "you@example.com"],
+                    ["Current password", "currentPassword", "password", "Required for email or password changes"],
+                    ["New password", "newPassword", "password", "Leave blank to keep current password"],
+                    ["Confirm new password", "confirmPassword", "password", "Repeat the new password"],
+                  ].map(([label, key, type, placeholder]) => (
+                    <label key={key} style={{ display: "grid", gap: 6, color: T.textMuted, fontSize: 11.5 }}>
+                      {label}
+                      <input type={type} value={profileForm[key]} placeholder={placeholder} autoComplete={key === "currentPassword" ? "current-password" : key.includes("Password") ? "new-password" : undefined}
+                        required={key === "name" || key === "email"} onChange={(event) => setProfileForm((form) => ({ ...form, [key]: event.target.value }))}
+                        style={{ width: "100%", boxSizing: "border-box", padding: "12px 13px", borderRadius: 12, border: `1px solid ${T.borderMed}`, background: T.bgAlt, color: T.text, outline: "none", fontFamily: "inherit" }} />
+                    </label>
+                  ))}
+                  {feedback.message && <div role="status" style={{ padding: 11, borderRadius: 11, fontSize: 12, color: feedback.type === "error" ? T.red : T.accent, background: feedback.type === "error" ? T.redSoft : T.accentSoft }}>{feedback.message}</div>}
+                  <button type="submit" disabled={saving} style={{ marginTop: 3, padding: 13, border: 0, borderRadius: 13, background: T.accent, color: "#fff", fontWeight: 750, cursor: saving ? "wait" : "pointer", opacity: saving ? .65 : 1 }}>{saving ? "Saving…" : "Save changes"}</button>
+                </form>
+              )}
+            </Motion.div>
+          </Motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Logout modal */}
       <AnimatePresence>

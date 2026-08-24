@@ -27,9 +27,7 @@ export default async function handler(request, response) {
     return response.status(405).json({ error: "Method not allowed" });
   }
 
-  // Support the project's previous variable name only inside this server
-  // function. The browser never reads or receives either value.
-  const apiKey = process.env.GROQ_API_KEY || process.env.VITE_GROQ_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return response.status(503).json({ error: "Assistant is not configured" });
 
   const messages = sanitizeMessages(request.body?.messages);

@@ -116,3 +116,43 @@ export async function logout() {
     throw err;
   }
 }
+
+export async function updateAccountName(name) {
+  const value = name.trim();
+  if (value.length < 2 || value.length > 128) throw new Error("Name must be between 2 and 128 characters.");
+  try {
+    return await account.updateName({ name: value });
+  } catch (err) {
+    throw authError(err, "Your name could not be updated.");
+  }
+}
+
+export async function updateAccountEmail(email, password) {
+  const value = email.trim().toLowerCase();
+  if (!/^\S+@\S+\.\S+$/.test(value)) throw new Error("Enter a valid email address.");
+  if (!password) throw new Error("Enter your current password to change your email.");
+  try {
+    return await account.updateEmail({ email: value, password });
+  } catch (err) {
+    throw authError(err, "Your email address could not be updated.");
+  }
+}
+
+export async function updateAccountPassword(password, oldPassword) {
+  if (password.length < 8) throw new Error("The new password must contain at least 8 characters.");
+  if (!oldPassword) throw new Error("Enter your current password to set a new password.");
+  try {
+    return await account.updatePassword({ password, oldPassword });
+  } catch (err) {
+    throw authError(err, "Your password could not be updated.");
+  }
+}
+
+export async function updateAccountPreferences(changes) {
+  try {
+    const current = await account.getPrefs();
+    return await account.updatePrefs({ prefs: { ...current, ...changes } });
+  } catch (err) {
+    throw authError(err, "Your preferences could not be saved.");
+  }
+}
