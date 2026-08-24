@@ -170,7 +170,7 @@ export default function CheckoutPage() {
                     onFocus={(e) => (e.target.style.borderColor = T.accent)}
                     onBlur={(e) => (e.target.style.borderColor = T.border)}
                   />
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div className="checkout-address-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                     <input placeholder="City" value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} style={inputStyle}
                       onFocus={(e) => (e.target.style.borderColor = T.accent)} onBlur={(e) => (e.target.style.borderColor = T.border)} />
                     <input placeholder="State" value={address.state} onChange={(e) => setAddress({ ...address, state: e.target.value })} style={inputStyle}

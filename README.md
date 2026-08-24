@@ -53,6 +53,15 @@ The application combines a polished public experience with an authenticated work
 
 <br />
 
+<div align="center">
+  <strong>Rescue workspace dashboard</strong><br /><br />
+  <img src="./frontend/public/screenshots/dashboard.png" width="900" alt="ResQPlate dashboard showing donation activity, available food, and rescue workspace navigation" />
+  <br />
+  <sub>A focused workspace for posting surplus food, monitoring pickups, and tracking rescue activity.</sub>
+</div>
+
+<br />
+
 <table>
   <tr>
     <td align="center" width="50%">

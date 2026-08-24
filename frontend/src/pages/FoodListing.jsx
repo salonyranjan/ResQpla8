@@ -313,7 +313,7 @@ export default function FoodListing() {
               variants={stagger}
               initial="hidden"
               animate="show"
-              style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
+              style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))", gap: 12 }}
             >
               <AnimatePresence>
                 {filtered.map((item) => (

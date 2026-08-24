@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import Logo from "./Logo";
 import { motion as Motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
@@ -69,8 +69,9 @@ const GlobalStyles = ({ c }) => {
       @keyframes rqShimmer { 0%,100%{background-position:0%} 50%{background-position:100%} }
 
       @media (max-width: 1020px) {
-        .rq-hero-grid { grid-template-columns: 1fr !important; text-align: center; }
-        .rq-card-col { max-width: 380px; margin: 0 auto; }
+        .rq-hero-grid { grid-template-columns: minmax(0, 1fr) !important; min-width: 0; text-align: center; }
+        .rq-hero-grid > * { min-width: 0; }
+        .rq-card-col { width: min(100%, 380px); max-width: 100%; margin: 0 auto; }
         .rq-hero-sub { margin-left: auto !important; margin-right: auto !important; }
         .rq-hero-btns { justify-content: center !important; }
         .rq-stats-grid { grid-template-columns: repeat(2,1fr) !important; }
@@ -80,6 +81,8 @@ const GlobalStyles = ({ c }) => {
         .rq-map-grid { grid-template-columns: 1fr !important; }
         .rq-test-grid { grid-template-columns: 1fr !important; }
         .rq-footer-grid { grid-template-columns: 1fr 1fr !important; }
+        .rq-footer-cta { grid-template-columns: 1fr !important; }
+        .rq-footer-cta-actions { justify-content: flex-start !important; }
         .rq-feat-header { justify-content: center !important; text-align: center; }
         .rq-nl-form { flex-direction: column !important; align-items: center !important; }
         .rq-mob-hide { display: none !important; }
@@ -89,6 +92,19 @@ const GlobalStyles = ({ c }) => {
         .rq-feat-grid { grid-template-columns: 1fr !important; }
         .rq-how-grid { grid-template-columns: 1fr !important; }
         .rq-footer-grid { grid-template-columns: 1fr !important; }
+        .rq-footer-bottom { align-items: flex-start !important; flex-direction: column !important; }
+        .rq-site-footer { padding: 0 18px 24px !important; }
+        .rq-hero { min-height: auto !important; padding: 70px 18px 92px !important; }
+        .rq-hero-title { max-width: 100%; font-size: clamp(38px, 13vw, 54px) !important; line-height: .96 !important; overflow-wrap: anywhere; }
+        .rq-hero-sub { max-width: 100% !important; }
+        .rq-hero-btns { margin-bottom: 20px !important; }
+        .rq-hero-btns > a { flex: 1 1 100%; }
+        .rq-hero-btns button { width: 100%; }
+        .rq-card-col { width: 100% !important; padding: 10px 0 24px !important; }
+        .rq-footer-cta { padding: 38px 22px !important; border-radius: 0 0 24px 24px !important; }
+        .rq-footer-cta-actions { width: 100%; }
+        .rq-footer-cta-actions > a { flex: 1 1 150px; text-align: center; }
+        .rq-footer-cta-actions > a > span { width: 100%; justify-content: center; }
       }
 
       /* Mobile drawer scroll lock */
@@ -172,25 +188,6 @@ const Reveal = ({ children, delay = 0, y = 36, x = 0, style = {} }) => {
       {children}
     </Motion.div>
   );
-};
-
-const Counter = ({ target, suffix = "" }) => {
-  const [val, setVal] = useState(0);
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true });
-  useEffect(() => {
-    if (!inView) return;
-    const n = parseInt(String(target).replace(/\D/g, ""));
-    let start = 0;
-    const step = Math.ceil(n / 60);
-    const t = setInterval(() => {
-      start = Math.min(start + step, n);
-      setVal(start);
-      if (start >= n) clearInterval(t);
-    }, 18);
-    return () => clearInterval(t);
-  }, [inView, target]);
-  return <span ref={ref}>{val.toLocaleString()}{suffix}</span>;
 };
 
 const LeafDeco = ({ c, style }) => (
@@ -968,60 +965,6 @@ const NavBar = ({ c, dark, toggleDark }) => {
   );
 };
 
-const LegacyFoodCard = () => {
-  const navigate = useNavigate();
-  return (
-    <div className="rq-card-col" style={{ position: "relative", padding: "26px 8px 38px 24px" }}>
-      <Motion.div
-        animate={{ y: [0, -8, 0], rotate: [0, 1, 0] }}
-        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-        onClick={() => navigate("/dashboard")}
-        style={{
-          position: "relative", zIndex: 2, overflow: "hidden", cursor: "pointer",
-          borderRadius: 30, padding: 24, color: "#f5fff8",
-          background: "linear-gradient(145deg, rgba(10,44,28,.98), rgba(20,91,58,.96))",
-          border: "1px solid rgba(183,228,199,.26)",
-          boxShadow: "0 48px 110px rgba(0,0,0,.32), inset 0 1px rgba(255,255,255,.12)",
-        }}
-      >
-        <div style={{ position: "absolute", width: 230, height: 230, borderRadius: "50%", right: -95, top: -110, background: "rgba(149,213,178,.14)", filter: "blur(2px)" }} />
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative" }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 7, color: "#95d5b2", font: "600 10px 'DM Mono', monospace", letterSpacing: ".12em", textTransform: "uppercase" }}>
-              <Motion.span animate={{ opacity: [.35, 1, .35] }} transition={{ duration: 1.8, repeat: Infinity }} style={{ width: 7, height: 7, borderRadius: "50%", background: "#74c69d", boxShadow: "0 0 0 5px rgba(116,198,157,.12)" }} /> Live rescue
-            </div>
-            <div style={{ marginTop: 7, font: "700 20px 'Cabinet Grotesk', sans-serif", letterSpacing: "-.02em" }}>Tonight&apos;s journey</div>
-          </div>
-          <div style={{ width: 42, height: 42, borderRadius: 14, display: "grid", placeItems: "center", background: "rgba(255,255,255,.09)", border: "1px solid rgba(255,255,255,.12)", fontSize: 19 }}>↗</div>
-        </div>
-
-        <div style={{ marginTop: 26, padding: "20px 16px", borderRadius: 20, background: "rgba(4,25,15,.34)", border: "1px solid rgba(255,255,255,.08)", position: "relative" }}>
-          <div style={{ position: "absolute", left: 31, right: 31, top: 36, height: 2, background: "rgba(149,213,178,.22)" }}>
-            <Motion.div animate={{ width: ["8%", "92%"] }} transition={{ duration: 3.2, repeat: Infinity, repeatDelay: 1.1, ease: "easeInOut" }} style={{ height: "100%", background: "linear-gradient(90deg,#74c69d,#ffd166)", boxShadow: "0 0 12px #74c69d" }} />
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", position: "relative" }}>
-            {[{ icon: "✦", label: "Surplus", sub: "Collected" }, { icon: "⌁", label: "On the way", sub: "12 min" }, { icon: "♡", label: "Community", sub: "Next stop" }].map((step, index) => (
-              <div key={step.label} style={{ width: "31%", textAlign: index === 0 ? "left" : index === 2 ? "right" : "center" }}>
-                <Motion.div animate={index === 1 ? { scale: [1, 1.12, 1] } : {}} transition={{ duration: 2, repeat: Infinity }} style={{ width: 34, height: 34, margin: index === 0 ? "0" : index === 2 ? "0 0 0 auto" : "0 auto", borderRadius: 12, display: "grid", placeItems: "center", background: index === 2 ? "#ffd166" : "#74c69d", color: "#123622", boxShadow: "0 7px 20px rgba(0,0,0,.24)", fontWeight: 800 }}>{step.icon}</Motion.div>
-                <div style={{ marginTop: 10, fontSize: 11, fontWeight: 700 }}>{step.label}</div>
-                <div style={{ marginTop: 2, color: "rgba(225,245,232,.56)", font: "9px 'DM Mono', monospace" }}>{step.sub}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12 }}>
-          <div style={{ padding: "13px 14px", borderRadius: 16, background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.08)" }}><div style={{ font: "800 22px 'Cabinet Grotesk', sans-serif" }}>45</div><div style={{ color: "rgba(225,245,232,.58)", font: "9px 'DM Mono', monospace", textTransform: "uppercase", letterSpacing: ".08em" }}>meals moving</div></div>
-          <div style={{ padding: "13px 14px", borderRadius: 16, background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.08)" }}><div style={{ font: "800 22px 'Cabinet Grotesk', sans-serif" }}>18<span style={{ fontSize: 12, color: "#95d5b2" }}> kg</span></div><div style={{ color: "rgba(225,245,232,.58)", font: "9px 'DM Mono', monospace", textTransform: "uppercase", letterSpacing: ".08em" }}>waste avoided</div></div>
-        </div>
-      </Motion.div>
-
-      <Motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }} style={{ position: "absolute", zIndex: 4, left: 0, bottom: 6, padding: "11px 15px", borderRadius: 16, background: "#fff8e8", color: "#6f4700", border: "1px solid rgba(255,209,102,.5)", boxShadow: "0 16px 38px rgba(54,30,0,.2)", font: "700 11px 'Cabinet Grotesk', sans-serif" }}>☀ 127 plates served today</Motion.div>
-      <Motion.div animate={{ y: [0, -7, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: .6 }} style={{ position: "absolute", zIndex: 4, right: -6, top: 4, padding: "10px 13px", borderRadius: 15, background: "rgba(255,255,255,.96)", color: "#184d33", border: "1px solid rgba(82,183,136,.25)", boxShadow: "0 14px 34px rgba(0,0,0,.18)", font: "700 10.5px 'Cabinet Grotesk', sans-serif" }}>● Rescue network active</Motion.div>
-    </div>
-  );
-};
-
 const GAME_ITEMS = [
   { id: "rice", icon: "🍚", label: "Rice", points: 10 },
   { id: "dal", icon: "🥣", label: "Dal", points: 10 },
@@ -1109,6 +1052,7 @@ const Hero = ({ c }) => {
 
   return (
     <section
+      className="rq-hero"
       id="hero"
       ref={ref}
       style={{
@@ -1164,6 +1108,7 @@ const Hero = ({ c }) => {
             </Motion.div>
 
             <Motion.h1
+              className="rq-hero-title"
               initial={{ opacity: 0, y: 60 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35, duration: 1, ease: [0.22, 1, 0.36, 1] }}
@@ -1836,40 +1781,104 @@ const CTA = ({ c }) => (
   </section>
 );
 
-const Footer = ({ c }) => (
-  <footer style={{ background: "#0a1a0d", color: "rgba(255,255,255,0.4)", padding: "38px 32px 26px" }}>
-    <div className="rq-footer-grid" style={{ maxWidth: 1100, margin: "0 auto 34px" }}>
-      <div>
-        <div style={{ color: "#fff", marginBottom: 14 }}><Logo size={40} /></div>
-        <p style={{ fontSize: 14, lineHeight: 1.78, maxWidth: 480, marginBottom: 22 }}>
-          A community platform helping surplus food reach people who can use it, safely and responsibly.
-        </p>
-        <div style={{ display: "flex", gap: 10 }}>
-          {[{ icon: "🐦", href: "https://x.com/itsSalonyy" }, { icon: "📸", href: "https://salonyranjan.github.io/" }, { icon: "💼", href: "https://www.linkedin.com/in/salony-ranjan-b63200280/" }].map(({ icon, href }) => (
-            <Motion.a
-              key={icon} href={href} target="_blank" rel="noopener noreferrer"
-              whileHover={{ scale: 1.15, background: "rgba(255,255,255,0.14)" }}
-              style={{
-                width: 38, height: 38, borderRadius: "50%",
-                background: "rgba(255,255,255,0.07)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 14, cursor: "pointer", textDecoration: "none",
-              }}
-            >{icon}</Motion.a>
+const Footer = ({ c }) => {
+  const linkGroups = [
+    {
+      title: "Explore",
+      links: [
+        { label: "About us", to: "/about" },
+        { label: "Browse food", to: "/dashboard/search" },
+        { label: "Rescue map", to: "/map" },
+        { label: "Contact", to: "/contact" },
+      ],
+    },
+    {
+      title: "Take action",
+      links: [
+        { label: "Donate food", to: "/dashboard/donate" },
+        { label: "Create account", to: "/register" },
+        { label: "Sign in", to: "/login" },
+        { label: "Dashboard", to: "/dashboard" },
+      ],
+    },
+  ];
+
+  const socials = [
+    { label: "X", name: "X / Twitter", href: "https://x.com/itsSalonyy" },
+    { label: "↗", name: "Portfolio", href: "https://salonyranjan.github.io/" },
+    { label: "in", name: "LinkedIn", href: "https://www.linkedin.com/in/salony-ranjan-b63200280/" },
+  ];
+
+  return (
+    <footer className="rq-site-footer" style={{ position: "relative", overflow: "hidden", background: "#061108", color: "rgba(232,245,236,0.62)", padding: "0 32px 28px" }}>
+      <div aria-hidden style={{ position: "absolute", width: 520, height: 520, borderRadius: "50%", top: -290, right: -150, background: "radial-gradient(circle,rgba(82,183,136,.14),transparent 68%)", pointerEvents: "none" }} />
+      <div aria-hidden style={{ position: "absolute", width: 340, height: 340, borderRadius: "50%", bottom: -240, left: -100, background: "radial-gradient(circle,rgba(245,158,11,.08),transparent 70%)", pointerEvents: "none" }} />
+
+      <div style={{ maxWidth: 1160, margin: "0 auto", position: "relative", zIndex: 1 }}>
+        <div className="rq-footer-cta" style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", alignItems: "center", gap: 36, padding: "48px clamp(24px,5vw,58px)", transform: "translateY(-1px)", border: "1px solid rgba(149,213,178,.16)", borderTop: 0, borderRadius: "0 0 30px 30px", background: "linear-gradient(125deg,rgba(45,106,79,.36),rgba(15,37,22,.72))", boxShadow: "0 26px 70px rgba(0,0,0,.22)" }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 12, fontFamily: "'DM Mono', monospace", fontSize: 10, fontWeight: 500, letterSpacing: ".18em", color: c.sage }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: c.sage, boxShadow: "0 0 0 5px rgba(82,183,136,.1)" }} />
+              MAKE YOUR NEXT MEAL MATTER
+            </div>
+            <h2 style={{ margin: 0, maxWidth: 620, fontFamily: "'Playfair Display', serif", fontSize: "clamp(30px,4vw,48px)", lineHeight: 1.08, letterSpacing: "-.025em", color: "#f1f8f3" }}>
+              Good food deserves a <em style={{ color: c.amber }}>second destination.</em>
+            </h2>
+          </div>
+          <div className="rq-footer-cta-actions" style={{ display: "flex", justifyContent: "flex-end", gap: 12, flexWrap: "wrap" }}>
+            <Link to="/dashboard/donate">
+              <Motion.span whileHover={{ y: -3, background: c.gold }} whileTap={{ scale: .97 }} style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "14px 22px", borderRadius: 100, background: c.amber, color: "#102416", fontSize: 14, fontWeight: 800, boxShadow: "0 14px 30px rgba(245,158,11,.18)" }}>
+                Donate food <span aria-hidden>→</span>
+              </Motion.span>
+            </Link>
+            <Link to="/dashboard/search">
+              <Motion.span whileHover={{ y: -3, background: "rgba(255,255,255,.1)" }} whileTap={{ scale: .97 }} style={{ display: "inline-flex", alignItems: "center", padding: "13px 21px", borderRadius: 100, border: "1px solid rgba(255,255,255,.16)", color: "#e8f5ec", fontSize: 14, fontWeight: 650 }}>
+                Find food
+              </Motion.span>
+            </Link>
+          </div>
+        </div>
+
+        <div className="rq-footer-grid" style={{ display: "grid", gridTemplateColumns: "minmax(260px,1.65fr) repeat(2,minmax(130px,.65fr))", gap: "48px clamp(34px,6vw,76px)", padding: "64px 8px 54px" }}>
+          <div>
+            <div style={{ color: "#fff", marginBottom: 20 }}><Logo size={42} /></div>
+            <p style={{ maxWidth: 390, margin: "0 0 26px", fontSize: 14, lineHeight: 1.8, color: "rgba(232,245,236,.52)" }}>
+              Connecting safe surplus food with nearby people and organizations through one clear, trackable rescue workflow.
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              {socials.map((social) => (
+                <Motion.a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.name} whileHover={{ y: -4, borderColor: "rgba(82,183,136,.55)", color: "#95d5b2" }} style={{ width: 40, height: 40, borderRadius: 12, border: "1px solid rgba(255,255,255,.1)", background: "rgba(255,255,255,.04)", color: "rgba(232,245,236,.64)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'DM Mono', monospace", fontSize: 12, fontWeight: 600 }}>
+                  {social.label}
+                </Motion.a>
+              ))}
+            </div>
+          </div>
+
+          {linkGroups.map((group) => (
+            <nav key={group.title} aria-label={`${group.title} links`}>
+              <div style={{ marginBottom: 20, fontFamily: "'DM Mono', monospace", fontSize: 10, fontWeight: 600, letterSpacing: ".17em", textTransform: "uppercase", color: c.sage }}>{group.title}</div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14 }}>
+                {group.links.map((link) => (
+                  <Motion.div key={link.label} whileHover={{ x: 4, color: "#e8f5ec" }} style={{ color: "rgba(232,245,236,.5)", fontSize: 14 }}>
+                    <Link to={link.to}>{link.label}</Link>
+                  </Motion.div>
+                ))}
+              </div>
+            </nav>
           ))}
         </div>
-      </div>
-    </div>
 
-    <div style={{ maxWidth: 1100, margin: "0 auto", borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 28, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-      <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12 }}>© 2026 ResQPlate · Food shared, not wasted.</span>
-      <div style={{ display: "flex", gap: 20 }}>
-        <Link to="/about"><span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, cursor: "pointer" }}>About</span></Link>
-        <Link to="/contact"><span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, cursor: "pointer", color: c.sage }}>Contact</span></Link>
+        <div className="rq-footer-bottom" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 18, padding: "24px 8px 0", borderTop: "1px solid rgba(255,255,255,.08)" }}>
+          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: "rgba(232,245,236,.34)" }}>© 2026 ResQPlate. Food shared, not wasted.</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 9, fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: ".08em", color: "rgba(149,213,178,.46)" }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: c.sage, boxShadow: "0 0 10px rgba(82,183,136,.8)" }} />
+            BUILT FOR COMMUNITY IMPACT
+          </div>
+        </div>
       </div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};
 
 const Landing = () => {
   const { dark } = useTheme();

@@ -55,6 +55,12 @@ input, select, textarea, button {
   }
 }
 
+@media (max-width: 420px) {
+  .checkout-address-row {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 button, a, input, select, textarea {
   -webkit-tap-highlight-color: transparent;
 }

@@ -779,12 +779,12 @@ const GLOBAL_CSS = (dark) => `
     .ab-stats{display:grid;grid-template-columns:1fr 1fr}.ab-stat{padding:10px 6px}.ab-stat + .ab-stat::before{display:none}
     .ab-how-header,.ab-values-header{margin-bottom:30px}.ab-value-card,.ab-step{padding:20px 18px}
   }
-  .ab-hero-layout { width:min(1120px,100%); margin:0 auto; display:grid; grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr); align-items:center; gap:58px; position:relative; z-index:2; }
+  .ab-hero-layout { width:min(1120px,100%); margin:0 auto; display:grid; grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr); align-items:start; gap:64px; position:relative; z-index:2; }
   .ab-hero-content { width:100%; margin:0; }
-  .ab-story-art { position:relative; margin:0; }
-  .ab-story-art::before { content:""; position:absolute; inset:10% -5% -7% 8%; border-radius:50%; background:${dark ? "rgba(82,183,136,.18)" : "rgba(45,106,79,.12)"}; filter:blur(30px); }
-  .ab-story-image { position:relative; display:block; width:100%; aspect-ratio:1; object-fit:cover; border-radius:30px 30px 80px 30px; border:1px solid ${dark ? "rgba(149,213,178,.2)" : "rgba(38,91,57,.14)"}; box-shadow:${dark ? "0 32px 80px rgba(0,0,0,.4)" : "0 32px 70px rgba(41,77,51,.18)"}; }
-  .ab-story-caption { position:absolute; left:-20px; bottom:24px; display:flex; align-items:center; gap:9px; padding:11px 15px; border-radius:14px; background:${dark ? "rgba(12,28,18,.92)" : "rgba(255,253,248,.94)"}; border:1px solid ${dark ? "rgba(149,213,178,.18)" : "rgba(38,91,57,.13)"}; color:${dark ? "#dcebe1" : "#213b2a"}; box-shadow:0 14px 34px rgba(0,0,0,.16); backdrop-filter:blur(12px); font-size:11px; font-weight:700; }
+  .ab-story-art { position:relative; width:100%; max-width:480px; margin:0; justify-self:end; aspect-ratio:1; overflow:hidden; isolation:isolate; background:${dark ? "#0b1a10" : "#e8dfca"}; border:1px solid ${dark ? "rgba(149,213,178,.22)" : "rgba(38,91,57,.16)"}; border-radius:30px 30px 68px 30px; box-shadow:${dark ? "0 28px 72px rgba(0,0,0,.4), 0 0 42px rgba(82,183,136,.09)" : "0 28px 64px rgba(41,77,51,.18)"}; }
+  .ab-story-art::after { content:""; position:absolute; inset:0; z-index:1; pointer-events:none; border:1px solid rgba(255,255,255,.14); border-radius:inherit; box-shadow:inset 0 -70px 80px rgba(4,15,8,.12); }
+  .ab-story-image { position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover; object-position:center 48%; transform:scale(1.12); transform-origin:center; }
+  .ab-story-caption { position:absolute; left:18px; right:18px; bottom:18px; z-index:2; display:flex; align-items:center; justify-content:center; gap:9px; min-height:42px; padding:10px 15px; border-radius:14px 14px 32px 14px; background:${dark ? "rgba(8,22,13,.88)" : "rgba(255,253,248,.9)"}; border:1px solid ${dark ? "rgba(149,213,178,.2)" : "rgba(38,91,57,.14)"}; color:${dark ? "#dcebe1" : "#213b2a"}; box-shadow:0 14px 34px rgba(0,0,0,.18); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); font-size:11px; font-weight:700; text-align:center; }
   .ab-story-caption i { width:8px; height:8px; border-radius:50%; background:#52b788; box-shadow:0 0 0 5px rgba(82,183,136,.14); }
   .ab-hero { min-height:500px; padding-block:58px; }
   .ab-stats,.ab-values { display:none; }
@@ -795,8 +795,8 @@ const GLOBAL_CSS = (dark) => `
   .ab-timeline::before { left:16%; right:16%; }
   .ab-cta { padding-block:58px 46px; }
   .ab-cta-sub { max-width:560px; }
-  @media(max-width:900px){.ab-hero-layout{grid-template-columns:1fr;gap:38px}.ab-story-art{width:min(480px,92%);margin:0 auto}.ab-hero{padding-top:62px}.ab-story-caption{left:-10px}}
-  @media(max-width:760px){.ab-timeline{grid-template-columns:1fr}.ab-hero{padding-block:48px}.ab-section{padding-block:46px}}
+  @media(max-width:900px){.ab-hero-layout{grid-template-columns:1fr;gap:38px}.ab-story-art{width:min(480px,100%);margin:0 auto;justify-self:center}.ab-hero{padding-top:62px}}
+  @media(max-width:760px){.ab-timeline{grid-template-columns:1fr}.ab-hero{padding-block:48px}.ab-section{padding-block:46px}.ab-story-art{width:min(430px,100%)}.ab-story-caption{left:12px;right:12px;bottom:12px}}
 `;
 
 function Counter({ to, suffix = "", prefix = "" }) {
@@ -1350,8 +1350,8 @@ export default function About() {
           </div>
           </div>
 
-          <Motion.figure className="ab-story-art rv rv-d2" animate={{ y: [0, -8, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}>
-            <img className="ab-story-image" src={foodRescueStory} alt="A family facing food insecurity as community volunteers arrive with fresh food" />
+          <Motion.figure className="ab-story-art rv rv-d2">
+            <img className="ab-story-image" src={foodRescueStory} alt="A family facing food insecurity as community volunteers arrive with fresh food" width="1024" height="1114" loading="eager" fetchPriority="high" />
             <figcaption className="ab-story-caption"><i aria-hidden="true" />A meal can change the next chapter</figcaption>
           </Motion.figure>
         </div>
