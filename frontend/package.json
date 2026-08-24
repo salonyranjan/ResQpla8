@@ -14,7 +14,6 @@
     "@tailwindcss/vite": "^4.1.18",
     "appwrite": "^25.0.0",
     "framer-motion": "^12.38.0",
-    "groq-sdk": "^1.1.2",
     "leaflet": "^1.9.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

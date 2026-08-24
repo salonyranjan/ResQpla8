@@ -31,9 +31,61 @@ const QUICK_REPLIES = [
   { label: "Track my donation", emoji: "📦" },
 ];
 
-const assistantApiUrl = import.meta.env.VITE_ASSISTANT_API_URL?.trim();
+const assistantApiUrl = import.meta.env.VITE_ASSISTANT_API_URL?.trim() || "/api/resqbot";
 
-const FALLBACK_MESSAGE = "I couldn't reach the assistant service. Please try again in a moment.";
+function getLocalResponse(input) {
+  const text = input.toLowerCase().replace(/[^a-z0-9\s]/g, " ");
+  const words = new Set(text.split(/\s+/).filter(Boolean));
+  const includesAny = (...terms) => terms.some((term) => text.includes(term));
+
+  if (["hello", "hi", "hey", "namaste"].some((word) => words.has(word))) {
+    return "Hello! I can help you donate food, find available donations, use the map, claim food, track a rescue, or follow food-safety guidance. What would you like to do?";
+  }
+  if (includesAny("donate", "post food", "add food", "list food")) {
+    return "To post food: sign in, open Dashboard → Donate Food, enter the food details and pickup address, attach a clear JPG, PNG, or WebP photo, then submit. The donation will appear in Browse Food and Map View after Appwrite confirms both the image and listing.";
+  }
+  if (includesAny("browse", "find food", "available food", "search food")) {
+    return "Open Dashboard → Browse Food to see donations that are still pending. Choose a card to review it or add it to your rescue cart. Completed and cancelled donations are intentionally hidden.";
+  }
+  if (includesAny("image", "photo", "upload", "bucket")) {
+    return "Food photos are stored in the configured Appwrite bucket. If upload is denied, the bucket needs Create permission for All users (authenticated users). Keep File Security enabled; the app grants read access to signed-in users and update/delete access only to the uploader.";
+  }
+  if (includesAny("map", "pin", "route", "distance", "shortest")) {
+    return "Open Map View and allow location access. Donation pins come from each listing's saved coordinates. Select a pin to calculate the shortest available road route from your current location to the pickup point.";
+  }
+  if (includesAny("checkout", "claim", "cart", "receiver")) {
+    return "Add an available donation to the cart, open Checkout, enter the complete destination address, and confirm the rescue. ResQPlate validates every item before completing the claim, so unavailable food is not partially processed.";
+  }
+  if (includesAny("track", "status", "order")) {
+    return "Use Dashboard → Track Rescue or the tracking button after checkout. Appwrite supports pending, completed, and cancelled statuses; the page shows the real saved status rather than simulated delivery stages.";
+  }
+  if (includesAny("volunteer", "matching", "algorithm", "reliability")) {
+    return "Volunteer matching ranks available volunteers using real distance, capacity, reliability, urgency, and a low-reliability penalty. Open Dashboard → Volunteer Matching to score the current Appwrite volunteer records.";
+  }
+  if (includesAny("safe", "safety", "spoiled", "expiry", "expired", "storage")) {
+    return "Keep hot food hot and cold food cold, use clean sealed containers, label allergens and preparation time, and do not donate food with uncertain storage history, spoilage signs, or an expired safe-use window. For a suspected foodborne illness, contact a qualified local health professional or authority.";
+  }
+  if (includesAny("analytics", "activity", "impact", "leaderboard")) {
+    return "Analytics, activity, impact, and leaderboard screens use accessible Appwrite records only. If a total looks empty, confirm that you are signed in and that the relevant documents grant your account read permission.";
+  }
+  if (includesAny("login", "sign in", "account", "register")) {
+    return "Create an account from Register or sign in from Login. If Appwrite rejects the request, confirm your deployed hostname is registered under Project → Platforms and that your project is active.";
+  }
+  if (includesAny("thank", "thanks")) return "You're welcome. What else can I help you with?";
+
+  return "I can help with ResQPlate donations, Browse Food, photo uploads, Map View, checkout, tracking, volunteer matching, analytics, and food safety. Tell me which feature you are using and what happened.";
+}
+
+function readAssistantResponse(payload) {
+  return String(
+    payload?.message?.content
+      || payload?.message
+      || payload?.content
+      || payload?.response
+      || payload?.choices?.[0]?.message?.content
+      || ""
+  ).trim();
+}
 
 function formatTime(ts) {
   return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -431,31 +483,36 @@ export default function ResQBot() {
       chatHistoryRef.current.push({ role: "user", parts });
 
       try {
-        if (!assistantApiUrl) throw new Error("Assistant API is not configured");
+        let responseText = "";
+        if (assistantApiUrl) {
+          const controller = new AbortController();
+          const timeoutId = window.setTimeout(() => controller.abort(), 12000);
 
-        // Build messages array for Groq
-        const messages = [{ role: "system", content: SYSTEM_INSTRUCTION }];
+          const apiMessages = [{ role: "system", content: SYSTEM_INSTRUCTION }];
 
-        // Convert chat history to Groq format
-        chatHistoryRef.current.forEach(entry => {
-          const text = entry.parts.map(p => p.text).filter(Boolean).join(" ");
-          if (!text) return;
-          if (entry.role === "user") {
-            messages.push({ role: "user", content: text });
-          } else if (entry.role === "model") {
-            messages.push({ role: "assistant", content: text });
+          chatHistoryRef.current.forEach(entry => {
+            const historyText = entry.parts.map(p => p.text).filter(Boolean).join(" ");
+            if (!historyText) return;
+            apiMessages.push({
+              role: entry.role === "model" ? "assistant" : "user",
+              content: historyText,
+            });
+          });
+
+          try {
+            const response = await fetch(assistantApiUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ messages: apiMessages }),
+              signal: controller.signal,
+            });
+            if (!response.ok) throw new Error(`Assistant request failed (${response.status})`);
+            responseText = readAssistantResponse(await response.json());
+          } finally {
+            window.clearTimeout(timeoutId);
           }
-        });
-
-        const response = await fetch(assistantApiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages }),
-        });
-        if (!response.ok) throw new Error(`Assistant request failed (${response.status})`);
-        const payload = await response.json();
-        const responseText = String(payload.message || payload.content || "").trim();
-        if (!responseText) throw new Error("Assistant returned an empty response");
+        }
+        if (!responseText) responseText = getLocalResponse(messageText);
 
         if (requestId !== requestIdRef.current) return;
         chatHistoryRef.current.push({ role: "model", parts: [{ text: responseText }] });
@@ -463,12 +520,11 @@ export default function ResQBot() {
 
         if (!isOpen || isMinimized) setHasUnread(true);
       } catch (error) {
-        console.error("Assistant error:", error);
+        console.warn("Assistant API unavailable; using built-in help:", error);
         if (requestId !== requestIdRef.current) return;
-        chatHistoryRef.current.pop();
-
-        const errText = FALLBACK_MESSAGE;
-        setMessages((prev) => [...prev, { id: Date.now() + 1, text: errText, sender: "bot" }]);
+        const responseText = getLocalResponse(messageText);
+        chatHistoryRef.current.push({ role: "model", parts: [{ text: responseText }] });
+        setMessages((prev) => [...prev, { id: Date.now() + 1, text: responseText, sender: "bot" }]);
       } finally {
         setIsTyping(false);
       }
@@ -489,7 +545,7 @@ export default function ResQBot() {
     setIsTyping(false);
     const name = user?.name?.split(" ")[0];
     const greeting = name
-      ? `Chat cleared! Hello again **${name}** 👋 How can I help?`
+      ? `Chat cleared! Hello again ${name} 👋 How can I help?`
       : "Chat cleared! How can I help you? 👋";
     setMessages([{ id: Date.now(), text: greeting, sender: "bot" }]);
   };
@@ -630,7 +686,7 @@ export default function ResQBot() {
                       animation: "resqGlow 2s infinite",
                     }} />
                     <span style={{ color: t.statusText, fontSize: 11 }}>
-                      {assistantApiUrl ? "Available · Food rescue help" : "Temporarily unavailable"}
+                      {assistantApiUrl ? "Available · AI + built-in help" : "Available · Built-in help"}
                     </span>
                   </div>
                 </div>

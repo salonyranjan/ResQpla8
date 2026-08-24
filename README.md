@@ -132,7 +132,8 @@ flowchart TD
   AW --> DB[("Pickup documents")]
   AW --> STORAGE[("Donation images")]
   AW --> REALTIME["Realtime updates"]
-  UI --> GROQ["Groq · optional"]
+  UI --> PROXY["Server-side ResQBot proxy"]
+  PROXY --> GROQ["Groq · optional"]
   UI --> EMAIL["EmailJS · optional"]
   PUBLIC --> OSM["OpenStreetMap tiles"]
 ```
@@ -160,7 +161,7 @@ pending → confirmed → preparing → out_for_delivery → completed
 | Motion | Framer Motion |
 | Backend platform | Appwrite Auth, Databases, Storage, and Realtime |
 | Mapping | Leaflet, React Leaflet, OpenStreetMap |
-| AI | Groq SDK (optional) |
+| AI | Server-side Groq chat-completions proxy with built-in fallback |
 | Contact delivery | EmailJS (optional) |
 | Icons | React Icons, Lucide React |
 | Deployment | Static SPA hosting; Vercel rewrite configuration included |
@@ -239,7 +240,9 @@ Open the URL printed by Vite—normally **http://localhost:5173**.
 | `VITE_GEOCODER_ENDPOINT` | Optional | Address geocoder used to place text-only pickup locations on Map View |
 | `VITE_APPWRITE_VOLUNTEERS_COLLECTION_ID` | Optional | Volunteer availability and location records used for routing |
 | `VITE_APPWRITE_NOTIFICATIONS_COLLECTION_ID` | Optional | Private notifications created for matched volunteers |
-| `VITE_GROQ_API_KEY` | Optional | Enables Groq-backed assistant and AI utilities |
+| `GROQ_API_KEY` | Optional | Server-only Groq credential used by the `/api/resqbot` Vercel function |
+| `GROQ_MODEL` | Optional | Groq model ID; defaults to `openai/gpt-oss-20b` |
+| `VITE_ASSISTANT_API_URL` | Optional | Override URL when the assistant proxy is hosted elsewhere |
 | `VITE_EMAILJS_SERVICE_ID` | Optional | EmailJS service identifier |
 | `VITE_EMAILJS_TEMPLATE_ID` | Optional | Landing form template identifier |
 | `VITE_EMAILJS_CONTACT_TEMPLATE_ID` | Optional | Contact form template identifier |
@@ -252,14 +255,15 @@ VITE_APPWRITE_DATABASE_ID=your_database_id
 VITE_APPWRITE_PICKUPS_COLLECTION_ID=pickups
 VITE_APPWRITE_BUCKET_ID=
 
-VITE_GROQ_API_KEY=
+GROQ_API_KEY=
+GROQ_MODEL=openai/gpt-oss-20b
 VITE_EMAILJS_SERVICE_ID=
 VITE_EMAILJS_TEMPLATE_ID=
 VITE_EMAILJS_CONTACT_TEMPLATE_ID=
 VITE_EMAILJS_PUBLIC_KEY=
 ```
 
-> **Security:** every `VITE_` value is bundled into browser code. Never place an Appwrite server API key or another privileged secret here. For production AI, proxy Groq calls through an Appwrite Function or another server endpoint.
+> **Security:** every `VITE_` value is bundled into browser code. Keep `GROQ_API_KEY` server-only. The included Vercel function proxies ResQBot requests without sending the key to the browser.
 
 ---
 
@@ -396,7 +400,7 @@ The included `frontend/vercel.json` already provides Vercel SPA rewrites and imm
 | Images do not appear | Verify bucket ID plus file create/read permissions |
 | Claimed food disappears from Browse Food | Expected: its status changed from `pending` to `completed` |
 | Refreshing a deployed route returns 404 | Add the SPA rewrite to `index.html` |
-| ResQBot is unavailable | Add a valid Groq key or move the integration to a server function |
+| ResQBot uses only built-in help | Add `GROQ_API_KEY` to Vercel Environment Variables and redeploy |
 | Contact messages fail | Verify EmailJS identifiers and the selected template |
 
 ---
