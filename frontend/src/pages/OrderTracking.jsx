@@ -1,210 +1,44 @@
-import { useParams, Link, useNavigate, useOutletContext } from "react-router-dom";
-import { motion as Motion, AnimatePresence } from "framer-motion";
-import {
-  HiOutlineArrowLeft,
-  HiOutlineCheckCircle,
-  HiOutlineClock,
-  HiOutlineShoppingBag,
-} from "react-icons/hi";
+import { Link, useNavigate, useOutletContext, useParams } from "react-router-dom";
+import { HiOutlineArrowLeft, HiOutlineArrowPath, HiOutlineCheckCircle, HiOutlineClock, HiOutlineMap, HiOutlineMapPin, HiOutlineShoppingBag, HiOutlineXCircle } from "react-icons/hi2";
 import { useOrderTracking } from "../hooks/useOrderTracking";
 import { useTheme } from "../context/ThemeContext";
+
+const statusCopy = {
+  posted: ["Awaiting a receiver", "This donation is still available to claim."],
+  reserved: ["Pickup is being coordinated", "The receiver address is confirmed and delivery is pending."],
+  completed: ["Rescue delivered", "The food reached its receiver successfully."],
+  cancelled: ["Rescue cancelled", "This rescue is closed and no further action is required."],
+};
 
 export default function OrderTracking() {
   const ctx = useOutletContext() || {};
   const { dark: appDark } = useTheme();
-  const dark = ctx?.dark ?? appDark;
-  const T = dark
-    ? {
-        bg: "#080e0a", bgAlt: "#0d1710", bgCard: "#111c14", border: "rgba(34,197,94,0.09)",
-        borderMed: "rgba(34,197,94,0.18)", text: "#ecfdf5", textMuted: "#6ee7b7",
-        textFaint: "rgba(110,231,183,0.35)", accent: "#22c55e", accentSoft: "rgba(34,197,94,0.09)",
-        amber: "#f59e0b", amberSoft: "rgba(245,158,11,0.1)", teal: "#14b8a6",
-        shadow: "0 4px 24px rgba(0,0,0,0.4)", nav: "rgba(8,14,10,0.97)",
-      }
-    : {
-        bg: "#f0f7f2", bgAlt: "#e8f2eb", bgCard: "#ffffff", border: "rgba(26,74,46,0.09)",
-        borderMed: "rgba(26,74,46,0.18)", text: "#0d1f12", textMuted: "#3a6647",
-        textFaint: "rgba(58,102,71,0.4)", accent: "#16a34a", accentSoft: "rgba(22,163,74,0.09)",
-        amber: "#d97706", amberSoft: "rgba(217,119,6,0.08)", teal: "#0d9488",
-        shadow: "0 4px 24px rgba(0,0,0,0.06)", nav: "rgba(240,247,242,0.97)",
-      };
-
+  const dark = ctx.dark ?? appDark;
+  const T = ctx.T || (dark ? { bg: "#080e0a", bgCard: "#111c14", bgAlt: "#0d1710", border: "rgba(34,197,94,.12)", text: "#ecfdf5", textMuted: "#8ab798", textFaint: "#587061", accent: "#32ad63", accentSoft: "rgba(50,173,99,.1)", red: "#ef4444" } : { bg: "#f3f7f4", bgCard: "#fff", bgAlt: "#eaf1ec", border: "rgba(25,76,42,.1)", text: "#132219", textMuted: "#587061", textFaint: "#829087", accent: "#278a50", accentSoft: "rgba(39,138,80,.09)", red: "#dc2626" });
   const { orderId } = useParams();
   const navigate = useNavigate();
-  const { order, currentStep, eta, progressPct, STATUS_STEPS, loading, error } = useOrderTracking(orderId);
+  const tracking = useOrderTracking(orderId);
 
-  // Map icons to steps (since hook doesn't include icon components)
-  const STEP_ICONS = {
-    pending: HiOutlineShoppingBag,
-    completed: HiOutlineCheckCircle,
-  };
+  return <main className="ot-page" style={{ "--ot-bg": T.bg, "--ot-card": T.bgCard, "--ot-soft": T.bgAlt, "--ot-line": T.border, "--ot-text": T.text, "--ot-muted": T.textMuted, "--ot-faint": T.textFaint, "--ot-accent": T.accent, "--ot-accent-soft": T.accentSoft, "--ot-red": T.red }}>
+    <style>{`
+      .ot-page{min-height:100vh;padding:28px;background:var(--ot-bg);color:var(--ot-text);font-family:var(--font-body)}.ot-shell{width:min(1050px,100%);margin:auto}.ot-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px}.ot-kicker{margin-bottom:6px;color:var(--ot-accent);font:500 10px var(--font-meta);letter-spacing:.12em;text-transform:uppercase}.ot-head h1{margin:0;font-size:28px;letter-spacing:-.035em}.ot-head p{margin:7px 0 0;color:var(--ot-muted);font-size:14px}.ot-icon-btn{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--ot-line);border-radius:10px;background:var(--ot-card);color:var(--ot-muted);cursor:pointer}.ot-alert,.ot-empty{padding:18px;border:1px solid var(--ot-line);border-radius:14px;background:var(--ot-card);color:var(--ot-muted)}.ot-alert{border-color:color-mix(in srgb,var(--ot-red) 25%,transparent);color:var(--ot-red)}
+      .ot-list{display:grid;gap:12px}.ot-order{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;padding:18px 20px;border:1px solid var(--ot-line);border-radius:15px;background:var(--ot-card);color:inherit;text-decoration:none;transition:.18s}.ot-order:hover{transform:translateY(-2px);border-color:var(--ot-accent)}.ot-order-top{display:flex;align-items:center;gap:12px}.ot-food-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:11px;background:var(--ot-accent-soft);color:var(--ot-accent)}.ot-food-icon svg{width:20px}.ot-order h2{margin:0;font-size:15px}.ot-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:5px;color:var(--ot-muted);font-size:11px}.ot-order-side{text-align:right}.ot-status{display:inline-block;padding:5px 9px;border-radius:100px;background:var(--ot-accent-soft);color:var(--ot-accent);font:600 9px var(--font-meta);text-transform:uppercase}.ot-order-side small{display:block;margin-top:8px;color:var(--ot-faint)}
+      .ot-detail-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.7fr);gap:16px}.ot-card{padding:20px;border:1px solid var(--ot-line);border-radius:16px;background:var(--ot-card)}.ot-hero{margin-bottom:16px;padding:24px}.ot-hero-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.ot-hero h2{margin:0;font-size:22px}.ot-hero p{margin:7px 0 0;color:var(--ot-muted);font-size:13px}.ot-live{display:flex;align-items:center;gap:6px;color:var(--ot-accent);font:600 9px var(--font-meta);letter-spacing:.08em}.ot-live i{width:7px;height:7px;border-radius:50%;background:var(--ot-accent);box-shadow:0 0 0 5px var(--ot-accent-soft)}.ot-progress{height:7px;margin-top:22px;overflow:hidden;border-radius:20px;background:var(--ot-soft)}.ot-progress span{display:block;height:100%;border-radius:inherit;background:var(--ot-accent);transition:width .4s}.ot-progress-copy{display:flex;justify-content:space-between;margin-top:8px;color:var(--ot-muted);font-size:10px}
+      .ot-steps{display:grid;gap:0}.ot-step{position:relative;display:grid;grid-template-columns:36px 1fr;gap:12px;padding-bottom:22px}.ot-step:last-child{padding-bottom:0}.ot-step:before{content:'';position:absolute;left:17px;top:34px;bottom:0;width:2px;background:var(--ot-line)}.ot-step:last-child:before{display:none}.ot-step-icon{width:36px;height:36px;display:grid;place-items:center;z-index:1;border:2px solid var(--ot-line);border-radius:50%;background:var(--ot-card);color:var(--ot-faint)}.ot-step.done .ot-step-icon{border-color:var(--ot-accent);background:var(--ot-accent);color:#fff}.ot-step.active .ot-step-icon{border-color:var(--ot-accent);color:var(--ot-accent)}.ot-step h3{margin:2px 0 3px;font-size:13px}.ot-step p{margin:0;color:var(--ot-muted);font-size:11px}.ot-label{margin:0 0 10px;color:var(--ot-faint);font:500 9px var(--font-meta);letter-spacing:.1em;text-transform:uppercase}.ot-address{display:flex;gap:9px;font-size:13px;line-height:1.5}.ot-address svg{width:18px;flex:none;color:var(--ot-accent)}.ot-side{display:grid;align-content:start;gap:14px}.ot-actions{display:grid;gap:8px}.ot-button{width:100%;padding:10px 13px;border:1px solid var(--ot-line);border-radius:9px;background:var(--ot-card);color:var(--ot-text);font:650 12px var(--font-body);text-align:center;text-decoration:none;cursor:pointer}.ot-button.primary{border-color:var(--ot-accent);background:var(--ot-accent);color:#fff}.ot-button.danger{color:var(--ot-red)}.ot-button:disabled{opacity:.55;cursor:wait}
+      @media(max-width:760px){.ot-page{padding:18px 14px}.ot-head h1{font-size:23px}.ot-detail-grid{grid-template-columns:1fr}.ot-order{grid-template-columns:1fr}.ot-order-side{text-align:left}.ot-hero{padding:18px}.ot-hero h2{font-size:19px}}@media(max-width:420px){.ot-meta{display:grid;gap:3px}.ot-meta span[aria-hidden]{display:none}.ot-hero-row{display:block}.ot-live{margin-top:15px}}
+    `}</style>
+    <div className="ot-shell">{orderId ? <OrderDetail {...tracking} navigate={navigate} /> : <OrderList {...tracking} />}</div>
+  </main>;
+}
 
-  if (loading) return <div style={{ minHeight: "60vh", display: "grid", placeItems: "center", background: T.bg, color: T.textMuted }}>Loading rescue status…</div>;
-  if (error || !order) return <div style={{ minHeight: "60vh", display: "grid", placeItems: "center", background: T.bg, color: "#ef4444", padding: 24, textAlign: "center" }}>{error || "Rescue not found."}</div>;
+function OrderList({ orders, loading, error, refresh }) {
+  return <><header className="ot-head"><div><div className="ot-kicker">Rescue activity</div><h1>Order tracking</h1><p>Follow every donation and claimed-food delivery from one place.</p></div><button className="ot-icon-btn" onClick={refresh} aria-label="Refresh orders"><HiOutlineArrowPath /></button></header>{error && <div className="ot-alert">{error}</div>}{loading ? <div className="ot-empty">Loading your rescue orders…</div> : orders.length ? <div className="ot-list">{orders.map((order) => <Link className="ot-order" to={`/dashboard/orders/${order.$id}`} key={order.$id}><div className="ot-order-top"><span className="ot-food-icon"><HiOutlineShoppingBag /></span><div><h2>{order.name}</h2><div className="ot-meta"><span>{order.quantity} meals</span><span aria-hidden>•</span><span>{order.pickupLocation}</span><span aria-hidden>•</span><span>{new Date(order.$createdAt).toLocaleDateString()}</span></div></div></div><div className="ot-order-side"><span className="ot-status">{statusCopy[order.workflowStatus][0]}</span><small>View tracking →</small></div></Link>)}</div> : <div className="ot-empty">No rescue orders yet. Claimed food and your posted donations will appear here.</div>}</>;
+}
 
-  return (
-    <div style={{ background: T.bg, minHeight: "100vh", paddingBottom: 32 }}>
-      {/* Header */}
-      <div style={{
-        position: "sticky", top: 0, background: T.nav, backdropFilter: "blur(20px)",
-        borderBottom: `1px solid ${T.border}`, padding: "14px 16px",
-        display: "flex", alignItems: "center", gap: 12, zIndex: 40,
-      }}>
-        <Motion.button whileTap={{ scale: 0.9 }} onClick={() => navigate(-1)}
-          style={{ width: 38, height: 38, borderRadius: 12, background: T.bgCard, border: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-          <HiOutlineArrowLeft style={{ fontSize: 18, color: T.textMuted }} />
-        </Motion.button>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: 16, fontWeight: 800, color: T.text }}>Tracking Order</h1>
-          <p style={{ fontSize: 11, color: T.accent, fontFamily: "monospace", fontWeight: 700 }}>{orderId}</p>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, background: T.accentSoft, border: `1px solid ${T.borderMed}`, borderRadius: 100, padding: "5px 12px" }}>
-          <Motion.div animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1.2, repeat: Infinity }}
-            style={{ width: 5, height: 5, borderRadius: "50%", background: T.accent }} />
-          <span style={{ fontFamily: "monospace", fontSize: 9, color: T.accent, letterSpacing: "0.1em" }}>LIVE</span>
-        </div>
-      </div>
-
-      {/* ETA Hero */}
-      <Motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        style={{
-          margin: "16px 16px 0",
-          background: currentStep === STATUS_STEPS.length - 1
-            ? `linear-gradient(135deg, ${dark ? "#1a3d1e" : "#dcfce7"}, ${dark ? "#0f2912" : "#f0fdf4"})`
-            : `linear-gradient(135deg, ${dark ? "#1a2c3d" : "#dbeafe"}, ${dark ? "#0f1f2d" : "#eff6ff"})`,
-          border: `1px solid ${currentStep === STATUS_STEPS.length - 1 ? T.borderMed : "rgba(59,130,246,0.2)"}`,
-          borderRadius: 22,
-          padding: "22px 20px",
-          textAlign: "center",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        <div style={{ position: "absolute", inset: 0, background: dark ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.3)" }} />
-        <div style={{ position: "relative" }}>
-          <AnimatePresence mode="wait">
-            <Motion.div
-              key={currentStep}
-              initial={{ y: 12, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -12, opacity: 0 }}
-            >
-              <div style={{ fontSize: 48, marginBottom: 10 }}>
-                {currentStep === STATUS_STEPS.length - 1 ? "🎉" : currentStep >= 3 ? "🚴" : currentStep >= 2 ? "🍳" : "📋"}
-              </div>
-              <p style={{ fontSize: 22, fontWeight: 900, color: T.text, letterSpacing: "-0.03em" }}>
-                {order.status === "cancelled" ? "Rescue cancelled" : currentStep === STATUS_STEPS.length - 1 ? "Rescue completed" : eta === null ? "Awaiting pickup" : `${eta} min until pickup`}
-              </p>
-              <p style={{ fontSize: 13, color: T.textMuted, marginTop: 6 }}>
-                {STATUS_STEPS[currentStep].sub}
-              </p>
-            </Motion.div>
-          </AnimatePresence>
-        </div>
-      </Motion.div>
-
-      {/* Progress bar */}
-      <div style={{ margin: "16px 16px 0", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 20, padding: 18 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-          <p style={{ fontSize: 12, fontFamily: "monospace", color: T.textFaint, letterSpacing: "0.08em" }}>PROGRESS</p>
-          <p style={{ fontSize: 12, fontFamily: "monospace", color: T.accent, fontWeight: 700 }}>{Math.round(progressPct)}%</p>
-        </div>
-        <div style={{ height: 8, background: T.bgAlt, borderRadius: 100, overflow: "hidden" }}>
-          <Motion.div
-            animate={{ width: `${progressPct}%` }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            style={{ height: "100%", background: `linear-gradient(90deg, ${T.accent}, ${T.teal})`, borderRadius: 100 }}
-          />
-        </div>
-      </div>
-
-      {/* Step tracker */}
-      <div style={{ margin: "16px 16px 0", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 20, padding: 20 }}>
-        <p style={{ fontSize: 11, fontFamily: "monospace", color: T.textFaint, letterSpacing: "0.08em", marginBottom: 16 }}>DELIVERY STEPS</p>
-        <div style={{ position: "relative" }}>
-          {/* Vertical line */}
-          <div style={{
-            position: "absolute", left: 19, top: 20, bottom: 20, width: 2,
-            background: T.border, borderRadius: 1,
-          }} />
-          <Motion.div
-            animate={{ height: `${progressPct}%` }}
-            transition={{ duration: 0.8 }}
-            style={{
-              position: "absolute", left: 19, top: 20, width: 2,
-              background: `linear-gradient(180deg, ${T.accent}, ${T.teal})`,
-              borderRadius: 1,
-            }}
-          />
-
-          {STATUS_STEPS.map((step, idx) => {
-            const Icon = STEP_ICONS[step.id] || HiOutlineShoppingBag;
-            const isCompleted = idx < currentStep;
-            const isCurrent = idx === currentStep;
-            return (
-              <Motion.div
-                key={step.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: idx < STATUS_STEPS.length - 1 ? 20 : 0 }}
-              >
-                <Motion.div
-                  animate={isCurrent ? { scale: [1, 1.2, 1] } : {}}
-                  transition={{ duration: 1.5, repeat: isCurrent ? Infinity : 0 }}
-                  style={{
-                    width: 40, height: 40, borderRadius: "50%", flexShrink: 0,
-                    background: isCompleted ? T.accent : isCurrent ? T.accentSoft : T.bgAlt,
-                    border: `2px solid ${isCompleted || isCurrent ? T.accent : T.border}`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    zIndex: 1, position: "relative",
-                  }}
-                >
-                  <Icon style={{ fontSize: 18, color: isCompleted ? "#fff" : isCurrent ? T.accent : T.textFaint }} />
-                </Motion.div>
-
-                <div style={{ paddingTop: 8 }}>
-                  <p style={{ fontWeight: isCompleted || isCurrent ? 700 : 400, fontSize: 14, color: isCompleted ? T.accent : isCurrent ? T.text : T.textFaint }}>
-                    {step.label}
-                  </p>
-                  <p style={{ fontSize: 11.5, color: T.textFaint, marginTop: 2 }}>{step.sub}</p>
-                  {isCurrent && (
-                    <Motion.div animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
-                      style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 6, background: T.accentSoft, borderRadius: 100, padding: "2px 10px", border: `1px solid ${T.borderMed}` }}>
-                      <div style={{ width: 4, height: 4, borderRadius: "50%", background: T.accent }} />
-                      <span style={{ fontSize: 9, color: T.accent, fontFamily: "monospace", fontWeight: 700 }}>IN PROGRESS</span>
-                    </Motion.div>
-                  )}
-                </div>
-              </Motion.div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Order summary */}
-      {order?.items?.length > 0 && (
-        <div style={{ margin: "16px 16px 0", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 20, padding: 16 }}>
-          <p style={{ fontSize: 11, fontFamily: "monospace", color: T.textFaint, letterSpacing: "0.08em", marginBottom: 14 }}>ITEMS</p>
-          {order.items.map((item, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: i < order.items.length - 1 ? `1px solid ${T.border}` : "none" }}>
-              <img src={item.image} alt={item.name} style={{ width: 40, height: 40, borderRadius: 10, objectFit: "cover", flexShrink: 0 }} />
-              <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{item.name}</p>
-                <p style={{ fontSize: 11, color: T.textFaint }}>{item.quantity}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Delivery address */}
-      <div style={{ margin: "16px 16px 0", background: T.bgCard, border: `1px solid ${T.border}`, borderRadius: 20, padding: 16 }}>
-        <p style={{ fontSize: 11, fontFamily: "monospace", color: T.textFaint, letterSpacing: "0.08em", marginBottom: 10 }}>DELIVERY TO</p>
-        <p style={{ fontSize: 13.5, color: T.textMuted }}>{order?.deliveryAddress || "Your saved address"}</p>
-      </div>
-    </div>
-  );
+function OrderDetail({ order, loading, error, busy, cancel, eta, progressPct, STATUS_STEPS, navigate }) {
+  if (loading) return <div className="ot-empty">Loading rescue status…</div>;
+  if (error && !order) return <><button className="ot-icon-btn" onClick={() => navigate(-1)}><HiOutlineArrowLeft /></button><div className="ot-alert" style={{ marginTop: 14 }}>{error}</div></>;
+  if (!order) return <div className="ot-empty">This rescue could not be found.</div>;
+  const [title, subtitle] = statusCopy[order.workflowStatus];
+  return <><header className="ot-head"><div style={{ display: "flex", gap: 12 }}><button className="ot-icon-btn" onClick={() => navigate(-1)} aria-label="Back"><HiOutlineArrowLeft /></button><div><div className="ot-kicker">Order {order.$id.slice(0, 8)}</div><h1>Rescue details</h1></div></div></header>{error && <div className="ot-alert" style={{ marginBottom: 14 }}>{error}</div>}<div className="ot-detail-grid"><section><div className="ot-card ot-hero"><div className="ot-hero-row"><div><h2>{title}</h2><p>{subtitle}</p></div><span className="ot-live"><i /> LIVE DATA</span></div><div className="ot-progress"><span style={{ width: `${progressPct}%` }} /></div><div className="ot-progress-copy"><span>{progressPct}% complete</span><span>{eta !== null ? `${eta} min remaining in rescue window` : order.workflowStatus === "completed" ? "Completed" : "No deadline"}</span></div></div><div className="ot-card"><p className="ot-label">Rescue progress</p><div className="ot-steps">{STATUS_STEPS.map((step, index) => { const active = index === order.currentStep && order.workflowStatus !== "cancelled"; const done = index < order.currentStep || order.workflowStatus === "completed"; return <div className={`ot-step ${done ? "done" : active ? "active" : ""}`} key={step.id}><span className="ot-step-icon">{done ? <HiOutlineCheckCircle /> : active ? <HiOutlineClock /> : <HiOutlineShoppingBag />}</span><div><h3>{step.label}</h3><p>{step.sub}</p></div></div>; })}</div></div></section><aside className="ot-side"><div className="ot-card"><p className="ot-label">Pickup from donor</p><div className="ot-address"><HiOutlineMapPin /><span>{order.pickupLocation}</span></div></div><div className="ot-card"><p className="ot-label">Deliver to receiver</p><div className="ot-address"><HiOutlineMapPin /><span>{order.deliveryAddress}</span></div></div><div className="ot-card"><p className="ot-label">Order summary</p><strong>{order.name}</strong><p style={{ margin: "5px 0 0", color: "var(--ot-muted)", fontSize: 12 }}>{order.quantity} meals · {order.description}</p></div><div className="ot-actions">{order.dropOffLocation && order.workflowStatus !== "cancelled" && <button className="ot-button primary" onClick={() => navigate("/dashboard/map")}><HiOutlineMap style={{ verticalAlign: "middle", marginRight: 6 }} />View donor-to-receiver route</button>}{order.workflowStatus === "posted" && <Link className="ot-button" to="/donations">View public listing</Link>}{["posted","reserved"].includes(order.workflowStatus) && <button className="ot-button danger" disabled={busy} onClick={cancel}><HiOutlineXCircle style={{ verticalAlign: "middle", marginRight: 6 }} />{busy ? "Cancelling…" : "Cancel rescue"}</button>}</div></aside></div></>;
 }

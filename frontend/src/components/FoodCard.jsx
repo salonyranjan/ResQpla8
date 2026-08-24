@@ -1,20 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { useCart } from "../context/CartContext";
 import { useTheme } from "../context/ThemeContext";
-
-const FONT_URL =
-  "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap";
+import { useAuth } from "../context/AuthContext";
+import { useLocation, useNavigate } from "react-router-dom";
 
 /* ── Inject styles once globally ── */
 let stylesInjected = false;
 const injectStyles = () => {
   if (stylesInjected || typeof document === "undefined") return;
   stylesInjected = true;
-
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = FONT_URL;
-  document.head.appendChild(link);
 
   const style = document.createElement("style");
   style.id = "fc-global";
@@ -24,7 +18,8 @@ const injectStyles = () => {
       --fc-img-h: 200px;
       --fc-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
       --fc-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
-      font-family: 'Outfit', system-ui, sans-serif;
+      font-family: var(--font-body);
+      width: 100%;
     }
 
     /* LIGHT */
@@ -83,7 +78,7 @@ const injectStyles = () => {
       cursor: pointer;
       text-decoration: none;
       color: var(--fc-text);
-      width: 300px;
+      width: 100%;
       transition:
         box-shadow 0.5s var(--fc-ease-smooth),
         transform 0.5s var(--fc-ease-smooth),
@@ -154,7 +149,7 @@ const injectStyles = () => {
       z-index: 4;
       background: var(--fc-bg);
       color: var(--fc-accent);
-      font-family: 'DM Mono', monospace;
+      font-family: var(--font-meta);
       font-size: 9px;
       font-weight: 500;
       letter-spacing: 0.12em;
@@ -207,6 +202,17 @@ const injectStyles = () => {
       box-shadow: var(--fc-shadow-btn);
     }
 
+    .fc-add-btn.fc-claim-btn {
+      width: auto;
+      min-width: 92px;
+      padding: 0 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .fc-add-btn.fc-claim-btn:hover { transform: scale(1.04); }
+
     .fc-add-btn.fc-added {
       background: var(--fc-accent);
       color: #fff;
@@ -231,7 +237,7 @@ const injectStyles = () => {
       padding: 6px 16px;
       background: linear-gradient(90deg, var(--fc-amber), rgba(0,0,0,0));
       color: #fff;
-      font-family: 'DM Mono', monospace;
+      font-family: var(--font-meta);
       font-size: 9.5px;
       font-weight: 500;
       letter-spacing: 0.06em;
@@ -246,7 +252,7 @@ const injectStyles = () => {
     }
 
     .fc-name {
-      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-family: var(--font-display);
       font-size: 20px;
       font-weight: 700;
       color: var(--fc-text);
@@ -262,7 +268,7 @@ const injectStyles = () => {
       font-size: 11px;
       font-weight: 600;
       color: var(--fc-accent);
-      font-family: 'DM Mono', monospace;
+      font-family: var(--font-meta);
       letter-spacing: 0.06em;
       text-transform: uppercase;
       margin: 0 0 8px;
@@ -299,7 +305,7 @@ const injectStyles = () => {
       display: flex;
       align-items: center;
       gap: 5px;
-      font-family: 'Outfit', sans-serif;
+      font-family: var(--font-body);
       font-size: 12px;
       font-weight: 500;
       color: var(--fc-text-sub);
@@ -328,7 +334,7 @@ const injectStyles = () => {
     }
 
     .fc-qty-label {
-      font-family: 'DM Mono', monospace;
+      font-family: var(--font-meta);
       font-size: 11px;
       font-weight: 400;
       color: var(--fc-text-muted);
@@ -337,7 +343,7 @@ const injectStyles = () => {
     }
 
     .fc-qty-value {
-      font-family: 'Outfit', sans-serif;
+      font-family: var(--font-body);
       font-size: 14px;
       font-weight: 700;
       color: var(--fc-accent);
@@ -376,7 +382,7 @@ const injectStyles = () => {
       border-radius: 100px;
       padding: 5px 13px 5px 8px;
       cursor: pointer;
-      font-family: 'Outfit', sans-serif;
+      font-family: var(--font-body);
       font-size: 12px;
       font-weight: 500;
       color: var(--fc-text-sub);
@@ -435,7 +441,7 @@ const injectStyles = () => {
     }
 
     .fc-img-placeholder-text {
-      font-family: 'DM Mono', monospace;
+      font-family: var(--font-meta);
       font-size: 9px;
       color: var(--fc-text-muted);
       letter-spacing: 0.12em;
@@ -449,12 +455,16 @@ const FoodCard = ({
   item = {},
   onClick,
   externalDark,
+  publicClaim = false,
 }) => {
   const [added, setAdded] = useState(false);
   const [failedImageSrc, setFailedImageSrc] = useState("");
   const { dark: appDark } = useTheme();
   const cardRef = useRef(null);
   const { addItem } = useCart();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const isDark = externalDark !== undefined ? externalDark : appDark;
 
@@ -463,6 +473,10 @@ const FoodCard = ({
   const handleAdd = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
     addItem({
       id: item.$id,
       name: item.name,
@@ -474,6 +488,10 @@ const FoodCard = ({
       maxQuantity: 1,
     }, 1);
     setAdded(true);
+    if (publicClaim) {
+      navigate("/cart");
+      return;
+    }
     setTimeout(() => setAdded(false), 1400);
   };
 
@@ -494,7 +512,7 @@ const FoodCard = ({
   } = item;
 
   return (
-    <div className="fc-root" data-theme={isDark ? "dark" : "light"} style={{ display: "inline-block" }}>
+    <div className="fc-root" data-theme={isDark ? "dark" : "light"}>
       <div
         ref={cardRef}
         className="fc-card"
@@ -522,11 +540,11 @@ const FoodCard = ({
           {/* Add-to-cart button */}
           <button
             onClick={handleAdd}
-            className={`fc-add-btn ${added ? "fc-added" : ""}`}
-            aria-label={`Add ${name} to cart`}
+            className={`fc-add-btn ${publicClaim ? "fc-claim-btn" : ""} ${added ? "fc-added" : ""}`}
+            aria-label={`${publicClaim ? "Claim" : "Add"} ${name}`}
             type="button"
           >
-            {added ? "✓" : "+"}
+            {added ? "✓" : publicClaim ? "Claim food" : "+"}
           </button>
 
           {/* Expires ribbon */}

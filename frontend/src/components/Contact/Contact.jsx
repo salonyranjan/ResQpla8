@@ -549,23 +549,23 @@ const InfoCards = ({ T }) => (
 
 const FAQS = [
   {
-    q: "How fast are NGOs matched to donations?",
-    a: "Our AI typically finds the best-fit NGO within 90 seconds — factoring distance, capacity, and food type simultaneously.",
-    link: { to: "/dashboard/ai-matching", label: "Try AI Matching" },
+    q: "How can a receiver find available food?",
+    a: "Available, unexpired donations appear on the public Donations page. Sign-in is required only when claiming food.",
+    link: { to: "/donations", label: "Browse Donations" },
   },
   {
     q: "How is food safety maintained in transit?",
-    a: "Volunteers use insulated carriers. Missed pickup windows auto-reassign to the next nearest verified volunteer.",
-    link: null,
+    a: "Donors provide collection deadlines and volunteers receive pickup and delivery details. Structured cold-chain controls are listed in the production-readiness plan.",
+    link: { to: "/about#values", label: "Read Our Values" },
   },
   {
-    q: "Can NGOs specify the food they need?",
-    a: "Yes. NGOs manage a live preference dashboard so they only receive food matching their current needs and storage capacity.",
-    link: null,
+    q: "How can someone become a volunteer?",
+    a: "Create a volunteer account, open Volunteer Pickups, enable location access, and set your current meal-carrying capacity.",
+    link: { to: "/register?role=volunteer", label: "Join as Volunteer" },
   },
   {
     q: "Do donors receive proof of impact?",
-    a: "Every donor gets a digital certificate showing meals rescued, CO₂ saved, and estimated families reached.",
+    a: "Donors can review completed rescue records and record-based impact totals in their dashboard.",
     link: { to: "/dashboard/impact-delivered", label: "View Impact Dashboard" },
   },
 ];
@@ -926,8 +926,8 @@ const PARTNERS = [
   {
     emoji: "🤲", title: "NGOs & Shelters",
     desc: "Register your needs and receive matched food donations with zero coordination overhead.",
-    cta: "Register NGO", color: "#3d8a67", link: "/register?role=ngo",
-    stat: "340+ NGOs served",
+    cta: "Receive Food", color: "#3d8a67", link: "/register?role=receiver",
+    stat: "Receiver access",
   },
   {
     emoji: "🚴", title: "Volunteers & Drivers",

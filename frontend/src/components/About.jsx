@@ -1098,7 +1098,7 @@ const MobileDrawer = ({ dark, toggleDark, activeIdx, setActiveIdx, open, onClose
               <Link to="/register" className="ab-drawer-cta-primary" onClick={onClose}>
                 Get Started Free →
               </Link>
-              <Link to="/dashboard/search" className="ab-drawer-cta-ghost" onClick={onClose}>
+              <Link to="/donations" className="ab-drawer-cta-ghost" onClick={onClose}>
                 Browse Listings
               </Link>
             </Motion.div>
@@ -1284,8 +1284,8 @@ export default function About() {
 
   const HOW_STEPS = [
     { emoji: "🍽️", title: "Food Listed",    body: "Restaurants, events & households list surplus food with expiry time and quantity.", color: "step-green", to: "/dashboard/donate" },
-    { emoji: "📍", title: "Made Discoverable", body: "Pending donations appear in the shared food listing with their pickup details.", color: "step-teal", to: "/dashboard/search" },
-    { emoji: "🤝", title: "Claim, Pick Up & Track", body: "A receiver claims the food, arranges collection, and records the completed rescue.", color: "step-amber", to: "/dashboard/search" },
+    { emoji: "📍", title: "Made Discoverable", body: "Pending donations appear in the shared food listing with their pickup details.", color: "step-teal", to: "/donations" },
+    { emoji: "🤝", title: "Claim, Pick Up & Track", body: "A receiver claims the food, arranges collection, and records the completed rescue.", color: "step-amber", to: "/donations" },
     { emoji: "❤️", title: "Outcome Recorded", body: "The pickup status becomes part of the platform's real activity and impact history.", color: "step-leaf", to: "/dashboard/orders" },
   ];
 

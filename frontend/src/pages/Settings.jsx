@@ -10,6 +10,7 @@ const Settings = () => {
   const navigate = useNavigate();
   const [browserAlerts, setBrowserAlerts] = useState(false);
   const [emailUpdates, setEmailUpdates] = useState(false);
+  const [role, setRole] = useState("receiver");
   const [permission, setPermission] = useState(() => typeof Notification === "undefined" ? "unsupported" : Notification.permission);
   const [saving, setSaving] = useState("");
   const [message, setMessage] = useState({ type: "", text: "" });
@@ -18,7 +19,8 @@ const Settings = () => {
   useEffect(() => {
     setBrowserAlerts(Boolean(user?.prefs?.browserAlerts));
     setEmailUpdates(Boolean(user?.prefs?.emailUpdates));
-  }, [user?.$id, user?.prefs?.browserAlerts, user?.prefs?.emailUpdates]);
+    setRole(user?.prefs?.role || "receiver");
+  }, [user?.$id, user?.prefs?.browserAlerts, user?.prefs?.emailUpdates, user?.prefs?.role]);
 
   const savePreference = async (key, value) => {
     setSaving(key);
@@ -87,6 +89,13 @@ const Settings = () => {
       {message.text && <div role="status" style={{ marginBottom: 16, padding: 12, borderRadius: 12, color: message.type === "error" ? T.red : T.accent, background: message.type === "error" ? T.redSoft : T.accentSoft, border: `1px solid ${message.type === "error" ? T.red : T.accent}33`, fontSize: 12 }}>{message.text}</div>}
 
       <div style={{ display: "grid", gap: 18, maxWidth: 760 }}>
+        <section style={card}>
+          <h3 style={{ color: T.text, fontSize: 16, marginBottom: 8 }}>Primary role</h3>
+          <p style={{ color: T.textMuted, fontSize: 11.5, marginBottom: 14 }}>This personalizes your workspace. Server permissions must still be configured separately for production.</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
+            {["receiver", "donor", "volunteer"].map((value) => <button key={value} type="button" disabled={saving === "role"} onClick={async () => { const previous = role; setRole(value); if (!(await savePreference("role", value))) setRole(previous); }} aria-pressed={role === value} style={{ padding: 11, borderRadius: 10, border: `1px solid ${role === value ? T.accent : T.border}`, background: role === value ? T.accentSoft : T.bgAlt, color: role === value ? T.accent : T.textMuted, cursor: "pointer", fontWeight: 700, textTransform: "capitalize" }}>{value}</button>)}
+          </div>
+        </section>
         <section style={card}>
           <h3 style={{ color: T.text, fontSize: 16, marginBottom: 8 }}>Appearance</h3>
           <p style={{ color: T.textMuted, fontSize: 11.5, marginBottom: 14 }}>Theme changes apply immediately and remain on this device.</p>

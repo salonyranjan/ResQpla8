@@ -1,4 +1,4 @@
-import { Client, Account, Databases, Storage, ID } from "appwrite";
+import { Client, Account, Databases, Functions, Storage, ID } from "appwrite";
 
 const endpoint = import.meta.env.VITE_APPWRITE_ENDPOINT?.trim();
 const projectId = import.meta.env.VITE_APPWRITE_PROJECT_ID?.trim();
@@ -23,6 +23,7 @@ const client = new Client()
 // Re‑usable service instances
 export const account = new Account(client);
 export const databases = new Databases(client);
+export const functions = new Functions(client);
 export const storage = new Storage(client);
 
 // Export the client itself for any advanced use‑cases.

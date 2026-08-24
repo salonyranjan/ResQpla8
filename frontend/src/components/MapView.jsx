@@ -3,9 +3,11 @@ import { Circle, MapContainer, Marker, Polyline, Popup, TileLayer, useMap, useMa
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useTheme } from "../context/ThemeContext";
-import { listAvailableFood, subscribeToPickupChanges } from "../services/foodService";
+import { useLocation } from "react-router-dom";
+import { listAllPickups, listAvailableFood, subscribeToPickupChanges } from "../services/foodService";
 import { geocodeAddress } from "../services/geocoding";
 import { getShortestPickupRoute } from "../services/routeService";
+import { isVerifiedRoutablePickup } from "../services/workflowRules";
 
 const DEFAULT_CENTER = [28.6139, 77.209];
 
@@ -67,6 +69,9 @@ function coordinatesFor(item, resolvedCoordinates) {
 
 export default function MapView({ selectedPickup, onPickupSelect }) {
   const { dark } = useTheme();
+  const location = useLocation();
+  const isDashboardMap = location.pathname.startsWith("/dashboard/map");
+  const requestedPickupId = new URLSearchParams(location.search).get("pickup");
   const [listings, setListings] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -79,17 +84,20 @@ export default function MapView({ selectedPickup, onPickupSelect }) {
   const [resolvedCoordinates, setResolvedCoordinates] = useState({});
   const [route, setRoute] = useState(null);
   const [routeLoading, setRouteLoading] = useState(false);
+  const [routeError, setRouteError] = useState("");
+  const [receiverPosition, setReceiverPosition] = useState(null);
 
   const loadListings = useCallback(async () => {
     try {
-      setListings(await listAvailableFood(200));
+      const documents = isDashboardMap ? await listAllPickups(500) : await listAvailableFood(200);
+      setListings(isDashboardMap ? documents.filter(isVerifiedRoutablePickup) : documents);
       setError("");
     } catch (requestError) {
       setError(requestError.message || "Map listings could not be loaded.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isDashboardMap]);
 
   useEffect(() => {
     loadListings();
@@ -98,11 +106,16 @@ export default function MapView({ selectedPickup, onPickupSelect }) {
   }, [loadListings]);
 
   useEffect(() => {
+    if (!isDashboardMap || selected || !listings.length) return;
+    setSelected(listings.find((item) => item.$id === requestedPickupId) || listings[0]);
+  }, [isDashboardMap, listings, requestedPickupId, selected]);
+
+  useEffect(() => {
     let active = true;
     const resolveMissingLocations = async () => {
       for (const item of listings) {
         if (!active) break;
-        if (coordinatesFor(item) || Object.hasOwn(resolvedCoordinates, item.$id)) continue;
+        if (coordinatesFor(item) || Object.hasOwn(resolvedCoordinates, item.$id) || isDashboardMap) continue;
         const address = item.pickupLocation || item.location;
         if (!address) continue;
         try {
@@ -116,7 +129,7 @@ export default function MapView({ selectedPickup, onPickupSelect }) {
     };
     resolveMissingLocations();
     return () => { active = false; };
-  }, [listings, resolvedCoordinates]);
+  }, [isDashboardMap, listings, resolvedCoordinates]);
 
   const mappedListings = useMemo(
     () => listings.map((item) => ({ ...item, coordinates: coordinatesFor(item, resolvedCoordinates[item.$id]) })).filter((item) => item.coordinates),
@@ -161,27 +174,57 @@ export default function MapView({ selectedPickup, onPickupSelect }) {
   const routePositions = useMemo(() => route?.positions || [], [route]);
 
   useEffect(() => {
-    if (!selectedPosition || !userPosition) {
+    if (!isDashboardMap || !selected?.dropOffLocation) {
+      setReceiverPosition(null);
+      return undefined;
+    }
+    let active = true;
+    geocodeAddress(selected.dropOffLocation)
+      .then((coordinates) => {
+        if (active) {
+          setReceiverPosition(coordinates);
+          setRouteError("");
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setReceiverPosition(null);
+          setRouteError("The receiver address could not be verified on the map.");
+        }
+      });
+    return () => { active = false; };
+  }, [isDashboardMap, selected]);
+
+  useEffect(() => {
+    const routeStart = isDashboardMap ? selectedPosition : userPosition;
+    const routeEnd = isDashboardMap ? receiverPosition : selectedPosition;
+    if (!routeStart || !routeEnd) {
+      setRoute(null);
       return undefined;
     }
     const controller = new AbortController();
     setRouteLoading(true);
-    getShortestPickupRoute(userPosition, selectedPosition, controller.signal)
+    setRouteError("");
+    getShortestPickupRoute(routeStart, routeEnd, controller.signal, !isDashboardMap)
       .then(setRoute)
       .catch((routeError) => {
-        if (routeError.name !== "AbortError") setError(routeError.message || "Pickup route could not be calculated.");
+        if (routeError.name !== "AbortError") {
+          setRoute(null);
+          setRouteError(routeError.message || "Pickup route could not be calculated.");
+        }
       })
       .finally(() => {
         if (!controller.signal.aborted) setRouteLoading(false);
       });
     return () => controller.abort();
-  }, [selectedPosition, userPosition]);
+  }, [isDashboardMap, receiverPosition, selectedPosition, userPosition]);
   const missingCoordinates = Math.max(0, listings.length - mappedListings.length);
 
   return (
-    <main className={`rq-professional-map ${dark ? "dark" : "light"}`}>
+    <main className={`rq-professional-map ${isDashboardMap ? "in-dashboard" : ""} ${dark ? "dark" : "light"}`}>
       <style>{`
         .rq-professional-map { --panel:#fff; --text:#17251c; --muted:#66776c; --line:rgba(19,74,39,.13); --soft:#f4f8f5; position:relative; height:calc(100dvh - 72px); margin-top:72px; overflow:hidden; background:#e8efe9; color:var(--text); font-family:'Cabinet Grotesk',system-ui,sans-serif; }
+        .rq-professional-map.in-dashboard { height:calc(100dvh - 76px); margin-top:0; padding:0!important; }
         .rq-professional-map.dark { --panel:#0c1710; --text:#edf7f0; --muted:#8ba092; --line:rgba(82,183,136,.14); --soft:#111f16; background:#09130d; }
         .rq-map-panel { position:absolute; z-index:600; top:16px; bottom:16px; left:16px; width:340px; display:flex; flex-direction:column; overflow:hidden; border:1px solid var(--line); border-radius:18px; background:color-mix(in srgb,var(--panel) 96%,transparent); box-shadow:0 18px 55px rgba(6,35,17,.16); backdrop-filter:blur(16px); }
         .rq-map-panel-head { padding:20px; border-bottom:1px solid var(--line); }
@@ -206,38 +249,42 @@ export default function MapView({ selectedPickup, onPickupSelect }) {
         .rq-map-user-dot { display:block; width:18px; height:18px; border:4px solid #fff; border-radius:50%; background:#2563eb; box-shadow:0 0 0 8px rgba(37,99,235,.18); }
         .rq-professional-map .leaflet-popup-content-wrapper { border-radius:13px; box-shadow:0 15px 45px rgba(0,0,0,.18); }
         .rq-professional-map .leaflet-popup-content { margin:14px 16px; }
+        @media(max-width:820px){.rq-professional-map.in-dashboard{height:calc(100dvh - 68px)}}
         @media(max-width:760px){ .rq-map-panel { top:12px; bottom:12px; left:12px; width:min(330px,calc(100% - 72px)); transform:translateX(-115%); transition:transform .25s; } .rq-map-panel.open { transform:translateX(0); } .rq-map-tools{top:12px;right:12px;} }
       `}</style>
 
       <aside className={`rq-map-panel ${sidebarOpen ? "open" : ""}`} aria-label="Mapped food listings">
         <div className="rq-map-panel-head">
-          <div className="rq-map-heading"><div><h1>Food rescue map</h1><p>Pending donations with saved coordinates</p></div><strong>{mappedListings.length}</strong></div>
+          <div className="rq-map-heading"><div><h1>{isDashboardMap ? "Donor to receiver" : "Food rescue map"}</h1><p>{isDashboardMap ? "Complete shortest routes for claimed food" : "Pending donations with saved coordinates"}</p></div><strong>{mappedListings.length}</strong></div>
           <input className="rq-map-search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search mapped listings" aria-label="Search mapped listings" />
         </div>
         <div className="rq-map-list">
           {loading ? <div className="rq-map-empty">Loading map listings…</div> : error ? <div className="rq-map-empty" role="alert">{error}</div> : filteredListings.length ? filteredListings.map((item) => (
             <button key={item.$id} className={`rq-map-card ${selected?.$id === item.$id ? "active" : ""}`} onClick={() => chooseListing(item)}>
-              <div><strong>{item.name}</strong><span>{item.pickupLocation}</span></div><div style={{ color: "#36a269", fontSize: 12, whiteSpace: "nowrap" }}>{item.mealsCount || 0} meals</div>
+              <div><strong>{item.name}</strong><span>{item.pickupLocation}</span>{isDashboardMap && <span>To: {item.dropOffLocation}</span>}</div><div style={{ color: "#36a269", fontSize: 12, whiteSpace: "nowrap" }}>{item.mealsCount || 0} meals</div>
             </button>
-          )) : <div className="rq-map-empty">No mapped donations are available.{missingCoordinates > 0 && ` ${missingCoordinates} current listing${missingCoordinates === 1 ? " is" : "s are"} hidden because coordinates were not saved.`}</div>}
+          )) : <div className="rq-map-empty">{isDashboardMap ? "No verified donor-to-receiver pickups are available yet." : <>No mapped donations are available.{missingCoordinates > 0 && ` ${missingCoordinates} current listing${missingCoordinates === 1 ? " is" : "s are"} hidden because coordinates were not saved.`}</>}</div>}
         </div>
       </aside>
 
       <div className="rq-map-tools">
         {selected && <div style={{ width: 220, padding: "11px 12px", border: "1px solid var(--line)", borderRadius: 12, background: "var(--panel)", boxShadow: "0 8px 24px rgba(6,35,17,.12)", fontSize: 12 }}>
           <strong style={{ display: "block" }}>{selected.name}</strong>
-          {!userPosition ? <span style={{ display: "block", marginTop: 5, color: "var(--muted)" }}>Select Locate to calculate the volunteer pickup route.</span>
+          {routeError && <span style={{ display: "block", marginTop: 5, color: "#dc5a5a" }}>{routeError}</span>}
+          {!routeError && (isDashboardMap && !receiverPosition ? <span style={{ display: "block", marginTop: 5, color: "var(--muted)" }}>Locating the receiver address…</span> : !isDashboardMap && !userPosition ? <span style={{ display: "block", marginTop: 5, color: "var(--muted)" }}>Select Locate to calculate the volunteer pickup route.</span>
             : routeLoading ? <span style={{ display: "block", marginTop: 5, color: "var(--muted)" }}>Calculating shortest route…</span>
-              : route && <><span style={{ display: "block", marginTop: 5, color: "#278653", fontWeight: 800 }}>{route.distanceKm.toFixed(1)} km{route.durationMinutes ? ` · ${route.durationMinutes} min` : ""}</span><small style={{ display: "block", marginTop: 3, color: "var(--muted)" }}>{route.source === "road" ? "Shortest available driving route" : "Straight-line fallback"}</small></>}
+              : route && <><span style={{ display: "block", marginTop: 5, color: "#278653", fontWeight: 800 }}>{route.distanceKm.toFixed(1)} km{route.durationMinutes ? ` · ${route.durationMinutes} min` : ""}</span><small style={{ display: "block", marginTop: 3, color: "var(--muted)" }}>{route.source === "road" ? "Shortest available driving route" : "Straight-line fallback"}</small></>)}
         </div>}
         <button className="rq-map-tool" onClick={() => setSidebarOpen((value) => !value)} aria-label={sidebarOpen ? "Hide listings" : "Show listings"}>{sidebarOpen ? "Hide" : "Listings"}</button>
-        <button className="rq-map-tool" onClick={locateUser} disabled={locating}>{locating ? "…" : "Locate"}</button>
+        {!isDashboardMap && <button className="rq-map-tool" onClick={locateUser} disabled={locating}>{locating ? "…" : "Locate"}</button>}
       </div>
 
       <MapContainer center={DEFAULT_CENTER} zoom={12} zoomControl>
         <TileLayer key={dark ? "dark" : "light"} url={dark ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"} attribution='&copy; OpenStreetMap contributors &copy; CARTO' subdomains="abcd" maxZoom={20} />
         <MapActions locateRequest={locateRequest} userPosition={userPosition} selectedPosition={selectedPosition} listingPositions={listingPositions} routePositions={routePositions} onMapSelect={onPickupSelect} />
         {routePositions.length > 1 && <Polyline positions={routePositions} pathOptions={{ color: "#e67e22", weight: 5, opacity: .9 }} />}
+        {isDashboardMap && selectedPosition && <Marker position={selectedPosition} icon={foodMarker}><Popup><strong>Donor pickup</strong><div style={{ marginTop: 4 }}>{selected?.pickupLocation}</div></Popup></Marker>}
+        {isDashboardMap && receiverPosition && <><Circle center={receiverPosition} radius={120} pathOptions={{ color: "#2563eb", fillColor: "#2563eb", fillOpacity: .08, weight: 1 }} /><Marker position={receiverPosition} icon={userMarker}><Popup><strong>Receiver</strong><div style={{ marginTop: 4 }}>{selected?.dropOffLocation}</div></Popup></Marker></>}
         {userPosition && <><Circle center={userPosition} radius={250} pathOptions={{ color: "#2563eb", fillColor: "#2563eb", fillOpacity: .08, weight: 1 }} /><Marker position={userPosition} icon={userMarker}><Popup>Your current location</Popup></Marker></>}
         {filteredListings.map((item) => <Marker key={item.$id} position={item.coordinates} icon={foodMarker} eventHandlers={{ click: () => setSelected(item) }}><Popup><strong>{item.name}</strong><div style={{ marginTop: 5 }}>{item.mealsCount || 0} meals</div><div style={{ marginTop: 3 }}>{item.pickupLocation}</div></Popup></Marker>)}
       </MapContainer>

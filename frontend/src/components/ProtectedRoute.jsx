@@ -2,6 +2,7 @@ import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { motion as Motion } from "framer-motion";
+import { canAccessRole, getRoleHome, getUserRole } from "../services/roleAccess";
 
 const LoadingSpinner = () => (
   <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
@@ -25,7 +26,7 @@ const LoadingSpinner = () => (
  *   • If no user → redirects to /login.
  *   • Otherwise renders children.
  */
-export default function ProtectedRoute({ children }) {
+export default function ProtectedRoute({ children, allowedRoles }) {
   const { loading, user } = useAuth();
   const location = useLocation();
 
@@ -34,8 +35,15 @@ export default function ProtectedRoute({ children }) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    return <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}` }} />;
   }
+
+  const role = getUserRole(user);
+  if (!role && location.pathname !== "/dashboard/settings") {
+    return <Navigate to="/dashboard/settings?setup=role" replace />;
+  }
+
+  if (!canAccessRole(allowedRoles, role)) return <Navigate to={getRoleHome(role)} replace />;
 
   return <>{children}</>;
 }

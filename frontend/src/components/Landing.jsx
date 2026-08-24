@@ -567,7 +567,7 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, dark, toggleDark
                     </Motion.div>
                   </Link>
 
-                  <Link to="/register?role=ngo" onClick={onClose}>
+                  <Link to="/donations" onClick={onClose}>
                     <Motion.div
                       whileTap={{ scale: 0.97 }}
                       style={{
@@ -1150,7 +1150,7 @@ const Hero = ({ c }) => {
                   }}
                 >Donate Food →</Motion.button>
               </Link>
-              <Link to="/register?role=ngo">
+              <Link to="/donations">
                 <Motion.button
                   whileHover={{ background: "rgba(255,255,255,0.14)" }}
                   whileTap={{ scale: 0.97 }}
@@ -1200,9 +1200,9 @@ const Hero = ({ c }) => {
 
 const STATS = [
   { value: "List", label: "Surplus food clearly", icon: "🍽️", color: "#52b788", to: "/dashboard/donate" },
-  { value: "Find", label: "Food available nearby", icon: "📍", color: "#e8a838", to: "/dashboard/search" },
-  { value: "Claim", label: "A pickup transparently", icon: "🤝", color: "#2d6a4f", to: "/dashboard/search" },
-  { value: "Track", label: "Real rescue activity", icon: "🌿", color: "#d4622a", to: "/dashboard" },
+  { value: "Find", label: "Food available nearby", icon: "📍", color: "#e8a838", to: "/donations" },
+  { value: "Claim", label: "A pickup transparently", icon: "🤝", color: "#2d6a4f", to: "/donations" },
+  { value: "Track", label: "Real rescue activity", icon: "🌿", color: "#d4622a", to: "/dashboard/orders" },
 ];
 
 const Stats = ({ c }) => (
@@ -1298,8 +1298,8 @@ const Mission = ({ c }) => (
 
 const FEATURES = [
   { emoji: "🍱", title: "Real Food Listings", desc: "Publish the food type, meal quantity, pickup location, collection window, and an optional photograph.", tag: "", accent: "#52b788", to: "/dashboard/donate" },
-  { emoji: "🔎", title: "Available Food", desc: "Browse pending Appwrite listings and search by food or pickup location without placeholder inventory.", tag: "", accent: "#e8a838", to: "/dashboard/search" },
-  { emoji: "🤝", title: "Clear Claiming", desc: "Claim available listings through checkout. Availability is checked again before the pickup record changes.", tag: "", accent: "#2d6a4f", to: "/dashboard/search" },
+  { emoji: "🔎", title: "Available Food", desc: "Browse pending Appwrite listings and search by food or pickup location without placeholder inventory.", tag: "", accent: "#e8a838", to: "/donations" },
+  { emoji: "🤝", title: "Clear Claiming", desc: "Claim available listings through checkout. Availability is checked again before the pickup record changes.", tag: "", accent: "#2d6a4f", to: "/donations" },
   { emoji: "📊", title: "Honest Impact", desc: "Dashboard totals and impact calculations come from recorded donations and completed pickups.", tag: "", accent: "#d4622a", to: "/dashboard" },
   { emoji: "🔔", title: "Activity Alerts", desc: "See alerts generated from real pending, active, completed, and cancelled pickup records.", tag: "", accent: "#7c3aed", to: "/dashboard/smart-alerts" },
   { emoji: "🧭", title: "Pickup Progress", desc: "Open a pickup record and follow the status and scheduled collection time stored by the platform.", tag: "", accent: "#0891b2", to: "/dashboard/orders" },
@@ -1382,8 +1382,8 @@ const Features = ({ c }) => (
 
 const HOW_STEPS = [
   { num: "01", emoji: "📸", title: "List Surplus Food", desc: "Add accurate food details, quantity, pickup location, collection time, and a photo.", color: "#52b788", to: "/dashboard/donate" },
-  { num: "02", emoji: "🔎", title: "Make It Discoverable", desc: "The pending donation appears in the dashboard and available-food listing.", color: "#e8a838", to: "/dashboard/search" },
-  { num: "03", emoji: "🤝", title: "Claim, Collect & Track", desc: "A receiver claims the food, arranges collection, and records the completed rescue.", color: "#d4622a", to: "/dashboard/search" },
+  { num: "02", emoji: "🔎", title: "Make It Discoverable", desc: "The pending donation appears in the dashboard and available-food listing.", color: "#e8a838", to: "/donations" },
+  { num: "03", emoji: "🤝", title: "Claim, Collect & Track", desc: "A receiver claims the food, arranges collection, and records the completed rescue.", color: "#d4622a", to: "/donations" },
   { num: "04", emoji: "📋", title: "Record the Outcome", desc: "Pickup status and completed rescue data become part of the project's real impact history.", color: "#2d6a4f", to: "/dashboard/impact-delivered" },
 ];
 
@@ -1739,7 +1739,7 @@ const CTA = ({ c }) => (
               }}
             >Start Donating →</Motion.button>
           </Link>
-          <Link to="/register?role=ngo">
+          <Link to="/donations">
             <Motion.button
               whileHover={{ background: "rgba(255,255,255,0.14)" }}
               whileTap={{ scale: 0.97 }}
@@ -1756,7 +1756,7 @@ const CTA = ({ c }) => (
           {[
             { label: "Learn More",      to: "/about"           },
             { label: "Contact Us",      to: "/contact"         },
-            { label: "Browse Listings", to: "/dashboard/search" },
+            { label: "Browse Listings", to: "/donations" },
           ].map((l) => (
             <Link key={l.label} to={l.to}>
               <Motion.span

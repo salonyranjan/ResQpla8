@@ -1,6 +1,7 @@
 import { ID, Permission, Query, Role } from "appwrite";
 import { databases, storage } from "./appwrite";
 import client from "./appwrite";
+import { canCancelPickup, isPickupAvailable, isValidResQPlateDonation } from "./workflowRules";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const PICKUPS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PICKUPS_COLLECTION_ID;
@@ -14,7 +15,7 @@ function assertConfigured() {
 }
 
 function isAppDonation(document) {
-  return Boolean(document?.$id && document.donorId && Number.isSafeInteger(Number(document.pickupId)));
+  return isValidResQPlateDonation(document);
 }
 
 function donationImageError(error) {
@@ -81,7 +82,7 @@ export async function listAvailableFood(limit = 100) {
   const now = Date.now();
   return response.documents
     .filter(isAppDonation)
-    .filter((document) => !document.scheduledTime || new Date(document.scheduledTime).getTime() > now)
+    .filter((document) => isPickupAvailable(document, now))
     .map(normalizePickup);
 }
 
@@ -130,7 +131,7 @@ export async function createFoodDonation({ userId, foodType, quantity, descripti
           fileId: documentId,
           file: image,
           permissions: [
-            Permission.read(Role.users()),
+            Permission.read(Role.any()),
             Permission.update(Role.user(userId)),
             Permission.delete(Role.user(userId)),
           ],
@@ -157,7 +158,9 @@ export async function createFoodDonation({ userId, foodType, quantity, descripti
       donorId: userId,
       weight: Number((mealsCount * 0.3).toFixed(2)),
       mealsCount,
-      foodType: `${foodType.trim()}: ${description.trim()}`.slice(0, 250),
+      // The deployed Appwrite column is 99 characters. Keep the payload
+      // inside that contract so long descriptions cannot reject a rescue.
+      foodType: `${foodType.trim()}: ${description.trim()}`.slice(0, 99),
       // Preserve the human-readable address in pickupLocation and use the
       // existing location string for coordinates, avoiding a schema migration.
       location: `geo:${latitude.toFixed(6)},${longitude.toFixed(6)}`,
@@ -179,7 +182,7 @@ export async function claimFood(items, deliveryAddress) {
   const latestDocuments = await Promise.all(items.map((item) =>
     databases.getDocument(DATABASE_ID, PICKUPS_COLLECTION_ID, item.id)
   ));
-  const unavailableIndex = latestDocuments.findIndex((document) => document.status !== "pending");
+  const unavailableIndex = latestDocuments.findIndex((document) => document.status !== "pending" || document.dropOffLocation);
   if (unavailableIndex !== -1) {
     throw new Error(`${items[unavailableIndex].name} is no longer available.`);
   }
@@ -189,11 +192,32 @@ export async function claimFood(items, deliveryAddress) {
       // The collection status enum only supports pending, completed, and
       // cancelled. Checkout completes the claim and must also remove the food
       // from the pending availability query.
-      status: "completed",
+      status: "pending",
       dropOffLocation: deliveryAddress,
     })
   ));
+  try {
+    const existing = JSON.parse(localStorage.getItem("resqplate_claimed_pickups") || "[]");
+    localStorage.setItem("resqplate_claimed_pickups", JSON.stringify([...new Set([...existing, ...updatedDocuments.map((item) => item.$id)])]));
+  } catch {
+    // Order tracking still works for donors if browser storage is unavailable.
+  }
   return updatedDocuments.map(normalizePickup);
+}
+
+export async function listUserOrders(userId, limit = 500) {
+  const pickups = await listAllPickups(limit);
+  let claimedIds = [];
+  try { claimedIds = JSON.parse(localStorage.getItem("resqplate_claimed_pickups") || "[]"); } catch { claimedIds = []; }
+  const claimed = new Set(Array.isArray(claimedIds) ? claimedIds : []);
+  return pickups.filter((pickup) => pickup.donorId === userId || claimed.has(pickup.$id));
+}
+
+export async function cancelPickup(documentId) {
+  assertConfigured();
+  const pickup = await databases.getDocument(DATABASE_ID, PICKUPS_COLLECTION_ID, documentId);
+  if (!canCancelPickup(pickup)) throw new Error("Only an active rescue can be cancelled.");
+  return normalizePickup(await databases.updateDocument(DATABASE_ID, PICKUPS_COLLECTION_ID, documentId, { status: "cancelled" }));
 }
 
 export async function getPickup(documentId) {

@@ -1,5 +1,5 @@
-import { lazy, Suspense } from "react";
-import { Navigate, Route, Routes, Outlet } from "react-router-dom";
+import { lazy, Suspense, useEffect } from "react";
+import { Navigate, Route, Routes, Outlet, useLocation } from "react-router-dom";
 
 // Components
 import Navbar from "./components/NavBar.jsx";
@@ -42,25 +42,46 @@ const PublicLayout = () => (
   </>
 );
 
+const RoleRoute = ({ roles, children }) => <ProtectedRoute allowedRoles={roles}>{children}</ProtectedRoute>;
+
+const RouteScrollManager = () => {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      if (hash) {
+        const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+        target?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [pathname, hash]);
+  return null;
+};
+
 function App() {
   return (
     <Suspense fallback={<AppLoader />}>
+        <RouteScrollManager />
         <Routes>
           {/* ── DASHBOARD (protected) ── */}
           <Route element={<PageTransition />}>
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
               <Route index          element={<DashboardHome />}  />
-              <Route path="search"  element={<FoodListing />}    />
+              <Route path="search"  element={<RoleRoute roles={["receiver"]}><FoodListing /></RoleRoute>} />
+              <Route path="map"     element={<MapView />}        />
               <Route path="orders"  element={<OrderTracking />} />
+              <Route path="orders/:orderId" element={<OrderTracking />} />
               <Route path="track"   element={<OrderTracking />}  />
               <Route path="profile" element={<ProfilePage />}    />
               <Route path="settings" element={<Settings />} />
-              <Route path="ai-matching" element={<AIMatching />} />
-              <Route path="donate" element={<DonateFood />} />
-              <Route path="analytics" element={<Analytics />} />
+              <Route path="ai-matching" element={<RoleRoute roles={["receiver"]}><AIMatching /></RoleRoute>} />
+              <Route path="donate" element={<RoleRoute roles={["donor"]}><DonateFood /></RoleRoute>} />
+              <Route path="analytics" element={<RoleRoute roles={["donor"]}><Analytics /></RoleRoute>} />
               <Route path="smart-alerts" element={<SmartAlerts />} />
               <Route path="post-60" element={<Navigate to="/dashboard/donate" replace />} />
-              <Route path="volunteer" element={<VolunteerPickup />} />
+              <Route path="volunteer" element={<RoleRoute roles={["volunteer"]}><VolunteerPickup /></RoleRoute>} />
               <Route path="impact-delivered" element={<ImpactDelivered />} />
               <Route path="leader-board" element={<Leaderboard />} />
             </Route>
@@ -74,13 +95,14 @@ function App() {
               <Route path="/register" element={<Signup />}   />
               <Route path="/contact"  element={<Contact />}  />
               <Route path="/about"    element={<About />}    />
+              <Route path="/donations" element={<FoodListing />} />
               <Route path="/map"      element={<MapView />}  />
             </Route>
           </Route>
 
           {/* ── STANDALONE ── */}
-          <Route path="/cart"                element={<ProtectedRoute><CartPage /></ProtectedRoute>}      />
-          <Route path="/checkout"            element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>}  />
+          <Route path="/cart"                element={<RoleRoute roles={["receiver"]}><CartPage /></RoleRoute>} />
+          <Route path="/checkout"            element={<RoleRoute roles={["receiver"]}><CheckoutPage /></RoleRoute>} />
           <Route path="/tracking/:orderId"   element={<ProtectedRoute><OrderTracking /></ProtectedRoute>} />
           <Route path="*"                    element={<Navigate to="/" replace />} />
         </Routes>

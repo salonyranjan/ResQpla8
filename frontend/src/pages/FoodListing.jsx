@@ -1,9 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
-import { useOutletContext, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useOutletContext, useSearchParams } from "react-router-dom";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import { HiOutlineSearch, HiOutlineAdjustments, HiOutlineX, HiOutlineClock, HiOutlineLocationMarker } from "react-icons/hi";
 import FoodCard from "../components/FoodCard";
 import { listAvailableFood, subscribeToPickupChanges } from "../services/foodService";
+import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
+import { useVolunteerPickups } from "../hooks/useVolunteerPickups";
 
 const stagger = { 
   hidden: { opacity: 0 }, 
@@ -17,16 +20,24 @@ const fadeUp = {
 
 export default function FoodListing() {
   const ctx = useOutletContext();
-  const dark = ctx?.dark ?? true;
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isPublicPage = location.pathname === "/donations";
+  const { user } = useAuth();
+  const isVolunteer = isPublicPage && user?.prefs?.role === "volunteer";
+  const { pickups: volunteerPickups, busyId: volunteerBusyId, error: volunteerError, accept: acceptVolunteerPickup } = useVolunteerPickups(isVolunteer);
+  const readyVolunteerPickups = useMemo(() => volunteerPickups.filter((pickup) => pickup.hasReceiver && ["pending", "accepted"].includes(pickup.status)), [volunteerPickups]);
+  const { dark: appDark } = useTheme();
+  const dark = ctx?.dark ?? appDark;
   const T = dark
     ? {
-        bg: "#080e0a", bgAlt: "#0d1710", bgCard: "#111c14", border: "rgba(34,197,94,0.09)",
+        bg: "#070f09", bgAlt: "#0d1710", bgCard: "#111c14", border: "rgba(255,255,255,0.09)",
         borderMed: "rgba(34,197,94,0.18)", text: "#ecfdf5", textMuted: "#6ee7b7",
         textFaint: "rgba(110,231,183,0.35)", accent: "#22c55e", accentSoft: "rgba(34,197,94,0.09)",
         amber: "#f59e0b", teal: "#14b8a6", shadow: "0 4px 24px rgba(0,0,0,0.4)", bgInput: "#0d1710",
       }
     : {
-        bg: "#f0f7f2", bgAlt: "#e8f2eb", bgCard: "#ffffff", border: "rgba(26,74,46,0.09)",
+        bg: "#f7f2e8", bgAlt: "#efe9de", bgCard: "#ffffff", border: "rgba(17,28,21,0.1)",
         borderMed: "rgba(26,74,46,0.18)", text: "#0d1f12", textMuted: "#3a6647",
         textFaint: "rgba(58,102,71,0.4)", accent: "#16a34a", accentSoft: "rgba(22,163,74,0.09)",
         amber: "#d97706", teal: "#0d9488", shadow: "0 4px 24px rgba(0,0,0,0.06)", bgInput: "#f8fdf9",
@@ -136,16 +147,52 @@ export default function FoodListing() {
 
   return (
     <div style={{ background: T.bg, minHeight: "100vh" }}>
+      {isPublicPage && <>
+        <section className="donations-hero">
+          <div className="donations-hero-inner">
+            <p className="donations-eyebrow"><span /> Community food sharing</p>
+            <h1>Good food deserves<br /><em>another table.</em></h1>
+            <p className="donations-intro">Browse fresh food shared by neighbours and local partners. No account is needed until you choose something to claim.</p>
+            <div className="donations-trust"><span>Free to browse</span><i /><span>Live availability</span><i /><span>Sign in only to claim</span></div>
+          </div>
+        </section>
+        <style>{`
+          .donations-hero{position:relative;overflow:hidden;padding:clamp(58px,8vw,96px) 24px clamp(48px,6vw,72px);border-bottom:1px solid ${T.border};background:${dark ? "radial-gradient(circle at 82% 20%,rgba(82,183,136,.13),transparent 28%),#070f09" : "radial-gradient(circle at 82% 20%,rgba(82,183,136,.18),transparent 28%),#f7f2e8"}}
+          .donations-hero-inner{width:min(760px,100%);margin:auto;text-align:center}.donations-eyebrow{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 18px;color:${dark ? "#8dd5aa" : "#2d6a4f"};font-family:var(--font-meta);font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase}.donations-eyebrow span{width:26px;height:1px;background:currentColor}
+          .donations-hero h1{margin:0 auto;max-width:680px;color:${T.text};font-family:var(--font-display);font-size:clamp(36px,5vw,58px);font-weight:700;letter-spacing:-.035em;line-height:1.08}.donations-hero h1 em{color:${dark ? "#8dd5aa" : "#2d6a4f"};font-weight:700}
+          .donations-intro{max-width:590px;margin:20px auto 24px;color:${dark ? "#aab8ae" : "#536158"};font-family:var(--font-body);font-size:clamp(15px,1.5vw,17px);line-height:1.65}.donations-trust{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;color:${dark ? "#77877c" : "#6b776f"};font-family:var(--font-meta);font-size:9px;letter-spacing:.06em;text-transform:uppercase}.donations-trust i{width:4px;height:4px;border-radius:50%;background:#52b788}
+          @media(max-width:600px){.donations-hero{padding:42px 18px 38px}.donations-hero h1{font-size:clamp(32px,10vw,40px);line-height:1.12}.donations-hero h1 br{display:none}.donations-intro{font-size:15px;margin-top:16px}.donations-trust{gap:8px;font-size:8px}.donation-search-header{top:62px!important}.donation-results-bar{align-items:flex-start!important;flex-direction:column}.donation-sort-options{width:100%;overflow-x:auto;padding-bottom:3px}.donation-sort-options button{flex:1;min-width:max-content}}
+        `}</style>
+      </>}
+      {isVolunteer && (readyVolunteerPickups.length > 0 || volunteerError) && (
+        <section className="donation-volunteer-board" style={{ background: T.bg, padding: "22px 16px 4px" }}>
+          <div style={{ width: "min(1180px, 100%)", margin: "0 auto", padding: 18, border: `1px solid ${T.borderMed}`, borderRadius: 16, background: T.bgCard, boxShadow: T.shadow }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
+              <div><p style={{ margin: "0 0 4px", color: T.accent, fontFamily: "var(--font-meta)", fontSize: 9, letterSpacing: ".1em", textTransform: "uppercase" }}>Private volunteer requests</p><h2 style={{ margin: 0, color: T.text, fontSize: 19 }}>Ready for pickup and delivery</h2><p style={{ margin: "5px 0 0", color: T.textMuted, fontSize: 12 }}>These matched rescues now have both donor and receiver locations.</p></div>
+              <span style={{ display: "grid", placeItems: "center", minWidth: 32, height: 32, borderRadius: 10, background: T.accentSoft, color: T.accent, fontWeight: 800 }}>{readyVolunteerPickups.length}</span>
+            </div>
+            {volunteerError && <div role="alert" style={{ marginBottom: 12, padding: 10, borderRadius: 9, background: "rgba(239,68,68,.09)", color: "#ef4444", fontSize: 12 }}>{volunteerError}</div>}
+            <div style={{ display: "grid", gap: 10 }}>
+              {readyVolunteerPickups.slice(0, 3).map((pickup) => <article key={pickup.notificationId} className="donation-volunteer-request" style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 14, alignItems: "center", padding: 14, borderRadius: 12, border: `1px solid ${T.border}`, background: T.bgAlt }}>
+                <div style={{ minWidth: 0 }}><strong style={{ display: "block", color: T.text, fontSize: 14 }}>{pickup.foodItem} · {pickup.meals} meals</strong><div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6, color: T.textMuted, fontSize: 11 }}><span>Pickup: {pickup.pickupLocation}</span><span aria-hidden="true">→</span><span>Deliver: {pickup.deliveryLocation}</span></div></div>
+                {pickup.status === "pending" ? <button type="button" disabled={volunteerBusyId === pickup.id} onClick={async () => { if (await acceptVolunteerPickup(pickup)) navigate("/dashboard/volunteer"); }} style={{ padding: "9px 14px", border: 0, borderRadius: 9, background: T.accent, color: "#fff", fontWeight: 750, cursor: "pointer" }}>{volunteerBusyId === pickup.id ? "Accepting…" : "Take delivery"}</button> : <button type="button" onClick={() => navigate("/dashboard/volunteer")} style={{ padding: "9px 14px", border: `1px solid ${T.borderMed}`, borderRadius: 9, background: T.bgCard, color: T.accent, fontWeight: 750, cursor: "pointer" }}>Open assignment</button>}
+              </article>)}
+            </div>
+          </div>
+          <style>{`@media(max-width:640px){.donation-volunteer-request{grid-template-columns:1fr!important}.donation-volunteer-request button{width:100%}}`}</style>
+        </section>
+      )}
       {/* Sticky search header */}
       <div
+        className={isPublicPage ? "donation-search-header" : undefined}
         style={{
           position: "sticky",
-          top: 0,
+          top: isPublicPage ? 68 : 0,
           zIndex: 40,
           background: dark ? "rgba(8,14,10,0.97)" : "rgba(240,247,242,0.97)",
           backdropFilter: "blur(20px)",
           borderBottom: `1px solid ${T.border}`,
-          padding: "16px 16px 14px",
+          padding: "16px max(16px, calc((100% - 1180px) / 2)) 14px",
         }}
       >
         {/* Search input */}
@@ -237,17 +284,18 @@ export default function FoodListing() {
 
       {/* Results bar */}
       <div
+        className={isPublicPage ? "donation-results-bar" : undefined}
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "12px 16px",
+          padding: "18px max(16px, calc((100% - 1180px) / 2)) 12px",
         }}
       >
         <p style={{ fontSize: 12.5, color: T.textMuted, fontFamily: "monospace" }}>
           <span style={{ color: T.text, fontWeight: 700 }}>{filtered.length}</span> results
         </p>
-        <div style={{ display: "flex", gap: 6 }}>
+        <div className={isPublicPage ? "donation-sort-options" : undefined} style={{ display: "flex", gap: 6 }}>
           {["recent", "distance", "quantity"].map((s) => (
             <button
               key={s}
@@ -307,7 +355,7 @@ export default function FoodListing() {
 
       {/* Food Grid */}
       {!loading && !error && (
-        <div style={{ padding: "0 12px 16px" }}>
+        <div style={{ width: "min(1180px, calc(100% - 32px))", margin: "0 auto", padding: "0 0 56px" }}>
           {filtered.length > 0 ? (
             <Motion.div
               variants={stagger}
@@ -323,7 +371,7 @@ export default function FoodListing() {
                     layout
                     exit={{ opacity: 0, scale: 0.85 }}
                   >
-                    <FoodCard item={item} T={T} dark={dark} />
+                    <FoodCard item={item} T={T} dark={dark} publicClaim={isPublicPage} />
                   </Motion.div>
                 ))}
               </AnimatePresence>

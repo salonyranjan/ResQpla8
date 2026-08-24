@@ -7,6 +7,7 @@ import { useTheme } from "../context/ThemeContext";
 const links = [
   { label: "Home", to: "/", end: true },
   { label: "About", to: "/about" },
+  { label: "Donations", to: "/donations" },
   { label: "Contact", to: "/contact" },
   { label: "Dashboard", to: "/dashboard", dashboard: true },
 ];

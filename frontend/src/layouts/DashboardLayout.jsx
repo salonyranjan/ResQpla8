@@ -4,11 +4,13 @@ import {
   HiOutlineBell,
   HiOutlineChartBar,
   HiOutlineCog6Tooth,
+  HiOutlineClipboardDocumentList,
   HiOutlineHome,
   HiOutlineMap,
   HiOutlineMoon,
   HiOutlinePlusCircle,
   HiOutlineShoppingBag,
+  HiOutlineTruck,
   HiOutlineSun,
   HiOutlineUserCircle,
   HiOutlineXMark,
@@ -17,6 +19,7 @@ import {
 import Logo from "../components/Logo";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { getUserRole, ROLE_DETAILS } from "../services/roleAccess";
 
 const themes = {
   dark: {
@@ -33,14 +36,16 @@ const themes = {
 
 const primaryLinks = [
   { label: "Overview", to: "/dashboard", end: true, icon: HiOutlineHome },
-  { label: "Post food", to: "/dashboard/donate", icon: HiOutlinePlusCircle },
-  { label: "Browse food", to: "/dashboard/search", icon: HiOutlineShoppingBag },
-  { label: "Analytics", to: "/dashboard/analytics", icon: HiOutlineChartBar },
+  { label: "Post food", to: "/dashboard/donate", icon: HiOutlinePlusCircle, roles: ["donor"] },
+  { label: "Browse food", to: "/dashboard/search", icon: HiOutlineShoppingBag, roles: ["receiver"] },
+  { label: "Order tracking", to: "/dashboard/orders", icon: HiOutlineClipboardDocumentList },
+  { label: "Analytics", to: "/dashboard/analytics", icon: HiOutlineChartBar, roles: ["donor"] },
   { label: "Activity", to: "/dashboard/smart-alerts", icon: HiOutlineBell },
+  { label: "Volunteer pickups", to: "/dashboard/volunteer", icon: HiOutlineTruck, roles: ["volunteer"] },
 ];
 
 const secondaryLinks = [
-  { label: "Map view", to: "/map", icon: HiOutlineMap },
+  { label: "Map view", to: "/dashboard/map", icon: HiOutlineMap },
   { label: "Profile", to: "/dashboard/profile", icon: HiOutlineUserCircle },
   { label: "Settings", to: "/dashboard/settings", icon: HiOutlineCog6Tooth },
 ];
@@ -62,6 +67,8 @@ export default function DashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const T = dark ? themes.dark : themes.light;
+  const role = getUserRole(user);
+  const visiblePrimaryLinks = primaryLinks.filter((item) => !item.roles || item.roles.includes(role));
   const initials = user?.name?.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "U";
 
   const signOut = async () => {
@@ -105,12 +112,12 @@ export default function DashboardLayout() {
         <div className="dashboard-logo"><Logo size={38} /></div>
         <nav className="dashboard-nav">
           <div className="dashboard-nav-label">Workspace</div>
-          {primaryLinks.map((item) => <NavigationLink key={item.to} item={item} onNavigate={closeMobile} />)}
+          {visiblePrimaryLinks.map((item) => <NavigationLink key={item.to} item={item} onNavigate={closeMobile} />)}
           <div className="dashboard-nav-label" style={{ marginTop: 24 }}>Account</div>
           {secondaryLinks.map((item) => <NavigationLink key={item.to} item={item} onNavigate={closeMobile} />)}
         </nav>
         <div className="dashboard-account">
-          <div className="dashboard-account-row"><div className="dashboard-avatar">{initials}</div><div className="dashboard-user"><strong>{user?.name || "ResQPlate user"}</strong><span>{user?.email}</span></div></div>
+          <div className="dashboard-account-row"><div className="dashboard-avatar">{initials}</div><div className="dashboard-user"><strong>{user?.name || "ResQPlate user"}</strong><span>{ROLE_DETAILS[role]?.label || "Choose role"} · {user?.email}</span></div></div>
           <button className="dashboard-signout" onClick={signOut} disabled={loggingOut}>{loggingOut ? "Signing out…" : "Sign out"}</button>
         </div>
       </aside>
@@ -122,7 +129,7 @@ export default function DashboardLayout() {
             <div className="dashboard-topbar-title"><strong>ResQPlate workspace</strong><span>Food rescue operations</span></div>
           </div>
           <div className="dashboard-top-actions">
-            <Link className="dashboard-icon-button" to="/cart" aria-label="Open cart"><HiOutlineShoppingBag /></Link>
+            {role === "receiver" && <Link className="dashboard-icon-button" to="/cart" aria-label="Open cart"><HiOutlineShoppingBag /></Link>}
             <button className="dashboard-icon-button" onClick={toggleTheme} aria-label={dark ? "Use light mode" : "Use dark mode"}>{dark ? <HiOutlineSun /> : <HiOutlineMoon />}</button>
             {mobileOpen && <button className="dashboard-icon-button" onClick={closeMobile} aria-label="Close navigation"><HiOutlineXMark /></button>}
           </div>

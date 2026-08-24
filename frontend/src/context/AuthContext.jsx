@@ -14,7 +14,7 @@ import { getCurrentUser, login, register, logout, updateAccountEmail, updateAcco
  *   loading: boolean,
  *   isAuthenticated: boolean,
  *   login: (email: string, password: string) => Promise<any>,
- *   register: (email: string, password: string, name: string) => Promise<any>,
+ *   register: (email: string, password: string, name: string, role: string) => Promise<any>,
  *   logout: () => Promise<void>,
  *   refetch: () => Promise<void>,
  * }} AuthContextValue
@@ -57,19 +57,22 @@ export function AuthProvider({ children }) {
   }, [refetch]);
 
   const handleLogin = useCallback(async (email, password) => {
-    const session = await login(email, password);
+    await login(email, password);
     const authenticatedUser = await getCurrentUser();
     if (!authenticatedUser) throw new Error("The session was created but the user could not be loaded.");
     setUser(authenticatedUser);
-    return session;
+    return authenticatedUser;
   }, []);
 
-  const handleRegister = useCallback(async (email, password, name) => {
+  const handleRegister = useCallback(async (email, password, name, role) => {
     const newUser = await register(email, password, name);
-    // Auto-login after registration (comment out if you require email verification)
-    await handleLogin(email, password);
+    await login(email, password);
+    await updateAccountPreferences({ role, onboardingComplete: true });
+    const authenticatedUser = await getCurrentUser();
+    if (!authenticatedUser) throw new Error("Your account was created but the profile could not be loaded.");
+    setUser(authenticatedUser);
     return newUser;
-  }, [handleLogin]);
+  }, []);
 
   const handleLogout = useCallback(async () => {
     try {

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Logo from "../components/Logo";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import "./AuthPages.css";
+import { getRoleHome } from "../services/roleAccess";
 
 const validEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
@@ -11,7 +12,10 @@ export default function Signup() {
   const { register, user, loading: authLoading } = useAuth();
   const { dark } = useTheme();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirmation: "" });
+  const [searchParams] = useSearchParams();
+  const requestedRole = searchParams.get("role");
+  const initialRole = ["donor", "receiver", "volunteer"].includes(requestedRole) ? requestedRole : requestedRole === "ngo" ? "receiver" : "receiver";
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirmation: "", role: initialRole });
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
@@ -45,8 +49,8 @@ export default function Signup() {
     setSubmitting(true);
     setServerError("");
     try {
-      await register(email, form.password, name);
-      navigate("/dashboard", { replace: true });
+      await register(email, form.password, name, form.role);
+      navigate(getRoleHome(form.role), { replace: true });
     } catch (error) {
       setServerError(error.message || "Account creation failed. Please try again.");
     } finally {
@@ -72,6 +76,13 @@ export default function Signup() {
             <label htmlFor="signup-email">Email address</label>
             <input id="signup-email" className="auth-input" name="email" type="email" value={form.email} onChange={update} autoComplete="email" inputMode="email" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? "signup-email-error" : undefined} />
             {errors.email && <p className="auth-field-error" id="signup-email-error">{errors.email}</p>}
+          </div>
+          <div className="auth-field">
+            <label>How will you use ResQPlate?</label>
+            <div className="auth-role-grid">
+              {[{ id: "receiver", label: "Receive", detail: "Claim available food" }, { id: "donor", label: "Donate", detail: "Share surplus food" }, { id: "volunteer", label: "Volunteer", detail: "Collect and deliver" }].map((role) => <button className="auth-role" key={role.id} type="button" onClick={() => setForm((current) => ({ ...current, role: role.id }))} aria-pressed={form.role === role.id}><strong>{role.label}</strong><span>{role.detail}</span></button>)}
+            </div>
+            <p className="auth-help">Your dashboard and permitted actions will match this role. You can change it later in Settings.</p>
           </div>
           <div className="auth-field">
             <label htmlFor="signup-password">Password</label>

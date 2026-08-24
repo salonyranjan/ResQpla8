@@ -1,363 +1,84 @@
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { motion as Motion, AnimatePresence } from "framer-motion";
+import { HiOutlineArrowPath, HiOutlineCheckCircle, HiOutlineClock, HiOutlineMapPin, HiOutlineTruck, HiOutlineUsers } from "react-icons/hi2";
 import { useVolunteerPickups } from "../hooks/useVolunteerPickups";
-import { useState, useMemo } from "react";
+import { useAuth } from "../context/AuthContext";
+import { getVolunteerProfile, getVolunteerWorkflowStatus, saveVolunteerProfile } from "../services/volunteerRouting";
 
-const VolunteerPickup = () => {
+const labels = { pending: "New request", accepted: "Assigned to you", delivered: "Delivered", declined: "Declined", expired: "Expired" };
+
+export default function VolunteerPickup() {
   const { T } = useOutletContext();
+  const { user, updatePreferences } = useAuth();
   const navigate = useNavigate();
-  const { pickups, loading, error } = useVolunteerPickups();
-  const [filter, setFilter] = useState("all");
+  const { pickups, loading, error, busyId, refresh, accept, decline, complete } = useVolunteerPickups();
+  const [filter, setFilter] = useState("active");
+  const [profile, setProfile] = useState(null);
+  const [profileForm, setProfileForm] = useState({ maxMeals: 20, available: true });
+  const [profileBusy, setProfileBusy] = useState(false);
+  const [profileMessage, setProfileMessage] = useState("");
+  const filtered = useMemo(() => pickups.filter((item) => filter === "all" || (filter === "active" ? ["pending", "accepted"].includes(item.status) : item.status === filter)), [pickups, filter]);
+  const activeCount = pickups.filter((item) => ["pending", "accepted"].includes(item.status)).length;
+  const deliveredCount = pickups.filter((item) => item.status === "delivered").length;
+  const workflowStatus = getVolunteerWorkflowStatus();
 
-  const filteredPickups = useMemo(() => {
-    if (!pickups) return [];
-    return filter === "all" ? pickups : pickups.filter(p => p.status === filter);
-  }, [filter, pickups]);
+  const directionsUrl = (address) => `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
 
-  const statusCounts = useMemo(() => {
-    const counts = { all: pickups?.length || 0 };
-    (pickups || []).forEach(p => {
-      counts[p.status] = (counts[p.status] || 0) + 1;
-    });
-    return counts;
-  }, [pickups]);
+  useEffect(() => {
+    getVolunteerProfile(user?.$id).then((result) => {
+      setProfile(result);
+      if (result) setProfileForm({ maxMeals: result.maxMeals || 20, available: Boolean(result.available) });
+    }).catch(() => setProfileMessage("Volunteer profile could not be loaded."));
+  }, [user?.$id]);
 
-  if (loading) {
-    return <div style={{ padding: "28px", background: T.bg, minHeight: "100vh" }}><p>Loading pickups...</p></div>;
-  }
-  if (error) {
-    return <div style={{ padding: "28px", background: T.bg, minHeight: "100vh" }}><p>Error loading pickups.</p></div>;
-  }
-
-  const getStatusBadge = (status) => {
-    const badges = {
-      pending: { label: "Pending response", color: T.blue, bg: T.blueSoft },
-      accepted: { label: "Accepted", color: T.accent, bg: T.accentSoft },
-      declined: { label: "Declined", color: T.red, bg: T.redSoft },
-      expired: { label: "Expired", color: T.textMuted, bg: T.bgAlt },
-    };
-    return badges[status] || badges.pending;
+  const saveProfile = () => {
+    if (!navigator.geolocation) { setProfileMessage("Location services are required to volunteer."); return; }
+    setProfileBusy(true); setProfileMessage("Requesting your location…");
+    navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+      try {
+        const saved = await saveVolunteerProfile({ userId: user.$id, latitude: coords.latitude, longitude: coords.longitude, ...profileForm });
+        setProfile(saved);
+        await updatePreferences({ role: "volunteer", onboardingComplete: true });
+        setProfileMessage("Volunteer availability saved. Nearby rescue requests can now reach you.");
+      } catch (profileError) { setProfileMessage(profileError.message || "Volunteer profile could not be saved."); }
+      finally { setProfileBusy(false); }
+    }, () => { setProfileMessage("Location permission was not granted. It is required for nearby matching."); setProfileBusy(false); }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
   };
 
-  return (
-    <div style={{ padding: "28px", background: T.bg, minHeight: "100vh" }}>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <Motion.div
-            animate={{ y: [0, -8, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            style={{
-              width: 40, height: 40, borderRadius: 10,
-              background: T.amberSoft, display: "flex",
-              alignItems: "center", justifyContent: "center", fontSize: 20,
-            }}
-          >🚴</Motion.div>
-          <div>
-            <h2 style={{
-              fontFamily: "'DM Mono', monospace", fontSize: 24,
-              color: T.text, margin: 0, letterSpacing: "-0.02em",
-            }}>Volunteer Pickups</h2>
-            <div style={{
-              fontFamily: "'DM Mono', monospace", fontSize: 11,
-              color: T.textMuted, letterSpacing: "0.06em",
-            }}>Real volunteer matches assigned to your account</div>
+  return <main className="vp-page" style={{ "--vp-bg": T.bg, "--vp-card": T.bgCard, "--vp-soft": T.bgAlt, "--vp-text": T.text, "--vp-muted": T.textMuted, "--vp-faint": T.textFaint, "--vp-line": T.border, "--vp-accent": T.accent, "--vp-accent-soft": T.accentSoft, "--vp-red": T.red }}>
+    <style>{`
+      .vp-page{min-height:100vh;padding:28px;background:var(--vp-bg);color:var(--vp-text);font-family:var(--font-body)}.vp-shell{width:min(1050px,100%);margin:auto}.vp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:24px}.vp-kicker{margin:0 0 7px;color:var(--vp-accent);font-family:var(--font-meta);font-size:10px;letter-spacing:.12em;text-transform:uppercase}.vp-head h1{margin:0;font-size:28px;letter-spacing:-.035em}.vp-head p{margin:7px 0 0;color:var(--vp-muted);font-size:14px}.vp-refresh{display:flex;align-items:center;gap:7px;padding:10px 13px;border:1px solid var(--vp-line);border-radius:10px;background:var(--vp-card);color:var(--vp-muted);font:600 12px var(--font-body);cursor:pointer}
+      .vp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}.vp-stat{display:flex;align-items:center;gap:13px;padding:17px;border:1px solid var(--vp-line);border-radius:14px;background:var(--vp-card)}.vp-stat svg{width:22px;height:22px;color:var(--vp-accent)}.vp-stat strong{display:block;font-size:20px}.vp-stat span{display:block;color:var(--vp-muted);font-size:11px}.vp-tabs{display:flex;gap:7px;margin-bottom:16px;overflow:auto;padding-bottom:2px}.vp-tab{white-space:nowrap;padding:8px 13px;border:1px solid var(--vp-line);border-radius:100px;background:transparent;color:var(--vp-muted);font:600 11px var(--font-body);cursor:pointer}.vp-tab.active{border-color:var(--vp-accent);background:var(--vp-accent-soft);color:var(--vp-accent)}.vp-alert{margin-bottom:16px;padding:12px 14px;border:1px solid color-mix(in srgb,var(--vp-red) 25%,transparent);border-radius:11px;background:color-mix(in srgb,var(--vp-red) 8%,transparent);color:var(--vp-red);font-size:13px}
+      .vp-list{display:grid;gap:14px}.vp-card{overflow:hidden;border:1px solid var(--vp-line);border-radius:17px;background:var(--vp-card)}.vp-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px 20px;border-bottom:1px solid var(--vp-line)}.vp-card-head h2{margin:0;font-size:17px}.vp-card-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;color:var(--vp-muted);font-size:11px}.vp-badge{flex:none;padding:5px 9px;border-radius:100px;font:600 9px var(--font-meta);letter-spacing:.05em;text-transform:uppercase}.vp-route{display:grid;grid-template-columns:1fr 42px 1fr;padding:18px 20px}.vp-stop{min-width:0}.vp-stop-label{display:flex;align-items:center;gap:6px;margin-bottom:7px;color:var(--vp-faint);font:500 9px var(--font-meta);letter-spacing:.09em;text-transform:uppercase}.vp-stop-label svg{width:14px}.vp-stop strong{display:block;font-size:13px;line-height:1.45}.vp-stop small{display:block;margin-top:5px;color:var(--vp-muted);font-size:11px}.vp-route-line{position:relative;display:flex;align-items:center;justify-content:center;color:var(--vp-accent)}.vp-route-line:before{content:'';width:28px;border-top:1px dashed var(--vp-accent)}.vp-progress{height:4px;background:var(--vp-soft)}.vp-progress span{display:block;height:100%;background:var(--vp-accent);transition:width .3s}.vp-actions{display:flex;align-items:center;gap:8px;padding:14px 20px;border-top:1px solid var(--vp-line);background:color-mix(in srgb,var(--vp-soft) 45%,transparent)}.vp-button{padding:9px 14px;border:1px solid var(--vp-line);border-radius:9px;background:var(--vp-card);color:var(--vp-text);font:650 12px var(--font-body);text-decoration:none;cursor:pointer}.vp-button.primary{border-color:var(--vp-accent);background:var(--vp-accent);color:#fff}.vp-button.danger{color:var(--vp-red)}.vp-button:disabled{opacity:.55;cursor:wait}.vp-note{margin-right:auto;color:var(--vp-muted);font-size:11px}.vp-empty{padding:60px 20px;text-align:center;border:1px dashed var(--vp-line);border-radius:16px;color:var(--vp-muted)}.vp-empty svg{width:34px;height:34px;margin-bottom:10px;color:var(--vp-accent)}
+      .vp-enrol{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:end;gap:12px;margin-bottom:18px;padding:17px;border:1px solid var(--vp-line);border-radius:14px;background:var(--vp-card)}.vp-enrol h2{margin:0 0 4px;font-size:15px}.vp-enrol p{margin:0;color:var(--vp-muted);font-size:11px}.vp-field label{display:block;margin-bottom:6px;color:var(--vp-muted);font-size:10px}.vp-field input{width:100px;padding:9px;border:1px solid var(--vp-line);border-radius:9px;background:var(--vp-soft);color:var(--vp-text)}.vp-availability{display:flex;align-items:center;gap:7px;padding:9px}.vp-profile-message{margin:-7px 0 16px;color:var(--vp-accent);font-size:11px}
+      @media(max-width:700px){.vp-page{padding:18px 14px}.vp-head h1{font-size:23px}.vp-head p{font-size:13px}.vp-refresh span{display:none}.vp-enrol{grid-template-columns:1fr 1fr}.vp-enrol>div:first-child{grid-column:1/-1}.vp-enrol .vp-button{grid-column:1/-1}.vp-stats{grid-template-columns:1fr 1fr}.vp-stat:last-child{grid-column:1/-1}.vp-route{grid-template-columns:1fr;padding:16px}.vp-route-line{height:28px;justify-content:flex-start;padding-left:7px}.vp-route-line:before{width:1px;height:20px;border-top:0;border-left:1px dashed var(--vp-accent)}.vp-actions{align-items:stretch;flex-direction:column;padding:13px 16px}.vp-note{margin:0 0 3px}.vp-button{text-align:center;width:100%}.vp-card-head{padding:16px}.vp-card-head h2{font-size:15px}}
+    `}</style>
+    <div className="vp-shell">
+      <header className="vp-head"><div><div className="vp-kicker">Volunteer operations</div><h1>Pickup assignments</h1><p>Accept nearby rescues, collect food safely, and confirm delivery.</p></div><button className="vp-refresh" onClick={refresh}><HiOutlineArrowPath /><span>Refresh</span></button></header>
+      <section className="vp-enrol"><div><h2>{profile ? "Volunteer availability" : "Become a pickup volunteer"}</h2><p>Your precise location is private and used to rank nearby requests.</p></div><div className="vp-field"><label htmlFor="volunteer-capacity">Meal capacity</label><input id="volunteer-capacity" type="number" min="1" max="500" value={profileForm.maxMeals} onChange={(event) => setProfileForm((current) => ({ ...current, maxMeals: event.target.value }))} /></div><label className="vp-availability"><input type="checkbox" checked={profileForm.available} onChange={(event) => setProfileForm((current) => ({ ...current, available: event.target.checked }))} /> Available</label><button className="vp-button primary" disabled={profileBusy} onClick={saveProfile}>{profileBusy ? "Saving…" : profile ? "Update location" : "Enable volunteering"}</button></section>
+      {profileMessage && <div className="vp-profile-message" role="status">{profileMessage}</div>}
+      {!workflowStatus.ready && <div className="vp-alert" role="alert">{workflowStatus.message}</div>}
+      <section className="vp-stats" aria-label="Assignment summary">
+        <div className="vp-stat"><HiOutlineTruck /><div><strong>{activeCount}</strong><span>Active assignments</span></div></div>
+        <div className="vp-stat"><HiOutlineClock /><div><strong>{pickups.filter((p) => p.status === "pending").length}</strong><span>Awaiting response</span></div></div>
+        <div className="vp-stat"><HiOutlineCheckCircle /><div><strong>{deliveredCount}</strong><span>Deliveries completed</span></div></div>
+      </section>
+      <nav className="vp-tabs" aria-label="Filter assignments">{[["active","Active"],["pending","New"],["accepted","Accepted"],["delivered","Delivered"],["all","All"]].map(([id,label]) => <button key={id} className={`vp-tab ${filter === id ? "active" : ""}`} onClick={() => setFilter(id)}>{label}</button>)}</nav>
+      {error && <div className="vp-alert" role="alert">{error}</div>}
+      {loading ? <div className="vp-empty">Loading volunteer assignments…</div> : filtered.length ? <div className="vp-list">{filtered.map((pickup) => {
+        const busy = busyId === pickup.id;
+        return <article className="vp-card" key={pickup.notificationId}>
+          <div className="vp-card-head"><div><h2>{pickup.foodItem}</h2><div className="vp-card-meta"><span>{pickup.meals} meals</span><span>•</span><span>{pickup.distanceKm.toFixed(1)} km away</span><span>•</span><span>{pickup.matchScore}% match</span></div></div><span className="vp-badge" style={{ color: pickup.color, background: `${pickup.color}18` }}>{labels[pickup.status]}</span></div>
+          <div className="vp-route"><div className="vp-stop"><div className="vp-stop-label"><HiOutlineMapPin />Pickup from donor</div><strong>{pickup.pickupLocation}</strong><small>{pickup.donor}</small></div><div className="vp-route-line" /><div className="vp-stop"><div className="vp-stop-label"><HiOutlineUsers />Deliver to receiver</div><strong>{pickup.deliveryLocation}</strong><small>{pickup.hasReceiver ? "Receiver address confirmed" : "You can accept now; delivery unlocks after a claim"}</small></div></div>
+          <div className="vp-progress"><span style={{ width: `${pickup.progress}%` }} /></div>
+          <div className="vp-actions">
+            {pickup.status === "pending" && <><span className="vp-note">Respond promptly so another volunteer can be notified.</span><button className="vp-button danger" disabled={busy} onClick={() => decline(pickup)}>Decline</button><button className="vp-button primary" disabled={busy} onClick={() => accept(pickup)}>{busy ? "Saving…" : "Accept pickup"}</button></>}
+            {pickup.status === "accepted" && <><span className="vp-note">Verify the food and receiver before completing.</span><a className="vp-button" href={directionsUrl(pickup.pickupLocation)} target="_blank" rel="noreferrer">Directions to donor</a><button className="vp-button" onClick={() => navigate(`/dashboard/map?pickup=${pickup.id}`)}>View full route</button><button className="vp-button primary" disabled={busy || !pickup.hasReceiver} onClick={() => complete(pickup)}>{busy ? "Updating…" : pickup.hasReceiver ? "Confirm delivered" : "Awaiting receiver"}</button></>}
+            {pickup.status === "delivered" && <><span className="vp-note">Delivery completed successfully.</span><button className="vp-button" onClick={() => navigate(`/tracking/${pickup.id}`)}>View receipt</button></>}
+            {["declined","expired"].includes(pickup.status) && <span className="vp-note">This assignment is closed.</span>}
           </div>
-        </div>
-
-        {/* Live indicator */}
-        <div style={{
-          display: "flex", alignItems: "center", gap: 8,
-          background: T.accentSoft, border: `1px solid ${T.borderMed}`,
-          borderRadius: 100, padding: "6px 14px",
-        }}>
-          <Motion.div
-            animate={{ opacity: [1, 0.3, 1] }}
-            transition={{ duration: 1.4, repeat: Infinity }}
-            style={{ width: 8, height: 8, borderRadius: "50%", background: T.accent }}
-          />
-          <span style={{
-            fontFamily: "'DM Mono', monospace", fontSize: 10,
-            color: T.accent, fontWeight: 700, letterSpacing: "0.08em",
-          }}>APPWRITE DATA</span>
-        </div>
-      </div>
-
-      {/* Stats Row */}
-      <div style={{
-        display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
-        gap: 14, marginBottom: 24,
-      }} className="rq-pickup-stats">
-        {[
-          { label: "Total matches", value: statusCounts.all, icon: "🚴", color: T.accent },
-          { label: "Pending", value: statusCounts.pending || 0, icon: "⏳", color: T.blue },
-          { label: "Accepted", value: statusCounts.accepted || 0, icon: "✓", color: T.teal },
-          { label: "Declined", value: statusCounts.declined || 0, icon: "×", color: T.red },
-        ].map((s, i) => (
-          <Motion.div
-            key={i}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            style={{
-              background: T.bgCard, borderRadius: 14, padding: "16px 18px",
-              border: `1px solid ${T.border}`,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              <span style={{ fontSize: 18 }}>{s.icon}</span>
-            </div>
-            <div style={{
-              fontFamily: "'DM Mono', monospace", fontSize: 22,
-              fontWeight: 700, color: s.color, lineHeight: 1, marginBottom: 4,
-            }}>{s.value}</div>
-            <div style={{
-              fontFamily: "'DM Mono', monospace", fontSize: 9,
-              color: T.textMuted, letterSpacing: "0.1em", textTransform: "uppercase",
-            }}>{s.label}</div>
-          </Motion.div>
-        ))}
-      </div>
-
-      {/* Filter Pills */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-        {[
-          { id: "all", label: "All matches" },
-          { id: "pending", label: "Pending" },
-          { id: "accepted", label: "Accepted" },
-          { id: "declined", label: "Declined" },
-        ].map(f => (
-          <Motion.button
-            key={f.id}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setFilter(f.id)}
-            style={{
-              padding: "7px 14px", borderRadius: 100,
-              border: `1px solid ${filter === f.id ? T.accent : T.border}`,
-              background: filter === f.id ? T.accentSoft : "transparent",
-              color: filter === f.id ? T.accent : T.textMuted,
-              fontFamily: "'DM Mono', monospace", fontSize: 10,
-              cursor: "pointer", fontWeight: filter === f.id ? 700 : 400,
-              letterSpacing: "0.04em", transition: "all 0.2s",
-            }}
-          >
-            {f.label} {f.id !== "all" && (
-              <span style={{
-                background: filter === f.id ? T.accent : T.bgAlt,
-                color: filter === f.id ? "#fff" : T.textFaint,
-                borderRadius: 100, padding: "1px 6px", marginLeft: 4,
-                fontSize: 9, fontWeight: 700,
-              }}>{statusCounts[f.id] || 0}</span>
-            )}
-          </Motion.button>
-        ))}
-      </div>
-
-      {/* Pickup Cards */}
-      <AnimatePresence>
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {filteredPickups.map((pickup, i) => {
-            const badge = getStatusBadge(pickup.status);
-            return (
-              <Motion.div
-                key={pickup.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ delay: i * 0.06, duration: 0.4 }}
-                whileHover={{ x: 4 }}
-                style={{
-                  background: T.bgCard, borderRadius: 18,
-                  border: `1px solid ${T.border}`,
-                  padding: "20px", cursor: "pointer", position: "relative",
-                  overflow: "hidden", transition: "border-color 0.2s",
-                }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = pickup.color}
-                onMouseLeave={e => e.currentTarget.style.borderColor = T.border}
-              >
-                {/* Left accent bar */}
-                <div style={{
-                  position: "absolute", left: 0, top: 0, bottom: 0, width: 3,
-                  background: pickup.color, borderRadius: "0 3px 3px 0",
-                }} />
-
-                {/* Header Row */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{
-                      width: 44, height: 44, borderRadius: 12,
-                      background: `${pickup.color}18`, border: `1px solid ${pickup.color}33`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 14, fontWeight: 700, color: pickup.color,
-                      fontFamily: "'DM Mono', monospace",
-                    }}>{pickup.avatar}</div>
-                    <div>
-                      <div style={{
-                        fontFamily: "sans-serif", fontSize: 15, fontWeight: 600,
-                        color: T.text,
-                      }}>{pickup.volunteer}</div>
-                      <div style={{
-                        fontFamily: "'DM Mono', monospace", fontSize: 10,
-                        color: T.textMuted, marginTop: 2,
-                      }}>Match score {pickup.matchScore}% · {pickup.distance}</div>
-                    </div>
-                  </div>
-
-                  <div style={{
-                    background: badge.bg, border: `1px solid ${badge.color}33`,
-                    borderRadius: 8, padding: "4px 10px", flexShrink: 0,
-                  }}>
-                    <span style={{
-                      fontFamily: "'DM Mono', monospace", fontSize: 9,
-                      color: badge.color, fontWeight: 700, letterSpacing: "0.06em",
-                    }}>{badge.label.toUpperCase()}</span>
-                  </div>
-                </div>
-
-                {/* Food Item */}
-                <div style={{
-                  background: T.bgAlt, borderRadius: 12, padding: "12px 16px",
-                  marginBottom: 16,
-                }}>
-                  <div style={{
-                    fontFamily: "sans-serif", fontSize: 14, fontWeight: 600,
-                    color: T.text, marginBottom: 4,
-                  }}>{pickup.foodItem}</div>
-                  <div style={{
-                    fontFamily: "'DM Mono', monospace", fontSize: 10,
-                    color: T.textMuted,
-                  }}>From: {pickup.donor}</div>
-                </div>
-
-                {/* Locations */}
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
-                  <div style={{ flex: 1, minWidth: 140 }}>
-                    <div style={{
-                      fontFamily: "'DM Mono', monospace", fontSize: 9,
-                      color: T.textFaint, letterSpacing: "0.1em", marginBottom: 4,
-                      textTransform: "uppercase",
-                    }}>Pickup</div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <span style={{ fontSize: 14 }}>📍</span>
-                      <span style={{
-                        fontFamily: "sans-serif", fontSize: 12, color: T.text,
-                      }}>{pickup.pickupLocation}</span>
-                    </div>
-                  </div>
-
-                  <Motion.div
-                    animate={{ x: [0, 8, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                    style={{ color: T.accent, fontSize: 18, flexShrink: 0 }}
-                  >→</Motion.div>
-
-                  <div style={{ flex: 1, minWidth: 140 }}>
-                    <div style={{
-                      fontFamily: "'DM Mono', monospace", fontSize: 9,
-                      color: T.textFaint, letterSpacing: "0.1em", marginBottom: 4,
-                      textTransform: "uppercase",
-                    }}>Deliver To</div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <span style={{ fontSize: 14 }}>🏠</span>
-                      <span style={{
-                        fontFamily: "sans-serif", fontSize: 12, color: T.text,
-                      }}>{pickup.deliveryLocation}</span>
-                    </div>
-                  </div>
-
-                  <div style={{
-                    background: `${pickup.color}18`, border: `1px solid ${pickup.color}33`,
-                    borderRadius: 8, padding: "6px 10px", flexShrink: 0, textAlign: "center",
-                  }}>
-                    <div style={{
-                      fontFamily: "'DM Mono', monospace", fontSize: 9,
-                      color: pickup.color, fontWeight: 700,
-                    }}>{pickup.eta}</div>
-                    <div style={{
-                      fontFamily: "'DM Mono', monospace", fontSize: 8,
-                      color: T.textFaint,
-                    }}>STATUS</div>
-                  </div>
-                </div>
-
-                {/* Progress Bar */}
-                <div style={{ marginBottom: 12 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                    <span style={{
-                      fontFamily: "'DM Mono', monospace", fontSize: 9,
-                      color: T.textFaint, letterSpacing: "0.08em",
-                    }}>PROGRESS</span>
-                    <span style={{
-                      fontFamily: "'DM Mono', monospace", fontSize: 9,
-                      color: pickup.color, fontWeight: 700,
-                    }}>{Math.round(pickup.progress)}%</span>
-                  </div>
-                  <div style={{
-                    height: 6, background: T.bgAlt, borderRadius: 100,
-                    overflow: "hidden",
-                  }}>
-                    <Motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${pickup.progress}%` }}
-                      transition={{ duration: 0.8, delay: 0.3 }}
-                      style={{
-                        height: "100%", borderRadius: 100,
-                        background: `linear-gradient(90deg, ${pickup.color}88, ${pickup.color})`,
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <Motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => navigate(`/tracking/${pickup.id}`)}
-                    style={{
-                      padding: "8px 14px", borderRadius: 8, border: "none",
-                      background: pickup.color, color: "#fff",
-                      fontFamily: "'DM Mono', monospace", fontSize: 10,
-                      fontWeight: 600, cursor: "pointer", flexShrink: 0,
-                    }}
-                  >📍 Track Live</Motion.button>
-                  <Motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => navigate(`/tracking/${pickup.id}`)}
-                    style={{
-                      padding: "8px 14px", borderRadius: 8,
-                      border: `1px solid ${T.border}`, background: T.bgAlt,
-                      color: T.textMuted, fontFamily: "'DM Mono', monospace", fontSize: 10,
-                      fontWeight: 500, cursor: "pointer", flexShrink: 0, marginLeft: "auto",
-                    }}
-                  >View Details →</Motion.button>
-                </div>
-              </Motion.div>
-            );
-          })}
-        </div>
-      </AnimatePresence>
-
-      {filteredPickups.length === 0 && (
-        <Motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          style={{ textAlign: "center", padding: "40px 20px", color: T.textFaint }}
-        >
-          <div style={{ fontSize: 40, marginBottom: 12 }}>🚴</div>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13 }}>
-            No pickups found for this filter
-          </div>
-        </Motion.div>
-      )}
-
-      {/* Responsive styles */}
-      <style>{`
-        @media (max-width: 700px) {
-          .rq-pickup-stats { grid-template-columns: repeat(2, 1fr) !important; }
-        }
-      `}</style>
+        </article>;
+      })}</div> : <div className="vp-empty"><HiOutlineTruck /><div>No assignments in this view</div></div>}
     </div>
-  );
-};
-
-export default VolunteerPickup;
+  </main>;
+}

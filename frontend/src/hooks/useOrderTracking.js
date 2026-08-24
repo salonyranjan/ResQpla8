@@ -1,48 +1,65 @@
-import { useEffect, useState } from "react";
-import { getPickup } from "../services/foodService";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { cancelPickup, getPickup, listUserOrders, subscribeToPickupChanges } from "../services/foodService";
+import { derivePickupWorkflowStatus } from "../services/workflowRules";
 
 export const STATUS_STEPS = [
-  { id: "pending", label: "Donation posted", sub: "The food was listed for rescue", icon: null },
-  { id: "completed", label: "Rescue completed", sub: "The food was successfully claimed", icon: null },
+  { id: "posted", label: "Donation posted", sub: "Food was made available for rescue" },
+  { id: "reserved", label: "Reserved", sub: "A receiver address has been confirmed" },
+  { id: "completed", label: "Delivered", sub: "The rescue was completed successfully" },
 ];
 
-const STATUS_INDEX = { pending: 0, completed: 1 };
+const enhance = (pickup) => {
+  const workflowStatus = derivePickupWorkflowStatus(pickup);
+  const currentStep = workflowStatus === "completed" ? 2 : workflowStatus === "reserved" ? 1 : 0;
+  return {
+    ...pickup, workflowStatus, currentStep,
+    deliveryAddress: pickup.dropOffLocation || "Waiting for a receiver",
+    items: [{ name: pickup.name, quantity: pickup.quantity, image: pickup.image }],
+    progressPct: workflowStatus === "cancelled" ? 0 : [20, 60, 100][currentStep],
+  };
+};
 
-/**
- * Hook for order tracking logic.
- * @param {string} orderId - The order ID to track.
- * @returns {object} order, currentStep, eta, progressPct
- */
 export const useOrderTracking = (orderId) => {
+  const { user } = useAuth();
   const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(Boolean(orderId));
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
-  useEffect(() => {
-    if (!orderId) return undefined;
-    let cancelled = false;
-    getPickup(orderId)
-      .then((pickup) => {
-        if (!cancelled) {
-          setOrder({ ...pickup, deliveryAddress: pickup.dropOffLocation || "Not assigned yet", items: [{ name: pickup.name, quantity: pickup.quantity, image: pickup.image }] });
-          setError("");
-        }
-      })
-      .catch((err) => !cancelled && setError(err.message || "This rescue could not be loaded."))
-      .finally(() => !cancelled && setLoading(false));
-    return () => { cancelled = true; };
-  }, [orderId]);
+  const load = useCallback(async () => {
+    if (!user?.$id) return;
+    try {
+      if (orderId) setOrder(enhance(await getPickup(orderId)));
+      else setOrders((await listUserOrders(user.$id)).map(enhance));
+      setError("");
+    } catch (requestError) { setError(requestError.message || "Rescue orders could not be loaded."); }
+    finally { setLoading(false); }
+  }, [orderId, user?.$id]);
 
   useEffect(() => {
-    if (!order?.scheduledTime) return undefined;
+    load();
+    let unsubscribe;
+    try { unsubscribe = subscribeToPickupChanges(load); } catch { unsubscribe = undefined; }
+    const fallback = window.setInterval(load, 30000);
+    return () => { unsubscribe?.(); window.clearInterval(fallback); };
+  }, [load]);
+
+  useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 30000);
     return () => window.clearInterval(timer);
-  }, [order?.scheduledTime]);
+  }, []);
 
-  const currentStep = order?.status === "cancelled" ? 0 : (STATUS_INDEX[order?.status] ?? 0);
-  const eta = order?.scheduledTime ? Math.max(0, Math.ceil((new Date(order.scheduledTime).getTime() - now) / 60000)) : null;
-  const progressPct = (currentStep / (STATUS_STEPS.length - 1)) * 100;
+  const cancel = useCallback(async () => {
+    if (!order) return;
+    setBusy(true); setError("");
+    try { setOrder(enhance(await cancelPickup(order.$id))); }
+    catch (actionError) { setError(actionError.message || "The rescue could not be cancelled."); }
+    finally { setBusy(false); }
+  }, [order]);
 
-  return { order, currentStep, eta, progressPct, STATUS_STEPS, loading, error };
+  const eta = order?.scheduledTime && order.workflowStatus !== "completed" ? Math.max(0, Math.ceil((new Date(order.scheduledTime).getTime() - now) / 60000)) : null;
+  return useMemo(() => ({ order, orders, currentStep: order?.currentStep || 0, eta, progressPct: order?.progressPct || 0, STATUS_STEPS, loading, error, busy, cancel, refresh: load }), [order, orders, eta, loading, error, busy, cancel, load]);
 };

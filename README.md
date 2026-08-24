@@ -18,7 +18,7 @@ A responsive food-rescue platform connecting surplus-food donors with people and
 
 [Explore Features](#-feature-highlights) · [Architecture](#-architecture) · [Run Locally](#-run-locally) · [Configure Appwrite](#-appwrite-setup) · [Deploy](#-deployment)
 
-> **Demo project:** ResQPlate demonstrates a complete food-rescue workflow. Donation records, availability, tracking states, and analytics are read from Appwrite rather than fabricated in the interface.
+> **Pilot-stage project:** ResQPlate reads operational data from Appwrite and implements the core rescue workflow. Review [PRODUCTION_READINESS.md](./PRODUCTION_READINESS.md) before using it as a public service.
 
 </div>
 
@@ -38,6 +38,78 @@ flowchart LR
 ```
 
 The application combines a polished public experience with an authenticated workspace for posting food, browsing live donations, claiming items, following pickups, and reviewing impact.
+
+---
+
+## How the application works
+
+ResQPlate coordinates three participants:
+
+- **Donors** publish safe surplus food with its quantity, photograph, pickup address, and rescue deadline.
+- **Receivers** publicly browse donations and sign in only when they are ready to claim food.
+- **Volunteers** publish availability, location, and carrying capacity so nearby assignments can be matched to them.
+
+### End-to-end rescue workflow
+
+```mermaid
+sequenceDiagram
+  participant D as Donor
+  participant R as Receiver
+  participant V as Volunteer
+  participant A as Appwrite
+  D->>A: Post food donation
+  A-->>R: Publish available listing
+  R->>A: Sign in and claim food
+  A->>A: Reserve food and hide public listing
+  A-->>V: Match nearby available volunteers
+  V->>A: Accept pickup assignment
+  A-->>V: Show donor-to-receiver route
+  V->>D: Collect food
+  V->>R: Deliver food
+  V->>A: Confirm delivery
+  A-->>D: Mark rescue completed
+  A-->>R: Mark rescue completed
+```
+
+### Donation and discovery
+
+1. A signed-in donor opens **Post Food** and enters the food details, meal count, photograph, pickup address, and expiry window.
+2. ResQPlate geocodes the address and stores the donation and image in Appwrite.
+3. The donation appears on `/donations`. Visitors can search and filter without creating an account.
+4. Expired, reserved, cancelled, or delivered donations are excluded from availability.
+
+### Claiming and reservation
+
+1. Selecting **Claim Food** requires authentication.
+2. The receiver confirms the food and supplies a delivery address.
+3. The donation is reserved and disappears from public availability immediately.
+4. Reservation does not mark food delivered. Completion happens after the volunteer confirms delivery.
+
+### Volunteer pickup
+
+1. A volunteer enables volunteering, shares their current location with consent, sets a meal capacity, and controls availability.
+2. Matching ranks volunteers using distance, capacity, reliability, and urgency.
+3. A matched volunteer can accept or decline the private assignment.
+4. An accepted volunteer can open donor directions and the complete donor-to-receiver route.
+5. Delivery confirmation is enabled only after a receiver address exists.
+
+### Map and order tracking
+
+- Dashboard Map View shows only verified claimed pickups with donor coordinates and a receiver address.
+- It renders the donor marker, receiver marker, shortest available driving route, distance, and estimated duration.
+- It does not draw a misleading straight line when a verified road route is unavailable.
+- Order Tracking shows account rescue activity as awaiting receiver, reserved, delivered, or cancelled.
+- Appwrite Realtime updates tracking data, with periodic refresh as a fallback.
+
+### Authentication and data
+
+- Appwrite Auth manages registration, login, session restoration, profiles, preferences, and logout.
+- Signup requires a donor, receiver, or volunteer role. Login restores it, opens the correct workspace, and route guards prevent other role workspaces from being opened. Appwrite permissions and the rescue function remain the server-side authorization boundary.
+- Appwrite Databases stores donations, volunteer profiles, and private assignment notifications.
+- Appwrite Storage stores donation photographs.
+- Leaflet and OpenStreetMap render maps; configured geocoding and routing services resolve locations and road routes.
+
+> **Production note:** this implementation is intended for a controlled pilot. Atomic server-side transitions, strict document permissions, structured food-safety data, verified handoffs, scheduled expiry, moderation, and incident response are required before unrestricted public use. See [PRODUCTION_READINESS.md](./PRODUCTION_READINESS.md).
 
 ---
 
@@ -99,7 +171,7 @@ The application combines a polished public experience with an authenticated work
 
 | Area | Capability |
 | --- | --- |
-| 🔐 Authentication | Registration, login, session restoration, logout, and protected routes through Appwrite Auth |
+| 🔐 Authentication | Role-based signup, role-aware login destinations, session restoration, logout, and protected routes through Appwrite Auth |
 | 🍱 Donations | Post food type, meal quantity, description, pickup location, expiry, and a validated food image |
 | 🔎 Discovery | Search, filter, and sort pending donations while automatically hiding expired listings |
 | 🛒 Rescue flow | Add available donations to a persistent cart and claim them through a free checkout flow |
@@ -132,6 +204,7 @@ flowchart TD
   AW --> DB[("Pickup documents")]
   AW --> STORAGE[("Donation images")]
   AW --> REALTIME["Realtime updates"]
+  AW --> WORKFLOW["Private volunteer workflow function"]
   UI --> PROXY["Server-side ResQBot proxy"]
   PROXY --> GROQ["Groq · optional"]
   UI --> EMAIL["EmailJS · optional"]
@@ -141,13 +214,15 @@ flowchart TD
 ### Data lifecycle
 
 ```text
-pending → confirmed → preparing → out_for_delivery → completed
-   └──────────────── cancelled can end an active rescue ────────────────┘
+posted (pending, no receiver) → reserved (pending, receiver assigned) → delivered (completed)
+                                  └─ volunteer accepts and fulfils the pickup
+cancelled can close an active rescue
 ```
 
 - New donations are stored as `pending`.
 - Browse Food displays only pending, unexpired records.
-- Claiming a donation changes it to `completed`, removing it from availability.
+- Claiming assigns the receiver address and reserves the donation, removing it from availability without falsely marking it delivered.
+- The assigned volunteer marks the pickup `completed` only after delivery.
 - Historical records remain in Appwrite so tracking and analytics stay accurate.
 
 ---
@@ -173,6 +248,8 @@ pending → confirmed → preparing → out_for_delivery → completed
 ```text
 ResQPlate_frontend/
 ├── .github/workflows/          Appwrite availability and reminder workflows
+├── appwrite.config.json         Versioned Appwrite tables and function configuration
+├── functions/rescue-workflow/  Secure matching and delivery state transitions
 ├── frontend/
 │   ├── public/                 Logo, sitemap, and public assets
 │   ├── src/
@@ -240,6 +317,7 @@ Open the URL printed by Vite—normally **http://localhost:5173**.
 | `VITE_GEOCODER_ENDPOINT` | Optional | Address geocoder used to place text-only pickup locations on Map View |
 | `VITE_APPWRITE_VOLUNTEERS_COLLECTION_ID` | Optional | Volunteer availability and location records used for routing |
 | `VITE_APPWRITE_NOTIFICATIONS_COLLECTION_ID` | Optional | Private notifications created for matched volunteers |
+| `VITE_APPWRITE_VOLUNTEER_FUNCTION_ID` | Required for volunteering | Appwrite Function that securely matches and updates rescue assignments |
 | `GROQ_API_KEY` | Optional | Server-only Groq credential used by the `/api/resqbot` Vercel function |
 | `GROQ_MODEL` | Optional | Groq model ID; defaults to `openai/gpt-oss-20b` |
 | `VITE_ASSISTANT_API_URL` | Optional | Override URL when the assistant proxy is hosted elsewhere |
@@ -283,14 +361,14 @@ Enable Appwrite's Email/Password authentication method.
 | --- | --- | :---: |
 | `pickupId` | Integer (64-bit) | ✅ |
 | `pickupLocation` | String | ✅ |
-| `dropOffLocation` | String |  |
+| `dropOffLocation` | String | ✅ |
 | `scheduledTime` | Datetime | ✅ |
 | `status` | Enum (`pending`, `completed`, `cancelled`) | ✅ |
-| `vehicleType` | Enum (`sedan`, `suv`, `truck`, `van`) | ✅ |
+| `vehicleType` | Enum (`sedan`, `suv`, `truck`, `van`) |  |
 | `donorId` | String | ✅ |
 | `weight` | Float | ✅ |
 | `mealsCount` | Integer | ✅ |
-| `foodType` | String (250+ characters) | ✅ |
+| `foodType` | String (99 characters) |  |
 | `location` | String | ✅ |
 
 Create indexes for `status`, descending `$createdAt`, and their combination if requested by Appwrite.
@@ -309,7 +387,7 @@ Create a Storage bucket when `VITE_APPWRITE_BUCKET_ID` is configured. Grant auth
 
 ### 6. Optional volunteer routing
 
-Set both volunteer-routing collection variables to enable matching. Volunteer documents use `userId` (string), `latitude` and `longitude` (float), `reliability` (float from 0–1 or 0–100), `available` (boolean), and `maxMeals` (integer). Notification documents use `volunteerId`, `donationId`, `status`, `distanceKm`, `score`, and `message`. Authenticated users need read access to volunteer records and create access to notifications. Each notification is readable and updatable only by its matched volunteer. If either collection is absent, routing is safely disabled and donation posting continues normally.
+Set both volunteer-routing collection variables and deploy the Appwrite Function in [`functions/rescue-workflow`](./functions/rescue-workflow). Volunteer documents use `userId` (string), `latitude` and `longitude` (float), `reliability` (float from 0–1 or 0–100), `available` (boolean), and `maxMeals` (integer). Notification documents use `volunteerId`, `donationId`, `status`, `distanceKm`, `score`, and `message`. Volunteer profiles and coordinates remain private; the function performs matching with `documents.read` and `documents.write` scopes. Each notification is readable and updatable only by its matched volunteer. Set `VITE_APPWRITE_VOLUNTEER_FUNCTION_ID` after deployment. The dashboard reports a clear setup error if this secure workflow is missing.
 
 ---
 
@@ -322,28 +400,32 @@ Set both volunteer-routing collection variables to enable matching. Volunteer do
 | `/` | Landing page and quick rescue game |
 | `/about` | Project story |
 | `/contact` | Contact experience |
+| `/donations` | Public live donation listings |
 | `/map` | Food-rescue map |
 | `/login` | Sign in |
 | `/register` | Create an account |
 
-### Protected routes
+### Protected and role-aware routes
 
-| Route | Experience |
-| --- | --- |
-| `/dashboard` | Operational overview |
-| `/dashboard/donate` | Post surplus food |
-| `/dashboard/search` | Browse available food |
-| `/dashboard/analytics` | Live record-based analytics |
-| `/dashboard/smart-alerts` | Rescue activity alerts |
-| `/dashboard/ai-matching` | Donation matching preview |
-| `/dashboard/volunteer` | Volunteer pickup operations |
-| `/dashboard/impact-delivered` | Completed impact view |
-| `/dashboard/leader-board` | Rescue leaderboard |
-| `/dashboard/profile` | Profile and donation history |
-| `/dashboard/settings` | Account preferences |
-| `/cart` | Selected donations |
-| `/checkout` | Claim flow |
-| `/tracking/:orderId` | Individual rescue tracking |
+| Route | Role | Experience |
+| --- | --- | --- |
+| `/dashboard` | All | Operational overview |
+| `/dashboard/donate` | Donor | Post surplus food |
+| `/dashboard/search` | Receiver | Browse available food |
+| `/dashboard/orders` | All | Account rescue history and tracking |
+| `/dashboard/orders/:orderId` | All | Individual dashboard order details |
+| `/dashboard/map` | All | Verified donor-to-receiver routes |
+| `/dashboard/analytics` | Donor | Live record-based analytics |
+| `/dashboard/smart-alerts` | All | Rescue activity alerts |
+| `/dashboard/ai-matching` | Receiver | Donation matching preview |
+| `/dashboard/volunteer` | Volunteer | Volunteer pickup operations |
+| `/dashboard/impact-delivered` | All | Completed impact view |
+| `/dashboard/leader-board` | All | Rescue leaderboard |
+| `/dashboard/profile` | All | Profile and donation history |
+| `/dashboard/settings` | All | Account and role preferences |
+| `/cart` | Receiver | Selected donations |
+| `/checkout` | Receiver | Claim flow |
+| `/tracking/:orderId` | All | Individual rescue tracking |
 
 Unknown routes safely redirect to `/`.
 
@@ -355,6 +437,7 @@ Unknown routes safely redirect to `/`.
 cd frontend
 npm run lint
 npm run build
+npm test
 npm run preview
 ```
 
@@ -363,6 +446,7 @@ npm run preview
 | `npm run dev` | Starts the Vite development server |
 | `npm run lint` | Checks the frontend with ESLint |
 | `npm run build` | Generates the optimized production bundle in `dist/` |
+| `npm test` | Runs workflow and role-access regression tests |
 | `npm run preview` | Serves the production bundle locally |
 
 ---
@@ -402,6 +486,7 @@ The included `frontend/vercel.json` already provides Vercel SPA rewrites and imm
 | Refreshing a deployed route returns 404 | Add the SPA rewrite to `index.html` |
 | ResQBot uses only built-in help | Add `GROQ_API_KEY` to Vercel Environment Variables and redeploy |
 | Contact messages fail | Verify EmailJS identifiers and the selected template |
+| Volunteer pickup list stays empty | Deploy `functions/rescue-workflow`, configure its four collection variables and database scopes, then set `VITE_APPWRITE_VOLUNTEER_FUNCTION_ID` in the web app |
 
 ---
 

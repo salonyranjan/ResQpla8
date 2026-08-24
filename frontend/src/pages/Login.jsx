@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from "../components/Logo";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { getSafeDestination, getUserRole } from "../services/roleAccess";
 import "./AuthPages.css";
 
 const validEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -14,7 +15,7 @@ export default function Login() {
   const navigate = useNavigate();
   const destination = useMemo(() => {
     const requested = location.state?.from;
-    return typeof requested === "string" && requested.startsWith("/") ? requested : "/dashboard";
+    return typeof requested === "string" && requested.startsWith("/") ? requested : "";
   }, [location.state]);
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -23,7 +24,7 @@ export default function Login() {
   const [serverError, setServerError] = useState("");
 
   useEffect(() => {
-    if (!authLoading && user) navigate(destination, { replace: true });
+    if (!authLoading && user) navigate(getSafeDestination(destination, getUserRole(user)), { replace: true });
   }, [authLoading, user, destination, navigate]);
 
   const update = (event) => {
@@ -45,8 +46,8 @@ export default function Login() {
     setSubmitting(true);
     setServerError("");
     try {
-      await login(email, form.password);
-      navigate(destination, { replace: true });
+      const signedInUser = await login(email, form.password);
+      navigate(getSafeDestination(destination, getUserRole(signedInUser)), { replace: true });
     } catch (error) {
       setServerError(error.message || "Sign in failed. Please try again.");
     } finally {
@@ -60,7 +61,7 @@ export default function Login() {
         <div className="auth-brand"><Logo size={42} /><Link className="auth-back" to="/">Back home</Link></div>
         <div className="auth-kicker">Account access</div>
         <h1 className="auth-title" id="login-title">Welcome back</h1>
-        <p className="auth-subtitle">Sign in to manage donations, browse available food, and follow pickups.</p>
+        <p className="auth-subtitle">Sign in once. ResQPlate will open the workspace saved for your account role.</p>
         {serverError && <div className="auth-alert" role="alert">{serverError}</div>}
         <form className="auth-form" onSubmit={submit} noValidate>
           <div className="auth-field">

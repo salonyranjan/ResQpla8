@@ -9,7 +9,7 @@ const haversineKm = ([lat1, lon1], [lat2, lon2]) => {
   return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-export async function getShortestPickupRoute(receiverPosition, donationPosition, signal) {
+export async function getShortestPickupRoute(receiverPosition, donationPosition, signal, allowFallback = true) {
   const [receiverLat, receiverLng] = receiverPosition;
   const [donationLat, donationLng] = donationPosition;
   const coordinates = `${receiverLng},${receiverLat};${donationLng},${donationLat}`;
@@ -29,6 +29,7 @@ export async function getShortestPickupRoute(receiverPosition, donationPosition,
     };
   } catch (error) {
     if (error.name === "AbortError") throw error;
+    if (!allowFallback) throw new Error("A verified road route is not available for these addresses.");
     return {
       source: "straight-line",
       distanceKm: haversineKm(receiverPosition, donationPosition),
