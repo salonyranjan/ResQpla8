@@ -451,6 +451,7 @@ const FoodCard = ({
   externalDark,
 }) => {
   const [added, setAdded] = useState(false);
+  const [failedImageSrc, setFailedImageSrc] = useState("");
   const { dark: appDark } = useTheme();
   const cardRef = useRef(null);
   const { addItem } = useCart();
@@ -470,6 +471,7 @@ const FoodCard = ({
       image: item.imageUrl,
       status: item.status,
       location: item.location,
+      maxQuantity: 1,
     }, 1);
     setAdded(true);
     setTimeout(() => setAdded(false), 1400);
@@ -504,8 +506,8 @@ const FoodCard = ({
       >
         {/* ── Image ── */}
         <div className="fc-img-wrap">
-          {image ? (
-            <img src={image} alt={name} className="fc-img" loading="lazy" decoding="async" />
+          {image && failedImageSrc !== image ? (
+            <img src={image} alt={name} className="fc-img" loading="lazy" decoding="async" onError={() => setFailedImageSrc(image)} />
           ) : (
             <div className="fc-img-placeholder">
               <span className="fc-img-placeholder-icon">🍱</span>

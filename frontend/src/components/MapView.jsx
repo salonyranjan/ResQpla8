@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Circle, MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import { Circle, MapContainer, Marker, Polyline, Popup, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useTheme } from "../context/ThemeContext";
 import { listAvailableFood, subscribeToPickupChanges } from "../services/foodService";
+import { geocodeAddress } from "../services/geocoding";
+import { getShortestPickupRoute } from "../services/routeService";
 
 const DEFAULT_CENTER = [28.6139, 77.209];
 
@@ -22,7 +24,7 @@ const userMarker = L.divIcon({
   iconAnchor: [12, 12],
 });
 
-function MapActions({ locateRequest, userPosition, selectedPosition, onMapSelect }) {
+function MapActions({ locateRequest, userPosition, selectedPosition, listingPositions, routePositions, onMapSelect }) {
   const map = useMap();
   useMapEvents({
     click(event) {
@@ -35,16 +37,32 @@ function MapActions({ locateRequest, userPosition, selectedPosition, onMapSelect
   }, [locateRequest, userPosition, map]);
 
   useEffect(() => {
+    if (routePositions.length > 1) {
+      map.fitBounds(L.latLngBounds(routePositions), { padding: [56, 56], maxZoom: 15 });
+    }
+  }, [routePositions, map]);
+
+  useEffect(() => {
+    if (routePositions.length) return;
     if (selectedPosition) map.flyTo(selectedPosition, 15, { duration: 0.7 });
-  }, [selectedPosition, map]);
+  }, [selectedPosition, routePositions, map]);
+
+  useEffect(() => {
+    if (selectedPosition || locateRequest || routePositions.length || !listingPositions.length) return;
+    if (listingPositions.length === 1) {
+      map.flyTo(listingPositions[0], 14, { duration: 0.7 });
+      return;
+    }
+    map.fitBounds(L.latLngBounds(listingPositions), { padding: [48, 48], maxZoom: 14 });
+  }, [listingPositions, locateRequest, selectedPosition, routePositions, map]);
 
   return null;
 }
 
-function coordinatesFor(item) {
+function coordinatesFor(item, resolvedCoordinates) {
   const latitude = Number(item.latitude ?? item.lat);
   const longitude = Number(item.longitude ?? item.lng);
-  return Number.isFinite(latitude) && Number.isFinite(longitude) ? [latitude, longitude] : null;
+  return Number.isFinite(latitude) && Number.isFinite(longitude) ? [latitude, longitude] : resolvedCoordinates || null;
 }
 
 export default function MapView({ selectedPickup, onPickupSelect }) {
@@ -58,6 +76,9 @@ export default function MapView({ selectedPickup, onPickupSelect }) {
   const [userPosition, setUserPosition] = useState(null);
   const [locating, setLocating] = useState(false);
   const [locateRequest, setLocateRequest] = useState(0);
+  const [resolvedCoordinates, setResolvedCoordinates] = useState({});
+  const [route, setRoute] = useState(null);
+  const [routeLoading, setRouteLoading] = useState(false);
 
   const loadListings = useCallback(async () => {
     try {
@@ -76,9 +97,30 @@ export default function MapView({ selectedPickup, onPickupSelect }) {
     return () => unsubscribe?.();
   }, [loadListings]);
 
+  useEffect(() => {
+    let active = true;
+    const resolveMissingLocations = async () => {
+      for (const item of listings) {
+        if (!active) break;
+        if (coordinatesFor(item) || Object.hasOwn(resolvedCoordinates, item.$id)) continue;
+        const address = item.pickupLocation || item.location;
+        if (!address) continue;
+        try {
+          const coordinates = await geocodeAddress(address);
+          if (active) setResolvedCoordinates((current) => ({ ...current, [item.$id]: coordinates }));
+        } catch (geocodeError) {
+          console.warn(`Could not locate donation ${item.$id}:`, geocodeError);
+          if (active) setResolvedCoordinates((current) => ({ ...current, [item.$id]: null }));
+        }
+      }
+    };
+    resolveMissingLocations();
+    return () => { active = false; };
+  }, [listings, resolvedCoordinates]);
+
   const mappedListings = useMemo(
-    () => listings.map((item) => ({ ...item, coordinates: coordinatesFor(item) })).filter((item) => item.coordinates),
-    [listings],
+    () => listings.map((item) => ({ ...item, coordinates: coordinatesFor(item, resolvedCoordinates[item.$id]) })).filter((item) => item.coordinates),
+    [listings, resolvedCoordinates],
   );
   const filteredListings = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -111,7 +153,29 @@ export default function MapView({ selectedPickup, onPickupSelect }) {
     if (window.innerWidth < 760) setSidebarOpen(false);
   };
 
-  const selectedPosition = selected ? coordinatesFor(selected) : null;
+  const selectedPosition = useMemo(
+    () => selected ? coordinatesFor(selected, resolvedCoordinates[selected.$id]) : null,
+    [selected, resolvedCoordinates],
+  );
+  const listingPositions = useMemo(() => mappedListings.map((item) => item.coordinates), [mappedListings]);
+  const routePositions = useMemo(() => route?.positions || [], [route]);
+
+  useEffect(() => {
+    if (!selectedPosition || !userPosition) {
+      return undefined;
+    }
+    const controller = new AbortController();
+    setRouteLoading(true);
+    getShortestPickupRoute(userPosition, selectedPosition, controller.signal)
+      .then(setRoute)
+      .catch((routeError) => {
+        if (routeError.name !== "AbortError") setError(routeError.message || "Pickup route could not be calculated.");
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setRouteLoading(false);
+      });
+    return () => controller.abort();
+  }, [selectedPosition, userPosition]);
   const missingCoordinates = Math.max(0, listings.length - mappedListings.length);
 
   return (
@@ -160,13 +224,20 @@ export default function MapView({ selectedPickup, onPickupSelect }) {
       </aside>
 
       <div className="rq-map-tools">
+        {selected && <div style={{ width: 220, padding: "11px 12px", border: "1px solid var(--line)", borderRadius: 12, background: "var(--panel)", boxShadow: "0 8px 24px rgba(6,35,17,.12)", fontSize: 12 }}>
+          <strong style={{ display: "block" }}>{selected.name}</strong>
+          {!userPosition ? <span style={{ display: "block", marginTop: 5, color: "var(--muted)" }}>Select Locate to calculate the volunteer pickup route.</span>
+            : routeLoading ? <span style={{ display: "block", marginTop: 5, color: "var(--muted)" }}>Calculating shortest route…</span>
+              : route && <><span style={{ display: "block", marginTop: 5, color: "#278653", fontWeight: 800 }}>{route.distanceKm.toFixed(1)} km{route.durationMinutes ? ` · ${route.durationMinutes} min` : ""}</span><small style={{ display: "block", marginTop: 3, color: "var(--muted)" }}>{route.source === "road" ? "Shortest available driving route" : "Straight-line fallback"}</small></>}
+        </div>}
         <button className="rq-map-tool" onClick={() => setSidebarOpen((value) => !value)} aria-label={sidebarOpen ? "Hide listings" : "Show listings"}>{sidebarOpen ? "Hide" : "Listings"}</button>
         <button className="rq-map-tool" onClick={locateUser} disabled={locating}>{locating ? "…" : "Locate"}</button>
       </div>
 
       <MapContainer center={DEFAULT_CENTER} zoom={12} zoomControl>
         <TileLayer key={dark ? "dark" : "light"} url={dark ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"} attribution='&copy; OpenStreetMap contributors &copy; CARTO' subdomains="abcd" maxZoom={20} />
-        <MapActions locateRequest={locateRequest} userPosition={userPosition} selectedPosition={selectedPosition} onMapSelect={onPickupSelect} />
+        <MapActions locateRequest={locateRequest} userPosition={userPosition} selectedPosition={selectedPosition} listingPositions={listingPositions} routePositions={routePositions} onMapSelect={onPickupSelect} />
+        {routePositions.length > 1 && <Polyline positions={routePositions} pathOptions={{ color: "#e67e22", weight: 5, opacity: .9 }} />}
         {userPosition && <><Circle center={userPosition} radius={250} pathOptions={{ color: "#2563eb", fillColor: "#2563eb", fillOpacity: .08, weight: 1 }} /><Marker position={userPosition} icon={userMarker}><Popup>Your current location</Popup></Marker></>}
         {filteredListings.map((item) => <Marker key={item.$id} position={item.coordinates} icon={foodMarker} eventHandlers={{ click: () => setSelected(item) }}><Popup><strong>{item.name}</strong><div style={{ marginTop: 5 }}>{item.mealsCount || 0} meals</div><div style={{ marginTop: 3 }}>{item.pickupLocation}</div></Popup></Marker>)}
       </MapContainer>

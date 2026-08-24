@@ -10,7 +10,6 @@ import {
   HiOutlineLocationMarker,
   HiOutlineCreditCard,
   HiOutlineShieldCheck,
-  HiOutlineClock,
 } from "react-icons/hi";
 
 export default function CheckoutPage() {
@@ -246,40 +245,9 @@ export default function CheckoutPage() {
               <div style={{ display: "inline-block", background: T.accentSoft, border: `1px solid ${T.borderMed}`, borderRadius: 12, padding: "8px 20px", marginBottom: 10 }}>
                 <p style={{ fontFamily: "monospace", fontSize: 14, color: T.accent, fontWeight: 700 }}>{orderId}</p>
               </div>
-              <p style={{ fontSize: 13, color: T.textMuted, marginBottom: 32 }}>You'll receive updates about your delivery soon.</p>
-
-              {/* Reservation Timer */}
-              <div style={{
-                marginTop: 12,
-                padding: "10px",
-                background: T.accentSoft,
-                borderRadius: "12px",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                maxWidth: 300,
-                margin: "0 auto 32px"
-              }}>
-                <HiOutlineClock style={{ color: T.accent }} />
-                <span style={{ fontSize: "11px", color: T.textMuted }}>
-                  Items reserved for <b>14:59</b> minutes
-                </span>
-              </div>
-
-              {/* CO2 Savings Badge */}
-              <div style={{
-                background: T.amber + "15",
-                border: `1px solid ${T.amber}44`,
-                borderRadius: 12,
-                padding: "10px 16px",
-                marginBottom: 32,
-                maxWidth: 280,
-                margin: "0 auto 32px"
-              }}>
-                <p style={{ fontSize: 12, color: T.amber, fontWeight: 700, fontFamily: "monospace" }}>
-                  This rescue can save approximately {(totalItems * 0.5).toFixed(1)}kg of CO₂ emissions
-                </p>
-              </div>
+              <p style={{ fontSize: 13, color: T.textMuted, marginBottom: 32 }}>
+                The claimed donation is recorded in Appwrite and is no longer listed as available.
+              </p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <Motion.button

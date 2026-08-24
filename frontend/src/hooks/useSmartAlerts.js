@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import { listAllPickups } from "../services/foodService";
 
 const relativeTime = (date) => {
@@ -13,30 +14,31 @@ const toAlert = (pickup) => {
   const status = pickup.status;
   const config = status === "completed"
     ? { type: "delivery", title: "Rescue completed", icon: "✓", action: "Completed", color: "#10b981", bg: "#10b98118" }
-    : status === "confirmed" || status === "preparing" || status === "out_for_delivery"
-      ? { type: "pickup", title: "Pickup in progress", icon: "↗", action: "Track", color: "#0d9488", bg: "#0d948818" }
-      : status === "cancelled"
-        ? { type: "urgent", title: "Pickup cancelled", icon: "!", action: "Review", color: "#f59e0b", bg: "#f59e0b18" }
-        : { type: "match", title: "Food available", icon: "+", action: "View", color: "#2563eb", bg: "#2563eb18" };
+    : status === "cancelled"
+      ? { type: "cancelled", title: "Donation cancelled", icon: "!", action: "Review", color: "#f59e0b", bg: "#f59e0b18" }
+      : { type: "pending", title: "Donation posted", icon: "+", action: "View", color: "#2563eb", bg: "#2563eb18" };
   return {
     id: pickup.$id, ...config, border: `${config.color}35`,
     message: `${pickup.foodType || "Food donation"} · ${pickup.mealsCount || 0} meals · ${status}`,
     location: pickup.pickupLocation || "Location not provided",
-    time: relativeTime(pickup.$createdAt),
+    time: relativeTime(status === "pending" ? pickup.$createdAt : pickup.$updatedAt),
   };
 };
 
 export const useSmartAlerts = () => {
+  const { user } = useAuth();
   const [alerts, setAlerts] = useState([]);
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
     let active = true;
     listAllPickups()
-      .then((items) => active && setAlerts(items.slice(0, 30).map(toAlert)))
+      .then((items) => active && setAlerts(
+        items.filter((item) => item.donorId === user?.$id).slice(0, 30).map(toAlert),
+      ))
       .catch(() => active && setAlerts([]));
     return () => { active = false; };
-  }, []);
+  }, [user?.$id]);
 
   const filteredAlerts = useMemo(() => {
     return filter === "all" ? alerts : alerts.filter(a => a.type === filter);

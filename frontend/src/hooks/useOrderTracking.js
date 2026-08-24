@@ -3,13 +3,10 @@ import { getPickup } from "../services/foodService";
 
 export const STATUS_STEPS = [
   { id: "pending", label: "Donation posted", sub: "The food was listed for rescue", icon: null },
-  { id: "confirmed", label: "Rescue confirmed", sub: "A receiver has claimed the food", icon: null },
-  { id: "preparing", label: "Pickup preparation", sub: "The donor is preparing the handoff", icon: null },
-  { id: "out_for_delivery", label: "In transit", sub: "The food is on its way", icon: null },
-  { id: "completed", label: "Delivered", sub: "The rescue has been completed", icon: null },
+  { id: "completed", label: "Rescue completed", sub: "The food was successfully claimed", icon: null },
 ];
 
-const STATUS_INDEX = { pending: 0, confirmed: 1, preparing: 2, out_for_delivery: 3, completed: 4 };
+const STATUS_INDEX = { pending: 0, completed: 1 };
 
 /**
  * Hook for order tracking logic.

@@ -1,6 +1,7 @@
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { useState } from "react";
 import { motion as Motion, AnimatePresence } from "framer-motion";
+import { findVolunteerMatches } from "../services/volunteerRouting";
 
 const AIMatching = () => {
   const { T } = useOutletContext();
@@ -14,20 +15,32 @@ const AIMatching = () => {
     expiresIn: "2h",
   });
   const [matches, setMatches] = useState([]);
+  const [error, setError] = useState("");
 
-  const runMatch = () => {
+  const runMatch = async () => {
     setLoading(true);
+    setError("");
+    setMatches([]);
     setStep(1);
-    setTimeout(() => { setStep(2); }, 1200);
-    setTimeout(() => {
-      setMatches([
-        { id: 1, name: "Akshaya Patra", location: "Delhi", capacity: "50 meals", distance: "1.2 km", rating: 4.9, eta: "8 min", color: T.accent },
-        { id: 2, name: "Feeding India", location: "Delhi", capacity: "40 meals", distance: "2.8 km", rating: 4.7, eta: "15 min", color: T.teal },
-        { id: 3, name: "Govt. Shelter #42", location: "Delhi", capacity: "30 meals", distance: "0.8 km", rating: 4.5, eta: "5 min", color: T.amber },
-      ]);
-      setLoading(false);
+    try {
+      const ranked = await findVolunteerMatches({ address: form.location, quantity: form.quantity, expiry: form.expiresIn });
+      setStep(2);
+      setMatches(ranked.slice(0, 3).map((volunteer, index) => ({
+        id: volunteer.$id,
+        name: volunteer.name || `Volunteer ${volunteer.userId.slice(-6)}`,
+        capacity: `${volunteer.maxMeals || 0} meals`,
+        distance: `${volunteer.distanceKm.toFixed(1)} km`,
+        reliability: Math.round((Number(volunteer.reliability) > 1 ? Number(volunteer.reliability) : Number(volunteer.reliability) * 100) || 0),
+        score: Math.round(volunteer.routingScore * 100),
+        color: [T.accent, T.teal, T.amber][index],
+      })));
       setStep(3);
-    }, 2800);
+    } catch (matchError) {
+      setError(matchError.message || "Volunteer matching could not be completed.");
+      setStep(0);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,11 +60,11 @@ const AIMatching = () => {
           <h2 style={{
             fontFamily: "'DM Mono', monospace", fontSize: 24,
             color: T.text, margin: 0, letterSpacing: "-0.02em",
-          }}>AI-Powered Matching</h2>
+          }}>Volunteer Matching</h2>
           <div style={{
             fontFamily: "'DM Mono', monospace", fontSize: 11,
             color: T.textMuted, letterSpacing: "0.06em",
-          }}>Real-time donor → NGO intelligence engine</div>
+          }}>Distance, capacity and reliability scoring from live volunteer records</div>
         </div>
       </div>
 
@@ -112,6 +125,7 @@ const AIMatching = () => {
             </div>
           ))}
 
+          {error && <div role="alert" style={{ marginBottom: 14, padding: 11, borderRadius: 10, color: T.red, background: T.redSoft }}>{error}</div>}
           <Motion.button
             whileHover={{ scale: 1.02, boxShadow: `0 8px 28px ${T.accentGlow}` }}
             whileTap={{ scale: 0.97 }}
@@ -128,7 +142,7 @@ const AIMatching = () => {
           >
             {loading ? (
               <Motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>⚙️</Motion.span>
-            ) : "⚡"}&nbsp;{loading ? "AI Processing..." : "Run AI Match"}
+            ) : "⚡"}&nbsp;{loading ? "Scoring volunteers..." : "Find Volunteers"}
           </Motion.button>
         </div>
 
@@ -146,7 +160,7 @@ const AIMatching = () => {
             <div style={{ display: "flex", alignItems: "center", gap: 0, overflow: "hidden" }}>
               {[
                 { icon: "📋", label: "Input", done: step >= 1 },
-                { icon: "🧠", label: "AI Scan", done: step >= 2 },
+                { icon: "🧠", label: "Scoring", done: step >= 2 },
                 { icon: "📍", label: "Geo Filter", done: step >= 2 },
                 { icon: "✅", label: "Match", done: step >= 3 },
               ].map((s, i) => (
@@ -228,7 +242,7 @@ const AIMatching = () => {
                       <div style={{
                         fontFamily: "'DM Mono', monospace", fontSize: 10,
                         color: T.textMuted, marginTop: 2,
-                      }}>{m.location} · {m.capacity} · ⭐ {m.rating} · {m.eta}</div>
+                      }}>{m.distance} · capacity {m.capacity} · reliability {m.reliability}% · score {m.score}%</div>
                     </div>
                     {i === 0 && (
                       <div style={{

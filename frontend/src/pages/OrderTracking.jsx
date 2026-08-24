@@ -4,9 +4,7 @@ import {
   HiOutlineArrowLeft,
   HiOutlineCheckCircle,
   HiOutlineClock,
-  HiOutlineTruck,
   HiOutlineShoppingBag,
-  HiOutlineFire,
 } from "react-icons/hi";
 import { useOrderTracking } from "../hooks/useOrderTracking";
 import { useTheme } from "../context/ThemeContext";
@@ -38,9 +36,6 @@ export default function OrderTracking() {
   // Map icons to steps (since hook doesn't include icon components)
   const STEP_ICONS = {
     pending: HiOutlineShoppingBag,
-    confirmed: HiOutlineCheckCircle,
-    preparing: HiOutlineFire,
-    out_for_delivery: HiOutlineTruck,
     completed: HiOutlineCheckCircle,
   };
 
@@ -100,7 +95,7 @@ export default function OrderTracking() {
                 {currentStep === STATUS_STEPS.length - 1 ? "🎉" : currentStep >= 3 ? "🚴" : currentStep >= 2 ? "🍳" : "📋"}
               </div>
               <p style={{ fontSize: 22, fontWeight: 900, color: T.text, letterSpacing: "-0.03em" }}>
-                {currentStep === STATUS_STEPS.length - 1 ? "Delivered!" : eta === null ? "Status in progress" : `${eta} min until pickup`}
+                {order.status === "cancelled" ? "Rescue cancelled" : currentStep === STATUS_STEPS.length - 1 ? "Rescue completed" : eta === null ? "Awaiting pickup" : `${eta} min until pickup`}
               </p>
               <p style={{ fontSize: 13, color: T.textMuted, marginTop: 6 }}>
                 {STATUS_STEPS[currentStep].sub}

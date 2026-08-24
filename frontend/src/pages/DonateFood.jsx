@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { motion as Motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { createFoodDonation } from "../services/foodService";
+import { routeDonationToVolunteers } from "../services/volunteerRouting";
+import { geocodeAddress } from "../services/geocoding";
 
 const DonateFood = () => {
   const { T } = useOutletContext();
@@ -21,6 +23,7 @@ const DonateFood = () => {
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -52,16 +55,26 @@ const DonateFood = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.quantity || !form.location || !form.description || !form.image) {
-      setError("Complete all required fields and select a food photo.");
+    if (!form.quantity || !form.location.trim() || !form.description.trim() || !form.image) {
+      setError("Complete the quantity, description, pickup location, and food photo.");
       return;
     }
     setLoading(true);
     setError("");
+    setNotice("");
     setSuccess(false);
     try {
-      await createFoodDonation({ ...form, userId: user?.$id });
+      const coordinates = await geocodeAddress(form.location);
+      if (!coordinates) {
+        throw new Error("We could not find that pickup address on the map. Add the city, state, and postal code, then try again.");
+      }
+      const donation = await createFoodDonation({ ...form, coordinates, userId: user?.$id });
+      const routing = await routeDonationToVolunteers({ donation, address: form.location, expiry: form.expiry });
       setSuccess(true);
+      const notices = [];
+      if (donation.imageUploadFailed) notices.push("Its photo could not be uploaded; check the Appwrite bucket permissions.");
+      if (routing.enabled && routing.notifiedCount > 0) notices.push(`${routing.notifiedCount} nearby volunteer${routing.notifiedCount === 1 ? " was" : "s were"} notified.`);
+      setNotice(notices.join(" "));
       setForm({
         foodType: "Veg",
         quantity: "",
@@ -71,7 +84,7 @@ const DonateFood = () => {
         image: null,
         imagePreview: null,
       });
-      setTimeout(() => navigate("/dashboard/search"), 900);
+      setTimeout(() => navigate("/dashboard/search"), notices.length ? 3500 : 900);
     } catch (err) {
       setError(err.message || "The donation could not be posted. Check Appwrite permissions and try again.");
     } finally {
@@ -129,6 +142,12 @@ const DonateFood = () => {
       {error && (
         <div role="alert" style={{ background: "rgba(239,68,68,.08)", border: "1px solid rgba(239,68,68,.25)", color: "#ef4444", borderRadius: 14, padding: "14px 18px", marginBottom: 20, fontSize: 13 }}>
           {error}
+        </div>
+      )}
+
+      {notice && (
+        <div role="status" style={{ background: "rgba(245,158,11,.09)", border: "1px solid rgba(245,158,11,.3)", color: "#b76e00", borderRadius: 14, padding: "14px 18px", marginBottom: 20, fontSize: 13 }}>
+          {notice}
         </div>
       )}
 

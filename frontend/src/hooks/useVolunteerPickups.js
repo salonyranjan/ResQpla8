@@ -1,87 +1,70 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Query } from "appwrite";
+import { useAuth } from "../context/AuthContext";
 import { databases } from "../services/appwrite";
+import { getPickup } from "../services/foodService";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
-const PICKUPS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PICKUPS_COLLECTION_ID;
+const NOTIFICATIONS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_NOTIFICATIONS_COLLECTION_ID;
+const progressByStatus = { pending: 20, accepted: 65, declined: 100, expired: 100 };
+const colorByStatus = { pending: "#2563EB", accepted: "#10B981", declined: "#EF4444", expired: "#64748B" };
 
-/**
- * Map an Appwrite document to the shape the UI expects.
- * Adjust the field mappings to match your actual Appwrite collection schema.
- */
-const mapPickup = (doc) => {
-  // Derive avatar initials from volunteer name
-  const volunteerName = doc.volunteerName || doc.volunteer || "Unknown";
-  const avatar = doc.avatar ||
-    volunteerName
-      .split(" ")
-      .map((part) => part[0])
-      .join("")
-      .toUpperCase();
-
-  // Determine color based on status
-  const statusColorMap = {
-    "on-the-way": "#10B981",
-    "arrived": "#F59E0B",
-    "picking-up": "#14B8A6",
-    "delivered": "#2563EB",
-  };
-
-  return {
-    id: doc.$id,
-    status: doc.status || "on-the-way",
-    volunteer: volunteerName,
-    avatar,
-    rating: doc.rating || doc.volunteerRating || 4.5,
-    rescues: doc.rescues || doc.volunteerRescues || 0,
-    foodItem: doc.foodItem || doc.food || "Unknown food",
-    donor: doc.donor || doc.restaurant || "Unknown donor",
-    ngo: doc.ngo || doc.ngoName || "Unknown NGO",
-    pickupLocation: doc.pickupLocation || doc.pickupAddress || "Unknown",
-    deliveryLocation: doc.deliveryLocation || doc.deliveryAddress || "Unknown",
-    distance: doc.distance || "0 km",
-    eta: doc.eta || "0 min",
-    progress: doc.progress ?? 0,
-    color: statusColorMap[doc.status] || "#10B981",
-    // Reliable static map placeholder — no external API dependency
-    mapImageUrl: `https://placehold.co/440x120/e2e8f0/475569?text=Map+${encodeURIComponent(doc.pickupLocation || doc.pickupAddress || "Pickup")}`,
-  };
-};
-
-/**
- * Hook to fetch volunteer pickups from Appwrite.
- * Returns { pickups, loading, error }.
- * Polling is set up to refresh data every 30 seconds for near-real-time feel.
- */
 export const useVolunteerPickups = () => {
+  const { user } = useAuth();
   const [pickups, setPickups] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
 
   const fetchPickups = useCallback(async () => {
+    if (!user?.$id || !DATABASE_ID || !NOTIFICATIONS_COLLECTION_ID) {
+      setPickups([]);
+      setLoading(false);
+      return;
+    }
     try {
-      const response = await databases.listDocuments(
-        DATABASE_ID,
-        PICKUPS_COLLECTION_ID
-        // Add queries if needed, e.g., Query.equal('status', 'active')
-      );
-      const mapped = response.documents.map(mapPickup);
+      const response = await databases.listDocuments(DATABASE_ID, NOTIFICATIONS_COLLECTION_ID, [
+        Query.orderDesc("$createdAt"), Query.limit(100),
+      ]);
+      const notifications = response.documents.filter((item) => item.volunteerId === user.$id);
+      const results = await Promise.allSettled(notifications.map(async (notification) => {
+        const donation = await getPickup(notification.donationId);
+        const volunteerName = user.name || user.email || "Volunteer";
+        return {
+          id: donation.$id,
+          notificationId: notification.$id,
+          status: notification.status,
+          volunteer: volunteerName,
+          avatar: volunteerName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase(),
+          matchScore: Math.round(Number(notification.score || 0) * 100),
+          foodItem: donation.name,
+          donor: donation.restaurant,
+          pickupLocation: donation.pickupLocation,
+          deliveryLocation: donation.dropOffLocation || "Not assigned",
+          distance: `${Number(notification.distanceKm || 0).toFixed(1)} km`,
+          eta: notification.status === "pending" ? "Awaiting response" : notification.status,
+          progress: progressByStatus[notification.status] ?? 0,
+          color: colorByStatus[notification.status] || "#64748B",
+        };
+      }));
+      const mapped = results
+        .filter((result) => result.status === "fulfilled")
+        .map((result) => result.value);
       setPickups(mapped);
-      setError(null);
-    } catch (err) {
-      console.error("Failed to fetch pickups:", err);
-      setError(err);
+      setError("");
+    } catch (requestError) {
+      console.error("Failed to fetch volunteer matches:", requestError);
+      setError(requestError.message || "Volunteer matches could not be loaded.");
+      setPickups([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.$id, user?.email, user?.name]);
 
   useEffect(() => {
     fetchPickups();
-
-    // Poll for updates every 30 seconds
-    const interval = setInterval(fetchPickups, 30000);
-    return () => clearInterval(interval);
+    const interval = window.setInterval(fetchPickups, 30000);
+    return () => window.clearInterval(interval);
   }, [fetchPickups]);
 
-  return { pickups, loading, error };
+  return useMemo(() => ({ pickups, loading, error }), [pickups, loading, error]);
 };

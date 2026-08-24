@@ -31,12 +31,12 @@ const VolunteerPickup = () => {
 
   const getStatusBadge = (status) => {
     const badges = {
-      "on-the-way": { label: "On The Way", color: T.blue, bg: T.blueSoft },
-      "arrived": { label: "Arrived", color: T.amber, bg: T.amberSoft },
-      "picking-up": { label: "Picking Up", color: T.accent, bg: T.accentSoft },
-      "delivered": { label: "Delivered", color: T.teal, bg: T.tealSoft },
+      pending: { label: "Pending response", color: T.blue, bg: T.blueSoft },
+      accepted: { label: "Accepted", color: T.accent, bg: T.accentSoft },
+      declined: { label: "Declined", color: T.red, bg: T.redSoft },
+      expired: { label: "Expired", color: T.textMuted, bg: T.bgAlt },
     };
-    return badges[status] || badges["on-the-way"];
+    return badges[status] || badges.pending;
   };
 
   return (
@@ -61,7 +61,7 @@ const VolunteerPickup = () => {
             <div style={{
               fontFamily: "'DM Mono', monospace", fontSize: 11,
               color: T.textMuted, letterSpacing: "0.06em",
-            }}>Live tracking of food rescue operations</div>
+            }}>Real volunteer matches assigned to your account</div>
           </div>
         </div>
 
@@ -79,7 +79,7 @@ const VolunteerPickup = () => {
           <span style={{
             fontFamily: "'DM Mono', monospace", fontSize: 10,
             color: T.accent, fontWeight: 700, letterSpacing: "0.08em",
-          }}>LIVE</span>
+          }}>APPWRITE DATA</span>
         </div>
       </div>
 
@@ -89,10 +89,10 @@ const VolunteerPickup = () => {
         gap: 14, marginBottom: 24,
       }} className="rq-pickup-stats">
         {[
-          { label: "Active Pickups", value: statusCounts.all, icon: "🚴", color: T.accent },
-          { label: "On The Way", value: statusCounts["on-the-way"], icon: "🚲", color: T.blue },
-          { label: "Arrived", value: statusCounts.arrived, icon: "📍", color: T.amber },
-          { label: "Avg Delivery", value: "4.2 min", icon: "⏱", color: T.teal },
+          { label: "Total matches", value: statusCounts.all, icon: "🚴", color: T.accent },
+          { label: "Pending", value: statusCounts.pending || 0, icon: "⏳", color: T.blue },
+          { label: "Accepted", value: statusCounts.accepted || 0, icon: "✓", color: T.teal },
+          { label: "Declined", value: statusCounts.declined || 0, icon: "×", color: T.red },
         ].map((s, i) => (
           <Motion.div
             key={i}
@@ -122,10 +122,10 @@ const VolunteerPickup = () => {
       {/* Filter Pills */}
       <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
         {[
-          { id: "all", label: "All Pickups" },
-          { id: "on-the-way", label: "🚲 On The Way" },
-          { id: "arrived", label: "📍 Arrived" },
-          { id: "picking-up", label: "📦 Picking Up" },
+          { id: "all", label: "All matches" },
+          { id: "pending", label: "Pending" },
+          { id: "accepted", label: "Accepted" },
+          { id: "declined", label: "Declined" },
         ].map(f => (
           <Motion.button
             key={f.id}
@@ -199,7 +199,7 @@ const VolunteerPickup = () => {
                       <div style={{
                         fontFamily: "'DM Mono', monospace", fontSize: 10,
                         color: T.textMuted, marginTop: 2,
-                      }}>★ {pickup.rating} · {pickup.rescues} rescues</div>
+                      }}>Match score {pickup.matchScore}% · {pickup.distance}</div>
                     </div>
                   </div>
 
@@ -276,7 +276,7 @@ const VolunteerPickup = () => {
                     <div style={{
                       fontFamily: "'DM Mono', monospace", fontSize: 8,
                       color: T.textFaint,
-                    }}>ETA</div>
+                    }}>STATUS</div>
                   </div>
                 </div>
 

@@ -10,7 +10,6 @@ import {
   HiOutlineClipboardDocument,
   HiOutlineCheckCircle,
 } from "react-icons/hi2";
-import { Groq } from "groq-sdk";
 
 const SYSTEM_INSTRUCTION = `You are ResQBot, the assistant for ResQPlate, a platform for listing, discovering, claiming, and tracking surplus food.
 
@@ -32,18 +31,7 @@ const QUICK_REPLIES = [
   { label: "Track my donation", emoji: "📦" },
 ];
 
-let groqClient = null;
-try {
-  const key = import.meta.env.VITE_GROQ_API_KEY;
-  if (key) {
-    groqClient = new Groq({
-      apiKey: key,
-      dangerouslyAllowBrowser: true,
-    });
-  }
-} catch (e) {
-  console.error("Groq init failed:", e);
-}
+const assistantApiUrl = import.meta.env.VITE_ASSISTANT_API_URL?.trim();
 
 const FALLBACK_MESSAGE = "I couldn't reach the assistant service. Please try again in a moment.";
 
@@ -443,7 +431,7 @@ export default function ResQBot() {
       chatHistoryRef.current.push({ role: "user", parts });
 
       try {
-        if (!groqClient) throw new Error("Groq client not initialized");
+        if (!assistantApiUrl) throw new Error("Assistant API is not configured");
 
         // Build messages array for Groq
         const messages = [{ role: "system", content: SYSTEM_INSTRUCTION }];
@@ -459,14 +447,15 @@ export default function ResQBot() {
           }
         });
 
-        const response = await groqClient.chat.completions.create({
-          model: "llama-3.1-8b-instant",
-          messages,
-          temperature: 0.7,
-          max_tokens: 200,
+        const response = await fetch(assistantApiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages }),
         });
-
-        const responseText = response.choices[0].message.content.trim();
+        if (!response.ok) throw new Error(`Assistant request failed (${response.status})`);
+        const payload = await response.json();
+        const responseText = String(payload.message || payload.content || "").trim();
+        if (!responseText) throw new Error("Assistant returned an empty response");
 
         if (requestId !== requestIdRef.current) return;
         chatHistoryRef.current.push({ role: "model", parts: [{ text: responseText }] });
@@ -474,7 +463,7 @@ export default function ResQBot() {
 
         if (!isOpen || isMinimized) setHasUnread(true);
       } catch (error) {
-        console.error("Groq error:", error);
+        console.error("Assistant error:", error);
         if (requestId !== requestIdRef.current) return;
         chatHistoryRef.current.pop();
 
@@ -641,7 +630,7 @@ export default function ResQBot() {
                       animation: "resqGlow 2s infinite",
                     }} />
                     <span style={{ color: t.statusText, fontSize: 11 }}>
-                      {groqClient ? "Available · Food rescue help" : "Temporarily unavailable"}
+                      {assistantApiUrl ? "Available · Food rescue help" : "Temporarily unavailable"}
                     </span>
                   </div>
                 </div>

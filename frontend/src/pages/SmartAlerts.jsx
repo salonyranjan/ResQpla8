@@ -25,11 +25,11 @@ const SmartAlerts = () => {
             <h2 style={{
               fontFamily: "'DM Mono', monospace", fontSize: 24,
               color: T.text, margin: 0, letterSpacing: "-0.02em",
-            }}>Smart Alerts</h2>
+            }}>Activity</h2>
             <div style={{
               fontFamily: "'DM Mono', monospace", fontSize: 11,
               color: T.textMuted, letterSpacing: "0.06em",
-            }}>Real-time notifications for your rescue operations</div>
+            }}>Recorded updates from donations posted by your account</div>
           </div>
         </div>
 
@@ -47,7 +47,7 @@ const SmartAlerts = () => {
           <span style={{
             fontFamily: "'DM Mono', monospace", fontSize: 10,
             color: T.accent, fontWeight: 700, letterSpacing: "0.08em",
-          }}>LIVE</span>
+          }}>APPWRITE DATA</span>
         </div>
       </div>
 
@@ -57,10 +57,10 @@ const SmartAlerts = () => {
         gap: 12, marginBottom: 24,
       }} className="rq-alerts-stats">
         {[
-          { label: "Total Alerts", value: typeCounts.all, color: T.accent, icon: "🔔" },
-          { label: "Urgent", value: typeCounts.urgent, color: T.amber, icon: "⚠️" },
-          { label: "AI Matches", value: typeCounts.match, color: T.blue, icon: "🤖" },
-          { label: "Active Pickups", value: typeCounts.pickup, color: T.teal, icon: "🚴" },
+          { label: "Total records", value: typeCounts.all, color: T.accent, icon: "🔔" },
+          { label: "Pending", value: typeCounts.pending || 0, color: T.blue, icon: "🍱" },
+          { label: "Completed", value: typeCounts.delivery || 0, color: T.teal, icon: "✓" },
+          { label: "Cancelled", value: typeCounts.cancelled || 0, color: T.amber, icon: "!" },
         ].map((s, i) => (
           <Motion.div
             key={i}
@@ -90,11 +90,10 @@ const SmartAlerts = () => {
       {/* Filter Pills */}
       <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
         {[
-          { id: "all", label: "All Alerts" },
-          { id: "urgent", label: "⚠️ Urgent" },
-          { id: "match", label: "🤖 AI Matches" },
-          { id: "pickup", label: "🚴 Pickups" },
-          { id: "delivery", label: "✅ Deliveries" },
+          { id: "all", label: "All activity" },
+          { id: "pending", label: "Pending" },
+          { id: "delivery", label: "Completed" },
+          { id: "cancelled", label: "Cancelled" },
         ].map(f => (
           <Motion.button
             key={f.id}
@@ -160,13 +159,13 @@ const SmartAlerts = () => {
                       fontFamily: "sans-serif", fontSize: 13, fontWeight: 600,
                       color: T.text,
                     }}>{alert.title}</span>
-                    {alert.type === "urgent" && (
+                    {alert.type === "cancelled" && (
                       <span style={{
                         background: T.amber, color: "#fff", borderRadius: 4,
                         padding: "2px 6px", fontSize: 8,
                         fontFamily: "'DM Mono', monospace", fontWeight: 700,
                         letterSpacing: "0.06em",
-                      }}>URGENT</span>
+                      }}>CANCELLED</span>
                     )}
                   </div>
                   <p style={{
@@ -187,7 +186,7 @@ const SmartAlerts = () => {
 
                 <Motion.button
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => navigate(alert.type === "match" || alert.type === "urgent" ? "/dashboard/search" : `/tracking/${alert.id}`)}
+                  onClick={() => navigate(alert.type === "pending" ? "/dashboard/search" : `/tracking/${alert.id}`)}
                   style={{
                     padding: "8px 14px", borderRadius: 8, border: "none",
                     background: alert.color, color: "#fff",
@@ -209,7 +208,7 @@ const SmartAlerts = () => {
         >
           <div style={{ fontSize: 40, marginBottom: 12 }}>🔕</div>
           <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13 }}>
-            No alerts found for this filter
+            No activity found for this filter
           </div>
         </Motion.div>
       )}

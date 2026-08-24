@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { listAllPickups } from "../services/foodService";
 
 const Analytics = () => {
   const { T } = useOutletContext();
+  const { user } = useAuth();
   const [pickups, setPickups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -17,27 +19,30 @@ const Analytics = () => {
     return () => { active = false; };
   }, []);
 
+  const ownPickups = useMemo(
+    () => pickups.filter((pickup) => pickup.donorId === user?.$id),
+    [pickups, user?.$id],
+  );
+
   const stats = useMemo(() => {
-    const completed = pickups.filter((p) => p.status === "completed");
+    const completed = ownPickups.filter((p) => p.status === "completed");
     const meals = completed.reduce((sum, p) => sum + Number(p.mealsCount || 0), 0);
-    const weight = completed.reduce((sum, p) => sum + Number(p.weight || 0), 0);
-    const successRate = pickups.length ? Math.round((completed.length / pickups.length) * 100) : 0;
-    return { completed: completed.length, meals, weight, successRate, pending: pickups.filter((p) => p.status === "pending").length };
-  }, [pickups]);
+    const successRate = ownPickups.length ? Math.round((completed.length / ownPickups.length) * 100) : 0;
+    return { completed: completed.length, meals, successRate, pending: ownPickups.filter((p) => p.status === "pending").length };
+  }, [ownPickups]);
 
   const cards = [
-    ["Total donations", pickups.length],
+    ["My donations", ownPickups.length],
     ["Pending rescues", stats.pending],
     ["Completed rescues", stats.completed],
     ["Meals rescued", stats.meals],
-    ["Food rescued", `${stats.weight.toFixed(1)} kg`],
     ["Completion rate", `${stats.successRate}%`],
   ];
 
   return (
     <main style={{ padding: 28, minHeight: "100vh", background: T.bg, color: T.text }}>
       <h1 style={{ margin: 0, fontSize: 28 }}>Analytics</h1>
-      <p style={{ margin: "8px 0 24px", color: T.textMuted }}>Live totals calculated from your Appwrite pickup records.</p>
+      <p style={{ margin: "8px 0 24px", color: T.textMuted }}>Live totals calculated only from donations posted by your account.</p>
 
       {loading && <p style={{ color: T.textMuted }}>Loading live analytics…</p>}
       {error && <div role="alert" style={{ padding: 14, borderRadius: 10, background: `${T.red}15`, color: T.red }}>{error}</div>}
@@ -55,7 +60,7 @@ const Analytics = () => {
 
           <section style={{ marginTop: 24, padding: 20, borderRadius: 14, background: T.bgCard, border: `1px solid ${T.border}` }}>
             <h2 style={{ margin: "0 0 16px", fontSize: 18 }}>Recent activity</h2>
-            {pickups.length === 0 ? <p style={{ color: T.textMuted }}>No donation records yet.</p> : pickups.slice(0, 8).map((pickup) => (
+            {ownPickups.length === 0 ? <p style={{ color: T.textMuted }}>You have no donation records yet.</p> : ownPickups.slice(0, 8).map((pickup) => (
               <div key={pickup.$id} style={{ display: "flex", justifyContent: "space-between", gap: 16, padding: "12px 0", borderBottom: `1px solid ${T.border}` }}>
                 <div>
                   <div style={{ fontWeight: 650 }}>{pickup.foodType || "Food donation"}</div>

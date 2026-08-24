@@ -146,7 +146,7 @@ pending → confirmed → preparing → out_for_delivery → completed
 
 - New donations are stored as `pending`.
 - Browse Food displays only pending, unexpired records.
-- Claiming a donation changes it to `confirmed`, removing it from availability.
+- Claiming a donation changes it to `completed`, removing it from availability.
 - Historical records remain in Appwrite so tracking and analytics stay accurate.
 
 ---
@@ -236,6 +236,9 @@ Open the URL printed by Vite—normally **http://localhost:5173**.
 | `VITE_APPWRITE_DATABASE_ID` | ✅ | Database containing rescue pickup records |
 | `VITE_APPWRITE_PICKUPS_COLLECTION_ID` | ✅ | Pickup collection identifier |
 | `VITE_APPWRITE_BUCKET_ID` | Optional | Storage bucket for donation photographs |
+| `VITE_GEOCODER_ENDPOINT` | Optional | Address geocoder used to place text-only pickup locations on Map View |
+| `VITE_APPWRITE_VOLUNTEERS_COLLECTION_ID` | Optional | Volunteer availability and location records used for routing |
+| `VITE_APPWRITE_NOTIFICATIONS_COLLECTION_ID` | Optional | Private notifications created for matched volunteers |
 | `VITE_GROQ_API_KEY` | Optional | Enables Groq-backed assistant and AI utilities |
 | `VITE_EMAILJS_SERVICE_ID` | Optional | EmailJS service identifier |
 | `VITE_EMAILJS_TEMPLATE_ID` | Optional | Landing form template identifier |
@@ -274,12 +277,12 @@ Enable Appwrite's Email/Password authentication method.
 
 | Attribute | Suggested type | Required |
 | --- | --- | :---: |
-| `pickupId` | String | ✅ |
+| `pickupId` | Integer (64-bit) | ✅ |
 | `pickupLocation` | String | ✅ |
 | `dropOffLocation` | String |  |
 | `scheduledTime` | Datetime | ✅ |
-| `status` | String or enum | ✅ |
-| `vehicleType` | String | ✅ |
+| `status` | Enum (`pending`, `completed`, `cancelled`) | ✅ |
+| `vehicleType` | Enum (`sedan`, `suv`, `truck`, `van`) | ✅ |
 | `donorId` | String | ✅ |
 | `weight` | Float | ✅ |
 | `mealsCount` | Integer | ✅ |
@@ -298,7 +301,11 @@ Create indexes for `status`, descending `$createdAt`, and their combination if r
 
 ### 5. Optional image storage
 
-Create a Storage bucket when `VITE_APPWRITE_BUCKET_ID` is configured. Authenticated users need create permission and intended viewers need read permission. Donation file IDs match pickup document IDs.
+Create a Storage bucket when `VITE_APPWRITE_BUCKET_ID` is configured. Grant authenticated users bucket-level create permission. With file security enabled, the app gives authenticated users read permission on each new photo and reserves update/delete access for its donor. Donation file IDs match pickup document IDs.
+
+### 6. Optional volunteer routing
+
+Set both volunteer-routing collection variables to enable matching. Volunteer documents use `userId` (string), `latitude` and `longitude` (float), `reliability` (float from 0–1 or 0–100), `available` (boolean), and `maxMeals` (integer). Notification documents use `volunteerId`, `donationId`, `status`, `distanceKm`, `score`, and `message`. Authenticated users need read access to volunteer records and create access to notifications. Each notification is readable and updatable only by its matched volunteer. If either collection is absent, routing is safely disabled and donation posting continues normally.
 
 ---
 
@@ -387,7 +394,7 @@ The included `frontend/vercel.json` already provides Vercel SPA rewrites and imm
 | Login reports unknown origin | Register the exact hostname as an Appwrite Web platform |
 | Dashboard cannot load data | Verify IDs, attributes, permissions, and indexes |
 | Images do not appear | Verify bucket ID plus file create/read permissions |
-| Claimed food disappears from Browse Food | Expected: its status changed from `pending` to `confirmed` |
+| Claimed food disappears from Browse Food | Expected: its status changed from `pending` to `completed` |
 | Refreshing a deployed route returns 404 | Add the SPA rewrite to `index.html` |
 | ResQBot is unavailable | Add a valid Groq key or move the integration to a server function |
 | Contact messages fail | Verify EmailJS identifiers and the selected template |

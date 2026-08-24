@@ -54,13 +54,14 @@ function cartReducer(state, action) {
   switch (action.type) {
     case 'ADD_ITEM': {
       const { product, quantity } = action.payload;
-      const qty = Math.max(1, Math.min(MAX_QUANTITY, quantity));
+      const itemLimit = Math.max(1, Math.min(MAX_QUANTITY, Number(product.maxQuantity) || MAX_QUANTITY));
+      const qty = Math.max(1, Math.min(itemLimit, quantity));
       const idx = state.findIndex((i) => i.id === product.id);
 
       if (idx !== -1) {
         return state.map((item, i) =>
           i === idx
-            ? { ...item, quantity: Math.min(MAX_QUANTITY, item.quantity + qty) }
+            ? { ...item, quantity: Math.min(itemLimit, item.quantity + qty) }
             : item,
         );
       }
@@ -75,7 +76,7 @@ function cartReducer(state, action) {
       if (quantity < 1) return state.filter((i) => i.id !== productId);
       return state.map((i) =>
         i.id === productId
-          ? { ...i, quantity: Math.min(MAX_QUANTITY, quantity) }
+          ? { ...i, quantity: Math.min(Math.max(1, Number(i.maxQuantity) || MAX_QUANTITY), quantity) }
           : i,
       );
     }
