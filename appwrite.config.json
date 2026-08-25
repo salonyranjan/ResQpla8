@@ -88,12 +88,8 @@
         {
             "$id": "pickups",
             "$permissions": [
-                "create(\"any\")",
-                "read(\"any\")",
-                "update(\"any\")",
                 "create(\"users\")",
-                "read(\"users\")",
-                "update(\"users\")"
+                "read(\"users\")"
             ],
             "databaseId": "69fb4b2200366b55777e",
             "name": "Pickups",
@@ -176,6 +172,15 @@
                     "required": true,
                     "array": false,
                     "size": 255,
+                    "default": null,
+                    "encrypt": false
+                },
+                {
+                    "key": "receiverId",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 36,
                     "default": null,
                     "encrypt": false
                 },

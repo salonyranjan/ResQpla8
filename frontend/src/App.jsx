@@ -95,7 +95,7 @@ function App() {
               <Route path="/register" element={<Signup />}   />
               <Route path="/contact"  element={<Contact />}  />
               <Route path="/about"    element={<About />}    />
-              <Route path="/donations" element={<FoodListing />} />
+              <Route path="/donations" element={<RoleRoute roles={["receiver"]}><FoodListing /></RoleRoute>} />
               <Route path="/map"      element={<MapView />}  />
             </Route>
           </Route>

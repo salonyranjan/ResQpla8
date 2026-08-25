@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Check the Appwrite project endpoint
         env:
-          APPWRITE_ENDPOINT: ${{ secrets.APPWRITE_ENDPOINT }}
+          APPWRITE_ENDPOINT: ${{ secrets.APPWRITE_ENDPOINT || vars.APPWRITE_ENDPOINT }}
           APPWRITE_PROJECT_ID: ${{ secrets.APPWRITE_PROJECT_ID }}
         run: |
           test -n "$APPWRITE_ENDPOINT" || { echo "Missing APPWRITE_ENDPOINT secret"; exit 1; }

@@ -1,11 +1,12 @@
 import { ID, Permission, Query, Role } from "appwrite";
-import { databases, storage } from "./appwrite";
+import { databases, functions, storage } from "./appwrite";
 import client from "./appwrite";
-import { canCancelPickup, isPickupAvailable, isValidResQPlateDonation } from "./workflowRules";
+import { isPickupAvailable, isValidResQPlateDonation } from "./workflowRules";
 
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const PICKUPS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PICKUPS_COLLECTION_ID;
 const BUCKET_ID = import.meta.env.VITE_APPWRITE_BUCKET_ID;
+const WORKFLOW_FUNCTION_ID = import.meta.env.VITE_APPWRITE_VOLUNTEER_FUNCTION_ID;
 const GEO_LOCATION_PATTERN = /^geo:([-+]?\d+(?:\.\d+)?),([-+]?\d+(?:\.\d+)?)$/;
 
 function assertConfigured() {
@@ -16,6 +17,25 @@ function assertConfigured() {
 
 function isAppDonation(document) {
   return isValidResQPlateDonation(document);
+}
+
+async function executePickupWorkflow(action, payload = {}) {
+  if (!WORKFLOW_FUNCTION_ID) {
+    throw new Error("Secure rescue operations are not configured. Add the Appwrite workflow function ID.");
+  }
+  const execution = await functions.createExecution({
+    functionId: WORKFLOW_FUNCTION_ID,
+    body: JSON.stringify({ action, ...payload }),
+    async: false,
+  });
+  let response = {};
+  try { response = JSON.parse(execution.responseBody || "{}"); } catch { response = {}; }
+  if (execution.status === "failed" || Number(execution.responseStatusCode) >= 400 || response.ok === false) {
+    const error = new Error(response.message || "The secure rescue workflow could not complete this request.");
+    error.code = Number(execution.responseStatusCode) || 500;
+    throw error;
+  }
+  return response;
 }
 
 function donationImageError(error) {
@@ -178,24 +198,13 @@ export async function createFoodDonation({ userId, foodType, quantity, descripti
 export async function claimFood(items, deliveryAddress) {
   assertConfigured();
   if (!items.length) throw new Error("Your cart is empty.");
-
-  const latestDocuments = await Promise.all(items.map((item) =>
-    databases.getDocument(DATABASE_ID, PICKUPS_COLLECTION_ID, item.id)
-  ));
-  const unavailableIndex = latestDocuments.findIndex((document) => document.status !== "pending" || document.dropOffLocation);
-  if (unavailableIndex !== -1) {
-    throw new Error(`${items[unavailableIndex].name} is no longer available.`);
-  }
-
-  const updatedDocuments = await Promise.all(latestDocuments.map((document) =>
-    databases.updateDocument(DATABASE_ID, PICKUPS_COLLECTION_ID, document.$id, {
-      // The collection status enum only supports pending, completed, and
-      // cancelled. Checkout completes the claim and must also remove the food
-      // from the pending availability query.
-      status: "pending",
-      dropOffLocation: deliveryAddress,
-    })
-  ));
+  const address = deliveryAddress?.trim();
+  if (!address || address.length > 255) throw new Error("Enter a valid delivery address.");
+  const result = await executePickupWorkflow("claim", {
+    donationIds: items.map((item) => item.id),
+    deliveryAddress: address,
+  });
+  const updatedDocuments = result.donations || [];
   try {
     const existing = JSON.parse(localStorage.getItem("resqplate_claimed_pickups") || "[]");
     localStorage.setItem("resqplate_claimed_pickups", JSON.stringify([...new Set([...existing, ...updatedDocuments.map((item) => item.$id)])]));
@@ -210,14 +219,13 @@ export async function listUserOrders(userId, limit = 500) {
   let claimedIds = [];
   try { claimedIds = JSON.parse(localStorage.getItem("resqplate_claimed_pickups") || "[]"); } catch { claimedIds = []; }
   const claimed = new Set(Array.isArray(claimedIds) ? claimedIds : []);
-  return pickups.filter((pickup) => pickup.donorId === userId || claimed.has(pickup.$id));
+  return pickups.filter((pickup) => pickup.donorId === userId || pickup.receiverId === userId || claimed.has(pickup.$id));
 }
 
 export async function cancelPickup(documentId) {
   assertConfigured();
-  const pickup = await databases.getDocument(DATABASE_ID, PICKUPS_COLLECTION_ID, documentId);
-  if (!canCancelPickup(pickup)) throw new Error("Only an active rescue can be cancelled.");
-  return normalizePickup(await databases.updateDocument(DATABASE_ID, PICKUPS_COLLECTION_ID, documentId, { status: "cancelled" }));
+  const result = await executePickupWorkflow("cancel", { donationId: documentId });
+  return normalizePickup(result.donation);
 }
 
 export async function getPickup(documentId) {

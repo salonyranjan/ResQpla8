@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,700&display=swap");
 @import "tailwindcss";
 
 :root {
@@ -6,7 +6,7 @@
   --page-bg: #f7f2e8;
   --page-text: #111c15;
   --font-display: "Playfair Display", Georgia, serif;
-  --font-body: "Cabinet Grotesk", "Segoe UI", sans-serif;
+  --font-body: "Manrope", "Segoe UI", sans-serif;
   --font-meta: "DM Mono", "SFMono-Regular", Consolas, monospace;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -38,6 +38,8 @@ body {
   background: var(--page-bg);
   color: var(--page-text);
   font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
   transition: background-color 240ms ease, color 240ms ease;
 }
 
@@ -45,13 +47,45 @@ img, svg, video, canvas {
   max-width: 100%;
 }
 
+img {
+  height: auto;
+}
+
 input, select, textarea, button {
   max-width: 100%;
 }
 
+p, li, label, input, textarea, select, button {
+  overflow-wrap: anywhere;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in srgb, currentColor 56%, transparent);
+  opacity: 1;
+}
+
 @media (max-width: 640px) {
+  body {
+    line-height: 1.55;
+  }
+
   input, select, textarea {
     font-size: 16px;
+  }
+
+  button, input, select, textarea {
+    min-height: 44px;
+  }
+
+  h1 {
+    letter-spacing: -0.035em;
   }
 }
 

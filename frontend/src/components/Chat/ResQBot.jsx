@@ -581,11 +581,11 @@ export default function ResQBot() {
           100% { transform: scale(1.8); opacity: 0; }
         }
 
-        .resqbot-wrap { font-family: 'Cabinet Grotesk', 'Segoe UI', sans-serif; }
+        .resqbot-wrap { font-family: 'Manrope', 'Segoe UI', sans-serif; }
         .resqbot-scrollbar::-webkit-scrollbar { width: 4px; }
         .resqbot-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .resqbot-scrollbar::-webkit-scrollbar-thumb { border-radius: 4px; background: #1f2937; }
-        .resqbot-textarea { font-family: 'Cabinet Grotesk', sans-serif; outline: none; }
+        .resqbot-textarea { font-family: 'Manrope', sans-serif; outline: none; }
         .resqbot-quick-btn { transition: all 0.18s cubic-bezier(0.34,1.56,0.64,1); }
         .resqbot-quick-btn:hover { transform: translateY(-1px); }
         .resqbot-fab-ring {

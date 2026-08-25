@@ -91,6 +91,31 @@ export default async ({ req, res, log, error }) => {
       return true;
     };
 
+    if (body.action === "claim") {
+      const donationIds = [...new Set(Array.isArray(body.donationIds) ? body.donationIds : [])];
+      const deliveryAddress = String(body.deliveryAddress || "").trim();
+      if (!donationIds.length || donationIds.length > 20) return send(res, 400, { ok: false, message: "Select between 1 and 20 donations." });
+      if (!deliveryAddress || deliveryAddress.length > 255) return send(res, 400, { ok: false, message: "Enter a valid delivery address." });
+      const pickups = await Promise.all(donationIds.map((id) => databases.getDocument(databaseId, pickupsId, id)));
+      const now = Date.now();
+      const unavailable = pickups.find((pickup) => pickup.status !== "pending"
+        || pickup.dropOffLocation
+        || (pickup.scheduledTime && new Date(pickup.scheduledTime).getTime() <= now));
+      if (unavailable) return send(res, 409, { ok: false, message: "One or more donations are no longer available." });
+      const updated = await Promise.all(pickups.map((pickup) => databases.updateDocument(
+        databaseId, pickupsId, pickup.$id, { dropOffLocation: deliveryAddress, receiverId: userId },
+      )));
+      return send(res, 200, { ok: true, donations: updated });
+    }
+
+    if (body.action === "cancel") {
+      const pickup = await databases.getDocument(databaseId, pickupsId, body.donationId);
+      if (pickup.donorId !== userId) return send(res, 403, { ok: false, message: "Only the donor can cancel this rescue." });
+      if (pickup.status !== "pending") return send(res, 409, { ok: false, message: "Only an active rescue can be cancelled." });
+      const updated = await databases.updateDocument(databaseId, pickupsId, pickup.$id, { status: "cancelled" });
+      return send(res, 200, { ok: true, donation: updated });
+    }
+
     if (body.action === "match") {
       const pickup = await databases.getDocument(databaseId, pickupsId, body.donationId);
       if (pickup.donorId !== userId) return send(res, 403, { ok: false, message: "Only the donor can dispatch this rescue." });

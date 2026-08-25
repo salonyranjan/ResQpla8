@@ -22,7 +22,7 @@ const GLOBAL_CSS = (dark) => `
   body {
     background: ${dark ? "#070f09" : "#f7f2e8"};
     color: ${dark ? "#e8f5ec" : "#111c15"};
-    font-family: 'Cabinet Grotesk', sans-serif;
+    font-family: 'Manrope', sans-serif;
     transition: background 0.45s ease, color 0.45s ease;
     overflow-x: hidden;
   }
@@ -146,7 +146,7 @@ const GLOBAL_CSS = (dark) => `
   .ab-drawer-link {
     display: flex; align-items: center; gap: 14px;
     padding: 14px 16px; border-radius: 16px;
-    font-family: 'Cabinet Grotesk', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-size: 15px; font-weight: 500;
     color: ${dark ? "rgba(110,231,183,0.65)" : "rgba(26,74,46,0.65)"};
     text-decoration: none; cursor: pointer;
@@ -209,7 +209,7 @@ const GLOBAL_CSS = (dark) => `
   .ab-drawer-cta-primary {
     display: flex; align-items: center; justify-content: center; gap: 8px;
     background: #52b788; color: #070f09;
-    font-family: 'Cabinet Grotesk', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-size: 14px; font-weight: 700; letter-spacing: 0.02em;
     padding: 14px 24px; border-radius: 100px; border: none;
     text-decoration: none;
@@ -226,7 +226,7 @@ const GLOBAL_CSS = (dark) => `
     background: transparent;
     border: 1px solid ${dark ? "rgba(82,183,136,0.20)" : "rgba(26,74,46,0.18)"};
     color: ${dark ? "rgba(149,213,178,0.75)" : "rgba(26,74,46,0.70)"};
-    font-family: 'Cabinet Grotesk', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-size: 14px; font-weight: 600;
     padding: 13px 24px; border-radius: 100px;
     text-decoration: none;
@@ -658,7 +658,7 @@ const GLOBAL_CSS = (dark) => `
   .ab-btn-primary {
     display: inline-flex; align-items: center; gap: 10px;
     background: #52b788; color: #070f09;
-    font-family: 'Cabinet Grotesk', sans-serif; font-size: 15px; font-weight: 700;
+    font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 700;
     letter-spacing: 0.02em; padding: 17px 40px; border-radius: 100px;
     border: none; cursor: pointer; text-decoration: none;
     transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s ease, background 0.25s ease;
@@ -674,7 +674,7 @@ const GLOBAL_CSS = (dark) => `
   .ab-btn-ghost {
     display: inline-flex; align-items: center; gap: 10px;
     background: rgba(255,255,255,0.06); color: rgba(200,230,170,0.85);
-    font-family: 'Cabinet Grotesk', sans-serif; font-size: 15px; font-weight: 600;
+    font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 600;
     padding: 17px 36px; border-radius: 100px;
     border: 1px solid rgba(82,183,136,0.22);
     cursor: pointer; text-decoration: none;
@@ -696,7 +696,7 @@ const GLOBAL_CSS = (dark) => `
     background: rgba(255,255,255,0.05); border: 1px solid rgba(82,183,136,0.14);
     border-radius: 100px; padding: 8px 20px; font-size: 12.5px; font-weight: 600;
     color: rgba(200,230,170,0.40); letter-spacing: 0.06em;
-    font-family: 'Cabinet Grotesk', sans-serif;
+    font-family: 'Manrope', sans-serif;
   }
   .ab-cta-foot { margin-top: 60px; font-size: 11px; color: rgba(149,213,178,0.25); letter-spacing: 0.08em; font-family: 'DM Mono', monospace; }
 
@@ -754,12 +754,12 @@ const GLOBAL_CSS = (dark) => `
   .ab-hero { min-height: 560px; padding-top: 82px; padding-bottom: 64px; }
   .ab-hero-content::after,.ab-hero-glow,.ab-hero-grain { display:none; }
   .ab-h1 { color:${dark ? "#f2f7f3" : "#17251c"}; }
-  .ab-hero-sub { color:${dark ? "#a9c9b3" : "#52655a"}; font-family:'Cabinet Grotesk',sans-serif; font-style:normal; }
+  .ab-hero-sub { color:${dark ? "#a9c9b3" : "#52655a"}; font-family:'Manrope',sans-serif; font-style:normal; }
   .ab-pill { color:${dark ? "#8bd2a6" : "#246044"}; }
   .ab-pill-dot { background:${dark ? "#82c99e" : "#2d6a4f"}; }
   .ab-stats { margin-top:34px; padding:16px 0; background:transparent; border-width:1px 0; border-radius:0; }
   .ab-stat { padding:0 24px; }
-  .ab-stat-n { color:${dark ? "#93d3aa" : "#205f43"}; font-family:'Cabinet Grotesk',sans-serif; font-size:23px; }
+  .ab-stat-n { color:${dark ? "#93d3aa" : "#205f43"}; font-family:'Manrope',sans-serif; font-size:23px; }
   .ab-stat-l { color:${dark ? "#8bad96" : "#607267"}; letter-spacing:.1em; }
   .ab-sep { display:none; }
   .ab-section { padding:68px 48px; }
@@ -860,7 +860,7 @@ const MagneticNavLink = ({ children, href, isActive, onClick, dark }) => {
         position: "relative", border: "none", background: "transparent",
         padding: "10px 18px", cursor: "pointer", display: "flex",
         alignItems: "center", gap: 6, borderRadius: 14,
-        fontFamily: "'Cabinet Grotesk', sans-serif",
+        fontFamily: "'Manrope', sans-serif",
         fontSize: 13, fontWeight: isActive ? 600 : 400,
         color: isActive
           ? (dark ? "#95d5b2" : "#1a4a2e")

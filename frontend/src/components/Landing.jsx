@@ -53,7 +53,7 @@ const GlobalStyles = ({ c }) => {
       html { scroll-behavior: smooth; }
       body { margin: 0; background: ${c.bg}; transition: background 0.45s; }
       a { text-decoration: none; color: inherit; }
-      button { cursor: pointer; font-family: 'Cabinet Grotesk', sans-serif; }
+      button { cursor: pointer; font-family: 'Manrope', sans-serif; }
       section:has(.rq-remove-live-impact) { display: none !important; }
 
       .rq-hero-em {
@@ -256,7 +256,7 @@ const MagneticLink = ({ children, href, isActive, onClick, dark }) => {
           position: "relative", border: "none", background: "transparent",
           padding: "10px 18px", cursor: "pointer", display: "flex",
           alignItems: "center", gap: 6, borderRadius: 14,
-          fontFamily: "'Cabinet Grotesk', sans-serif",
+          fontFamily: "'Manrope', sans-serif",
           fontSize: 13, fontWeight: isActive ? 600 : 400,
           color: isActive
             ? (dark ? "#95d5b2" : "#1a4a2e")
@@ -503,7 +503,7 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, dark, toggleDark
 
                       <div style={{ flex: 1 }}>
                         <div style={{
-                          fontFamily: "'Cabinet Grotesk', sans-serif",
+                          fontFamily: "'Manrope', sans-serif",
                           fontSize: 15, fontWeight: activeIdx === i ? 700 : 500,
                           color: activeIdx === i
                             ? (dark ? "#95d5b2" : "#1a4a2e")
@@ -555,7 +555,7 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, dark, toggleDark
                         background: dark ? "#f59e0b" : "#e8a838",
                         color: dark ? "#0a1a0d" : "#1a3d26",
                         borderRadius: 14, padding: "13px 18px",
-                        fontFamily: "'Cabinet Grotesk', sans-serif",
+                        fontFamily: "'Manrope', sans-serif",
                         fontWeight: 700, fontSize: 14,
                         display: "flex", alignItems: "center", gap: 10,
                         cursor: "pointer",
@@ -575,7 +575,7 @@ const MobileDrawer = ({ open, onClose, activeIdx, setActiveIdx, dark, toggleDark
                         border: `1px solid ${dark ? "rgba(82,183,136,0.22)" : "rgba(45,106,79,0.16)"}`,
                         color: dark ? "#95d5b2" : "#2d6a4f",
                         borderRadius: 14, padding: "13px 18px",
-                        fontFamily: "'Cabinet Grotesk', sans-serif",
+                        fontFamily: "'Manrope', sans-serif",
                         fontWeight: 600, fontSize: 14,
                         display: "flex", alignItems: "center", gap: 10,
                         cursor: "pointer",
@@ -1002,7 +1002,7 @@ const FoodCard = () => {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative" }}>
           <div>
             <div style={{ color: "#2d6a4f", font: "700 9px 'DM Mono', monospace", letterSpacing: ".14em", textTransform: "uppercase" }}>30-second game</div>
-            <h3 style={{ margin: "6px 0 0", font: "800 20px 'Cabinet Grotesk', sans-serif", letterSpacing: "-.02em" }}>Build a rescue plate</h3>
+            <h3 style={{ margin: "6px 0 0", font: "800 20px 'Manrope', sans-serif", letterSpacing: "-.02em" }}>Build a rescue plate</h3>
           </div>
           <div style={{ padding: "7px 10px", borderRadius: 12, background: "#e8f5ec", color: "#246044", font: "800 11px 'DM Mono', monospace" }}>{rescued.length * 10} pts</div>
         </div>
@@ -1034,7 +1034,7 @@ const FoodCard = () => {
         </div>
       </Motion.div>
 
-      <Motion.div animate={{ y: [0, 7, 0], rotate: [-1, 1, -1] }} transition={{ duration: 4.4, repeat: Infinity, ease: "easeInOut" }} style={{ position: "absolute", right: -8, bottom: 5, zIndex: 3, padding: "10px 14px", borderRadius: 14, background: "linear-gradient(135deg,#f59e0b,#e67908)", color: "#fff", boxShadow: "0 15px 34px rgba(190,105,8,.3)", font: "800 10.5px 'Cabinet Grotesk', sans-serif" }}>Every plate counts ✦</Motion.div>
+      <Motion.div animate={{ y: [0, 7, 0], rotate: [-1, 1, -1] }} transition={{ duration: 4.4, repeat: Infinity, ease: "easeInOut" }} style={{ position: "absolute", right: -8, bottom: 5, zIndex: 3, padding: "10px 14px", borderRadius: 14, background: "linear-gradient(135deg,#f59e0b,#e67908)", color: "#fff", boxShadow: "0 15px 34px rgba(190,105,8,.3)", font: "800 10.5px 'Manrope', sans-serif" }}>Every plate counts ✦</Motion.div>
     </div>
   );
 };
@@ -1123,7 +1123,7 @@ const Hero = ({ c }) => {
               transition={{ delay: 0.5, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
               className="rq-hero-sub"
               style={{
-                fontFamily: "'Cabinet Grotesk', sans-serif",
+                fontFamily: "'Manrope', sans-serif",
                 fontSize: "clamp(15px,1.8vw,19px)", color: "rgba(255,255,255,0.57)",
                 maxWidth: 500, lineHeight: 1.76, marginBottom: 42, fontWeight: 300,
               }}
@@ -1146,7 +1146,7 @@ const Hero = ({ c }) => {
                   style={{
                     padding: "16px 34px", borderRadius: 100, border: "none",
                     background: c.amber, color: c.leaf,
-                    fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 700, fontSize: 15, cursor: "pointer",
+                    fontFamily: "'Manrope', sans-serif", fontWeight: 700, fontSize: 15, cursor: "pointer",
                   }}
                 >Donate Food →</Motion.button>
               </Link>
@@ -1158,7 +1158,7 @@ const Hero = ({ c }) => {
                     padding: "16px 34px", borderRadius: 100,
                     border: "1px solid rgba(255,255,255,0.22)",
                     background: "rgba(255,255,255,0.07)", color: "#fff",
-                    fontFamily: "'Cabinet Grotesk', sans-serif", fontSize: 15, cursor: "pointer",
+                    fontFamily: "'Manrope', sans-serif", fontSize: 15, cursor: "pointer",
                   }}
                 >Request Food</Motion.button>
               </Link>
@@ -1505,7 +1505,7 @@ const ImpactMap = ({ c }) => (
               style={{
                 marginTop: 28, padding: "12px 28px", borderRadius: 100,
                 border: `1.5px solid ${c.border2}`, background: "transparent",
-                fontFamily: "'Cabinet Grotesk', sans-serif", fontSize: 14,
+                fontFamily: "'Manrope', sans-serif", fontSize: 14,
                 fontWeight: 600, color: c.text2, cursor: "pointer", transition: "all 0.25s",
               }}
             >View Live Map →</Motion.button>
@@ -1528,7 +1528,7 @@ const ImpactMap = ({ c }) => (
                   transition={{ duration: 2.8, repeat: Infinity, delay: i * 0.48, ease: "easeInOut" }}
                 />
                 <circle cx={d.x} cy={d.y} r={d.r} fill={d.c} />
-                <text x={d.x + d.r + 7} y={d.y + 4} fontSize="10" fill={c.text3} fontFamily="Cabinet Grotesk, sans-serif">
+                <text x={d.x + d.r + 7} y={d.y + 4} fontSize="10" fill={c.text3} fontFamily="Manrope, sans-serif">
                   {d.label}
                 </text>
               </g>
@@ -1545,7 +1545,7 @@ const ImpactMap = ({ c }) => (
           >
             <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: c.text3, marginBottom: 5, textTransform: "uppercase" }}>Active Now</div>
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 900, color: c.sage }}>47</div>
-            <div style={{ fontSize: 11, color: c.text2, fontFamily: "'Cabinet Grotesk', sans-serif" }}>Live pickups</div>
+            <div style={{ fontSize: 11, color: c.text2, fontFamily: "'Manrope', sans-serif" }}>Live pickups</div>
           </Motion.div>
         </Link>
       </Reveal>
@@ -1599,7 +1599,7 @@ const Testimonials = ({ c }) => (
                     background: `linear-gradient(135deg,${t.color},${t.color}88)`,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 13, fontWeight: 700, color: "#fff", flexShrink: 0,
-                    fontFamily: "'Cabinet Grotesk', sans-serif",
+                    fontFamily: "'Manrope', sans-serif",
                   }}
                 >{t.av}</Motion.div>
                 <div>
@@ -1670,7 +1670,7 @@ const Newsletter = ({ c }) => {
               style={{
                 flex: 1, padding: "13px 20px", borderRadius: 100,
                 border: `1.5px solid ${sent ? c.leafm : c.border2}`,
-                background: c.surface, fontFamily: "'Cabinet Grotesk', sans-serif",
+                background: c.surface, fontFamily: "'Manrope', sans-serif",
                 fontSize: 14, color: sent ? c.text3 : c.text, outline: "none", transition: "all 0.3s ease",
               }}
             />
@@ -1681,7 +1681,7 @@ const Newsletter = ({ c }) => {
               style={{
                 background: sent ? c.leaf : c.leafm, color: "#fff", border: "none",
                 padding: "13px 28px", borderRadius: 100,
-                fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 600, fontSize: 14,
+                fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: 14,
                 cursor: loading || sent ? "default" : "pointer", whiteSpace: "nowrap",
                 minWidth: "140px", display: "flex", alignItems: "center", justifyContent: "center",
                 transition: "background 0.5s ease",
@@ -1735,7 +1735,7 @@ const CTA = ({ c }) => (
               style={{
                 padding: "18px 46px", borderRadius: 100, border: "none",
                 background: c.amber, color: c.leaf,
-                fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 700, fontSize: 16, cursor: "pointer",
+                fontFamily: "'Manrope', sans-serif", fontWeight: 700, fontSize: 16, cursor: "pointer",
               }}
             >Start Donating →</Motion.button>
           </Link>
@@ -1747,7 +1747,7 @@ const CTA = ({ c }) => (
                 padding: "18px 46px", borderRadius: 100,
                 border: "1px solid rgba(255,255,255,0.22)",
                 background: "rgba(255,255,255,0.07)", color: "#fff",
-                fontFamily: "'Cabinet Grotesk', sans-serif", fontSize: 16, cursor: "pointer",
+                fontFamily: "'Manrope', sans-serif", fontSize: 16, cursor: "pointer",
               }}
             >Request Food</Motion.button>
           </Link>
